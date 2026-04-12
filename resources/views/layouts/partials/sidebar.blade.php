@@ -131,6 +131,7 @@
                     <ul style="{{ request()->routeIs('education', 'jamb') ? 'display: block;' : 'display: none;' }}">
                         <li><a href="{{ route('education') }}" class="{{ request()->routeIs('education') ? 'active' : '' }}">Waec PIN & Exam</a></li>
                         <li><a href="{{ route('jamb') }}" class="{{ request()->routeIs('jamb') ? 'active' : '' }}">Jamb UTME & DE</a></li>
+                        <li><a href="{{ route('neco-nabted') }}" class="{{ request()->routeIs('neco-nabted') ? 'active' : '' }}">Neco & Nabted</a></li>
                     </ul>
                 </li>
 

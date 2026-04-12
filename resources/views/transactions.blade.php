@@ -322,6 +322,23 @@
                                 class="admin-comment-card p-3 rounded-3 bg-light border-start border-4 border-primary mb-4">
                                 <label class="small text-uppercase text-muted fw-bold mb-2 d-block">Description</label>
                                 <p class="text-dark mb-0 fw-medium">{{ $transaction->description }}</p>
+
+                                @php
+                                    $metadata = json_decode($transaction->metadata, true);
+                                    $purchasedPin = $metadata['purchased_code'] ?? $metadata['purchased_pin'] ?? $metadata['pin'] ?? null;
+                                @endphp
+
+                                @if($purchasedPin)
+                                    <div class="mt-3 p-2 bg-primary bg-opacity-10 border border-primary border-opacity-10 rounded">
+                                        <label class="small text-uppercase text-primary fw-bold mb-1 d-block">Purchased PIN/Token</label>
+                                        <div class="d-flex align-items-center justify-content-between">
+                                            <span class="font-monospace fw-bold text-dark fs-12">{{ $purchasedPin }}</span>
+                                            <button class="btn btn-sm btn-link text-primary p-0" onclick="navigator.clipboard.writeText('{{ $purchasedPin }}').then(() => Swal.fire({title: 'Copied!', text: 'PIN copied to clipboard', icon: 'success', timer: 1500, showConfirmButton: false}))">
+                                                <i class="bi bi-clipboard"></i> Copy
+                                            </button>
+                                        </div>
+                                    </div>
+                                @endif
                             </div>
 
                             <!-- AI Unified Section (Using standard card styling) -->

@@ -12,12 +12,12 @@
             </div>
         </div>
 
-        <div class="container-fluid">
-            <div class="row mt-3">
+        <div class="container-fluid px-0 px-md-3">
+            <div class="row g-0 g-md-4 mt-3">
                 <!-- BVN Verification Form -->
-                <div class="col-xl-6 mb-4">
-                    <div class="card shadow-sm border-0 rounded-3">
-                        <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                <div class="col-12 col-xl-6 mb-4">
+                    <div class="card shadow-lg border-0 rounded-0 rounded-md-4">
+                        <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center rounded-0 rounded-top-md-4">
                             <h5 class="mb-0 fw-bold"><i class="bi bi-shield-check me-2"></i>Verify BVN</h5>
                             <span class="badge bg-light text-primary fw-semibold">Instant</span>
                         </div>
@@ -82,9 +82,9 @@
                 </div>
 
                 <!-- Verification Info -->
-                <div class="col-xl-6">
-                    <div class="card shadow-sm border-0 rounded-3">
-                        <div class="card-header bg-success text-white d-flex justify-content-between align-items-center">
+                <div class="col-12 col-xl-6 mt-2 mt-md-0">
+                    <div class="card shadow-lg border-0 rounded-0 rounded-md-4">
+                        <div class="card-header bg-success text-white d-flex justify-content-between align-items-center rounded-0 rounded-top-md-4">
                             <h5 class="mb-0 fw-bold"><i class="bi bi-person-lines-fill me-2"></i>Verification Result</h5>
                         </div>
 

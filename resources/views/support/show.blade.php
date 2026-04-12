@@ -9,50 +9,52 @@
             background: #fff;
         }
 
+        .glass-footer {
+            background: rgba(255, 255, 255, 0.8) !important;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-top: 1px solid rgba(0, 0, 0, 0.05) !important;
+        }
+
         .message-bubble {
             max-width: 85%;
-            border-radius: 15px;
+            border-radius: 18px;
             position: relative;
             transition: all 0.2s ease;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03) !important;
+        }
+
+        .message-admin {
+            background-color: #ffffff;
+            border-bottom-left-radius: 4px !important;
+            animation: bubble-in-left 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .message-user {
+            background-color: #e3f2fd;
+            border-bottom-right-radius: 4px !important;
+            animation: bubble-in-right 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        @keyframes bubble-in-left {
+            from { opacity: 0; transform: translateX(-20px) scale(0.95); }
+            to { opacity: 1; transform: translateX(0) scale(1); }
+        }
+
+        @keyframes bubble-in-right {
+            from { opacity: 0; transform: translateX(20px) scale(0.95); }
+            to { opacity: 1; transform: translateX(0) scale(1); }
         }
 
         @media (max-width: 768px) {
             .chat-wrapper {
                 height: calc(100vh - 120px);
-                border-radius: 0;
             }
-
             .message-bubble {
-                max-width: 92%;
+                max-width: 92% !important;
             }
-
-            .container-fluid {
-                padding-left: 0 !important;
-                padding-right: 0 !important;
-            }
-
-            .page-body {
-                padding: 0 !important;
-                margin: 0 !important;
-            }
-
-            .card {
-                margin: 0 !important;
-                border-radius: 0 !important;
-            }
-
-            .card-body {
-                padding: 10px !important;
-            }
-
-            .card-header,
-            .card-footer {
-                padding: 10px !important;
-            }
-
             .page-title {
                 display: none !important;
-                /* Hide title bar on mobile to save space */
             }
         }
 
@@ -60,18 +62,6 @@
             background-color: #f8f9fa;
             background-image: radial-gradient(#dee2e6 0.5px, transparent 0.5px);
             background-size: 20px 20px;
-        }
-
-        .message-admin {
-            background-color: #ffffff;
-            border-bottom-left-radius: 4px !important;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05) !important;
-        }
-
-        .message-user {
-            background-color: #e3f2fd;
-            border-bottom-right-radius: 4px !important;
-            box-shadow: 0 2px 8px rgba(13, 110, 253, 0.08) !important;
         }
 
         .typing-indicator {
@@ -94,32 +84,28 @@
             opacity: 0.4;
         }
 
-        .typing-dot:nth-child(2) {
-            animation-delay: 0.2s;
+        .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+        .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+
+        .focus-within-primary {
+            transition: all 0.3s ease;
+            border: 1px solid #eee;
         }
 
-        .typing-dot:nth-child(3) {
-            animation-delay: 0.4s;
+        .focus-within-primary:focus-within {
+            border-color: var(--bs-primary) !important;
+            box-shadow: 0 0 0 0.25rem rgba(var(--bs-primary-rgb), 0.15) !important;
+            background: #fff !important;
         }
 
         @keyframes typing {
-
-            0%,
-            60%,
-            100% {
-                transform: translateY(0);
-                opacity: 0.4;
-            }
-
-            30% {
-                transform: translateY(-4px);
-                opacity: 1;
-            }
+            0%, 60%, 100% { transform: translateY(0); opacity: 0.4; }
+            30% { transform: translateY(-4px); opacity: 1; }
         }
     </style>
 
     <div class="page-body">
-        <div class="container-fluid">
+        <div class="container-fluid px-0 px-md-3">
             <div class="page-title mb-3">
                 <div class="row align-items-center">
                     <div class="col-12 col-md-6 mb-2 mb-md-0">
@@ -168,12 +154,12 @@
             </div>
         </div>
 
-        <div class="container-fluid">
-            <div class="row">
-                <div class="col-lg-12">
-                    <div class="card shadow-sm border-0 chat-wrapper">
+        <div class="container-fluid px-0 px-md-3">
+            <div class="row g-0 g-md-4">
+                <div class="col-12 col-lg-12">
+                    <div class="card shadow-lg border-0 rounded-0 rounded-md-4 chat-wrapper">
                         <!-- Chat Header -->
-                        <div class="card-header bg-white border-bottom py-3">
+                        <div class="card-header bg-white border-bottom py-3 rounded-0 rounded-top-md-4">
                             <div class="d-flex justify-content-between align-items-center">
                                 <div class="d-flex align-items-center">
                                     <div class="avatar bg-soft-primary text-primary rounded-circle d-flex align-items-center justify-content-center me-3"
@@ -181,9 +167,9 @@
                                         <i class="ti ti-robot fs-15"></i>
                                     </div>
                                     <div>
-                                        <h6 class="mb-0 fw-bold">Support Assistant</h6>
+                                        <h6 class="mb-0 fw-bold">Support Assistant <span class="badge bg-soft-info text-info fw-normal ms-1" style="font-size: 0.6rem; letter-spacing: 0.5px;">AI POWERED</span></h6>
                                         <small class="text-success"><i class="ti ti-circle-filled fs-xs me-1"></i>
-                                            Online & Ready to help</small>
+                                            Automated Helper & Ready</small>
                                     </div>
                                 </div>
                                 <div class="dropdown">
@@ -224,27 +210,23 @@
                                         <div class="card-body p-3">
                                             <p class="mb-1 text-dark" style="line-height: 1.5;">{{ $message->message }}</p>
 
-                                            @if($message->attachment)
+                                            @if($message->attachment_url)
                                                 <div class="mt-2 bg-light p-2 rounded border-start border-primary border-4">
                                                     @php
-                                                        $attachmentUrl = $message->attachment;
-                                                        if (!str_starts_with($attachmentUrl, 'http')) {
-                                                            $attachmentUrl = Storage::url($attachmentUrl);
-                                                        }
                                                         $extension = strtolower(pathinfo($message->attachment, PATHINFO_EXTENSION));
                                                         $isImage = in_array($extension, ['jpg', 'jpeg', 'png', 'gif', 'webp']);
                                                     @endphp
 
                                                     @if($isImage)
                                                         <div class="mb-1">
-                                                            <a href="{{ $attachmentUrl }}" target="_blank">
-                                                                <img src="{{ $attachmentUrl }}" alt="Attachment"
+                                                            <a href="{{ $message->attachment_url }}" target="_blank">
+                                                                <img src="{{ $message->attachment_url }}" alt="Attachment"
                                                                     class="img-fluid rounded border shadow-sm"
                                                                     style="max-width: 100%; max-height: 250px;">
                                                             </a>
                                                         </div>
                                                     @else
-                                                        <a href="{{ $attachmentUrl }}" target="_blank"
+                                                        <a href="{{ $message->attachment_url }}" target="_blank"
                                                             class="d-flex align-items-center text-decoration-none">
                                                             <i class="ti ti-file-text fs-15 me-2"></i>
                                                             <span class="small fw-semibold">View Attachment</span>
@@ -292,11 +274,16 @@
                         </div>
 
                         <!-- Reply Area -->
-                        <div class="card-footer bg-white border-top p-3 p-md-4">
+                        <div class="card-footer p-3 p-md-4 rounded-0 rounded-bottom-md-4 glass-footer">
                             @if($ticket->status !== 'closed')
                                 <form id="reply-form" action="{{ route('support.reply', $ticket->ticket_reference) }}"
                                     method="POST" enctype="multipart/form-data" class="w-100">
                                     @csrf
+                                    <div class="mb-2 text-center">
+                                        <span class="badge bg-soft-warning text-dark border-0 small px-3 py-1" style="font-size: 0.75rem;">
+                                            <i class="ti ti-shield-lock me-1"></i> Safety Tip: Never share your Password or PIN here.
+                                        </span>
+                                    </div>
                                     <div
                                         class="d-flex align-items-end gap-2 bg-light p-2 rounded-4 border shadow-sm transition-all focus-within-primary w-100">
                                         <input type="file" name="attachment" id="replyAttachment" class="d-none"
@@ -382,16 +369,16 @@
                             <div class="card-body p-3">
                                 <p class="mb-1 text-dark" style="line-height: 1.5;">${msg.message}</p>
                                 
-                                ${msg.attachment ? `
+                                ${msg.attachment_url ? `
                                     <div class="mt-2 bg-light p-2 rounded border-start border-primary border-4">
-                                        ${msg.attachment.match(/\.(jpg|jpeg|png|gif|webp)$/i) ? `
+                                        ${msg.attachment_url.match(/\.(jpg|jpeg|png|gif|webp)$/i) ? `
                                             <div class="mb-1">
-                                                <a href="${msg.attachment}" target="_blank">
-                                                    <img src="${msg.attachment}" alt="Attachment" class="img-fluid rounded border shadow-sm" style="max-width: 100%; max-height: 250px;">
+                                                <a href="${msg.attachment_url}" target="_blank">
+                                                    <img src="${msg.attachment_url}" alt="Attachment" class="img-fluid rounded border shadow-sm" style="max-width: 100%; max-height: 250px;">
                                                 </a>
                                             </div>
                                         ` : `
-                                            <a href="${msg.attachment}" target="_blank" class="d-flex align-items-center text-decoration-none">
+                                            <a href="${msg.attachment_url}" target="_blank" class="d-flex align-items-center text-decoration-none">
                                                 <i class="ti ti-file-text fs-15 me-2"></i>
                                                 <span class="small fw-semibold">View Attachment</span>
                                             </a>
@@ -456,8 +443,31 @@
                     .catch(console.error);
             }
 
-            // Start polling
-            const pollInterval = setInterval(pollUpdates, 4000);
+            // Optimized Polling with Page Visibility API
+            let pollInterval;
+            function startPolling() {
+                if (!pollInterval) {
+                    pollInterval = setInterval(pollUpdates, 4000);
+                }
+            }
+
+            function stopPolling() {
+                clearInterval(pollInterval);
+                pollInterval = null;
+            }
+
+            // Handle visibility change
+            document.addEventListener('visibilitychange', function() {
+                if (document.hidden) {
+                    stopPolling();
+                } else {
+                    startPolling();
+                    pollUpdates(); // Update immediately upon return
+                }
+            });
+
+            // Initial start
+            startPolling();
 
             // Handle reply form via AJAX
             if (replyForm) {

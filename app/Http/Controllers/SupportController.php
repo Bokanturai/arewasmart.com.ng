@@ -15,6 +15,10 @@ class SupportController extends Controller
 {
     public function sendContactMessage(Request $request)
     {
+        if ($request->filled('honeypot_field')) {
+            return back()->with('success', 'Thank you for your message!');
+        }
+
         $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|email|max:255',
@@ -68,6 +72,10 @@ class SupportController extends Controller
 
     public function store(Request $request)
     {
+        if ($request->filled('honeypot_field')) {
+            return response()->json(['success' => true, 'message' => 'Ticket created successfully!']);
+        }
+
         $request->validate([
             'subject' => 'required|string|max:255',
             'message' => 'required|string',
@@ -84,16 +92,7 @@ class SupportController extends Controller
 
         $attachmentPath = null;
         if ($request->hasFile('attachment')) {
-            $file = $request->file('attachment');
-            $fileName = 'support_' . Str::random(10) . '.' . $file->getClientOriginalExtension();
-            $destinationPath = public_path('uploads/support');
-            
-            if (!file_exists($destinationPath)) {
-                mkdir($destinationPath, 0755, true);
-            }
-            
-            $file->move($destinationPath, $fileName);
-            $attachmentPath = rtrim(config('app.url'), '/') . '/uploads/support/' . $fileName;
+            $attachmentPath = $request->file('attachment')->store('support', 'public');
         }
 
         SupportMessage::create([
@@ -142,16 +141,7 @@ class SupportController extends Controller
 
         $attachmentPath = null;
         if ($request->hasFile('attachment')) {
-            $file = $request->file('attachment');
-            $fileName = 'support_reply_' . Str::random(10) . '.' . $file->getClientOriginalExtension();
-            $destinationPath = public_path('uploads/support');
-            
-            if (!file_exists($destinationPath)) {
-                mkdir($destinationPath, 0755, true);
-            }
-            
-            $file->move($destinationPath, $fileName);
-            $attachmentPath = rtrim(config('app.url'), '/') . '/uploads/support/' . $fileName;
+            $attachmentPath = $request->file('attachment')->store('support', 'public');
         }
 
         $message = SupportMessage::create([

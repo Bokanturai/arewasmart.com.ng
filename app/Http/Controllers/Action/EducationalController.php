@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Action;
 
 use App\Helpers\RequestIdHelper;
 use App\Http\Controllers\Controller;
-use App\Mail\JambPurchaseNotification;
+use App\Mail\EducationalPurchaseNotification;
 use App\Models\Report;
 use App\Models\Transaction;
 use App\Models\Wallet;
@@ -22,26 +22,24 @@ class EducationalController extends Controller
 {
     use ActiveUsers;
 
-    protected $loginUserId;
+    // No constructor needed as Auth is handled per-method
 
-    public function __construct()
-    {
-        $this->loginUserId = Auth::id();
-    }
 
     // ─────────────────────────────────────────────
     //  PAGE VIEWS
     // ─────────────────────────────────────────────
 
-    /**
-     * Show Educational Pin Services & Price Lists
-     */
     public function pin(Request $request)
     {
         // 1. Authenticate user
         $user = Auth::user();
         if (!$user) {
             return redirect()->route('login')->with('error', 'Please log in to access this page.');
+        }
+
+        // 2. Check account status early
+        if (($user->status ?? 'inactive') !== 'active') {
+            return redirect()->route('dashboard')->with('error', 'Your account is currently ' . ($user->status ?? 'inactive') . '. Please contact support.');
         }
 
         $wallet = Wallet::firstOrCreate(
@@ -72,6 +70,11 @@ class EducationalController extends Controller
             return redirect()->route('login')->with('error', 'Please log in to access this page.');
         }
 
+        // 2. Check account status early
+        if (($user->status ?? 'inactive') !== 'active') {
+            return redirect()->route('dashboard')->with('error', 'Your account is currently ' . ($user->status ?? 'inactive') . '. Please contact support.');
+        }
+
         $wallet = Wallet::firstOrCreate(
             ['user_id' => $user->id],
             ['balance' => 0.00, 'status' => 'active']
@@ -85,6 +88,30 @@ class EducationalController extends Controller
         $variations = DB::table('data_variations')->where('service_id', 'jamb')->get();
 
         return view('utilities.buy-jamb', compact('wallet', 'history', 'variations'));
+    }
+
+    /**
+     * Show Transaction Receipt
+     */
+    public function receipt($transactionRef)
+    {
+        $user = Auth::user();
+        $transaction = Transaction::where('transaction_ref', $transactionRef)
+            ->where('user_id', $user->id)
+            ->firstOrFail();
+
+        $metadata = is_string($transaction->metadata) 
+            ? json_decode($transaction->metadata, true) 
+            : $transaction->metadata;
+
+        return view('thankyou')->with([
+            'success' => 'Transaction Receipt',
+            'ref'     => $transaction->transaction_ref,
+            'mobile'  => $metadata['phone'] ?? $metadata['profile_id'] ?? 'N/A',
+            'amount'  => $transaction->amount,
+            'token'   => $metadata['purchased_code'] ?? null,
+            'network' => $metadata['service'] ?? $metadata['service_type'] ?? 'N/A',
+        ]);
     }
 
     // ─────────────────────────────────────────────
@@ -104,55 +131,7 @@ class EducationalController extends Controller
         return response()->json(['valid' => Hash::check($request->pin, $user->pin)]);
     }
 
-    /**
-     * Fetch & store variations from VTpass
-     */
-    public function getVariation(Request $request)
-    {
-        try {
-            $url = env('VARIATION_URL') . $request->type;
 
-            $response = Http::withHeaders([
-                'api-key'    => env('API_KEY'),
-                'secret-key' => env('SECRET_KEY'),
-            ])->get($url);
-
-            if ($response->successful()) {
-                $data = $response->json();
-
-                if (isset($data['content']['variations'])) {
-                    $serviceName    = $data['content']['ServiceName'];
-                    $serviceId      = $data['content']['serviceID'];
-                    $convenienceFee = $data['content']['convinience_fee'] ?? '0%';
-
-                    foreach ($data['content']['variations'] as $variation) {
-                        DB::table('data_variations')->updateOrInsert(
-                            ['variation_code' => $variation['variation_code']],
-                            [
-                                'service_name'     => $serviceName,
-                                'service_id'       => $serviceId,
-                                'convenience_fee'  => $convenienceFee,
-                                'name'             => $variation['name'],
-                                'variation_amount' => $variation['variation_amount'],
-                                'fixed_price'      => $variation['fixedPrice'],
-                                'created_at'       => Carbon::now(),
-                                'updated_at'       => Carbon::now(),
-                            ]
-                        );
-                    }
-
-                    return response()->json(['success' => true, 'message' => 'Variation list updated successfully.']);
-                }
-            }
-
-            Log::error('VTpass Variation Fetch Failed', ['response' => $response->json()]);
-            return response()->json(['success' => false, 'message' => 'Failed to fetch variations.']);
-
-        } catch (\Exception $e) {
-            Log::error('VTpass Variation Exception', ['error' => $e->getMessage()]);
-            return response()->json(['success' => false, 'message' => 'Something went wrong.']);
-        }
-    }
 
     // ─────────────────────────────────────────────
     //  BUY EDUCATIONAL PIN  (WAEC / WAEC Registration)
@@ -184,7 +163,13 @@ class EducationalController extends Controller
             'service'  => ['required', 'string', 'in:waec-registration,waec'],
             'type'     => ['required', 'string'],
             'mobileno' => ['required', 'numeric', 'digits:11'],
+            'pin'      => ['required', 'string', 'digits:5'],
         ]);
+
+        // ── 2.1 Verify PIN ───────────────────────
+        if (!Hash::check($request->pin, $user->pin)) {
+            return redirect()->back()->with('error', 'Incorrect transaction PIN. Please try again.');
+        }
 
         // ── 3. Check service active (user account) ─
         if (($user->status ?? 'inactive') !== 'active') {
@@ -234,17 +219,20 @@ class EducationalController extends Controller
             $wallet->decrement('balance', $fee);
             $newBalance = $wallet->fresh()->balance;
 
-            // ── 9. Call VTpass API ───────────────
+            // ── 9. Call VTpass API (with timeout) ───────────────
+            $startTime = microtime(true);
             $response = Http::withHeaders([
                 'api-key'    => env('API_KEY'),
                 'secret-key' => env('SECRET_KEY'),
-            ])->post(env('MAKE_PAYMENT'), [
+            ])->timeout(30)->post(env('MAKE_PAYMENT'), [
                 'request_id'     => $requestId,
                 'serviceID'      => $request->service,
                 'billersCode'    => '0123456789',
                 'variation_code' => $request->type,
                 'phone'          => $request->mobileno,
             ]);
+            $elapsedTime = round(microtime(true) - $startTime, 2);
+            Log::info("VTPass API (waec) took {$elapsedTime}s", ['request_id' => $requestId]);
 
             if (!$response->successful()) {
                 // HTTP-level failure – rollback and abort without recording anything
@@ -311,6 +299,23 @@ class EducationalController extends Controller
             ]);
 
             DB::commit();
+
+            // Send email notification (non-blocking, after commit)
+            $targetEmail = $request->email ?: $user->email;
+            if ($targetEmail) {
+                try {
+                    Mail::to($targetEmail)->queue(new EducationalPurchaseNotification([
+                        'customer_name'    => $user->name,
+                        'pin'              => $finalToken,
+                        'amount'           => $fee,
+                        'reference'        => $requestId,
+                        'service_type'     => $description,
+                        'transaction_date' => now()->format('d M Y, h:i A'),
+                    ]));
+                } catch (\Exception $e) {
+                    Log::error('WAEC Email Failed: ' . $e->getMessage());
+                }
+            }
 
             return redirect()->route('thankyou')->with([
                 'success' => 'Educational pin purchase successful!',
@@ -383,7 +388,7 @@ class EducationalController extends Controller
             $response = Http::withHeaders([
                 'api-key'    => env('API_KEY'),
                 'secret-key' => env('SECRET_KEY'),
-            ])->post(env('BASE_URL', 'https://vtpass.com/api') . '/merchant-verify', $requestPayload);
+            ])->timeout(30)->post(env('VTPASS_BASE_URL', 'https://vtpass.com/api') . '/merchant-verify', $requestPayload);
 
             $data = $response->json();
 
@@ -450,7 +455,13 @@ class EducationalController extends Controller
             'profile_id' => 'required|string',
             'mobileno'   => 'required|numeric|digits:11',
             'email'      => 'nullable|email',
+            'pin'        => 'required|string|digits:5',
         ]);
+
+        // ── 2.1 Verify PIN ───────────────────────
+        if (!Hash::check($request->pin, $user->pin)) {
+            return redirect()->back()->with('error', 'Incorrect transaction PIN. Please try again.');
+        }
 
         // ── 3. Check service active (user account) ─
         if (($user->status ?? 'inactive') !== 'active') {
@@ -500,17 +511,20 @@ class EducationalController extends Controller
             $wallet->decrement('balance', $fee);
             $newBalance = $wallet->fresh()->balance;
 
-            // ── 9. Call VTpass API ───────────────
+            // ── 9. Call VTpass API (with timeout) ───────────────
+            $startTime = microtime(true);
             $response = Http::withHeaders([
                 'api-key'    => env('API_KEY'),
                 'secret-key' => env('SECRET_KEY'),
-            ])->post(env('MAKE_PAYMENT'), [
+            ])->timeout(30)->post(env('MAKE_PAYMENT'), [
                 'request_id'     => $requestId,
                 'serviceID'      => 'jamb',
                 'billersCode'    => $request->profile_id,
                 'variation_code' => $request->service,
                 'phone'          => $request->mobileno,
             ]);
+            $elapsedTime = round(microtime(true) - $startTime, 2);
+            Log::info("VTPass API (jamb) took {$elapsedTime}s", ['request_id' => $requestId]);
 
             if (!$response->successful()) {
                 // HTTP-level failure – rollback and abort without recording anything
@@ -577,14 +591,16 @@ class EducationalController extends Controller
                 'description'  => $transDescription,
                 'old_balance'  => $oldBalance,
                 'new_balance'  => $newBalance,
+                'token'        => $finalToken,
             ]);
 
             DB::commit();
 
             // Send email notification (non-blocking, after commit)
-            if ($request->email) {
+            $targetEmail = $request->email ?: $user->email;
+            if ($targetEmail) {
                 try {
-                    Mail::to($request->email)->send(new JambPurchaseNotification([
+                    Mail::to($targetEmail)->queue(new EducationalPurchaseNotification([
                         'customer_name'    => $payerName,
                         'profile_id'       => $request->profile_id,
                         'pin'              => $finalToken,

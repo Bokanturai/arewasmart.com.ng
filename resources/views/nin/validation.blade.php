@@ -14,12 +14,12 @@
             </div>
         </div>
 
-        <div class="container-fluid">
-            <div class="row">
+        <div class="container-fluid px-0 px-md-3">
+            <div class="row g-0 g-md-4">
                 <!-- Form Section -->
-                <div class="col-xl-5 mb-4">
-                    <div class="card shadow-lg border-0 rounded-4">
-                        <div class="card-header bg-primary text-white p-3 p-md-4 border-0 rounded-top-4 text-center text-sm-start">
+                <div class="col-12 col-xl-5 mb-4">
+                    <div class="card shadow-lg border-0 rounded-0 rounded-md-4">
+                        <div class="card-header bg-primary text-white p-3 p-md-4 border-0 rounded-0 rounded-top-md-4 text-center text-sm-start">
                             <h5 class="mb-0 fw-bold fs-15">New Request</h5>
                             <p class="mb-0 small text-white-50 mt-1">Please ensure all details are correct. Fees are non-refundable.</p>
                         </div>
@@ -103,10 +103,10 @@
                 </div>
 
                 <!-- History Section -->
-                <div class="col-xl-7">
-                    <div class="card shadow-lg border-0 rounded-4">
+                <div class="col-12 col-xl-7 mt-2 mt-md-0">
+                    <div class="card shadow-lg border-0 rounded-0 rounded-md-4">
                         <!-- Header -->
-                        <div class="card-header bg-white p-3 p-md-4 border-bottom d-flex justify-content-center justify-content-sm-between align-items-center rounded-top-4">
+                        <div class="card-header bg-white p-3 p-md-4 border-bottom d-flex justify-content-center justify-content-sm-between align-items-center rounded-0 rounded-top-md-4">
                             <h5 class="mb-0 fw-bold text-dark fs-15"><i class="bi bi-clock-history text-primary me-2"></i>Request History</h5>
                         </div>
 

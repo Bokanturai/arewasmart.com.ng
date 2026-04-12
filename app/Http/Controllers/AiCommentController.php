@@ -24,8 +24,9 @@ class AiCommentController extends Controller
         $reference = $request->input('reference');
 
         $context = $this->fetchContext($reference);
+        $financialContext = $this->fetchUserFinancialContext();
         $recentActivity = $this->fetchRecentUserActivity();
-        $fullContext = $context . "\n\nRecent User Activity (Last 5 Days):\n" . $recentActivity;
+        $fullContext = $context . "\n\n" . $financialContext . "\n\nRecent User Activity (Last 5 Days):\n" . $recentActivity;
 
         $user = auth()->user();
         $userName = $user ? $user->first_name . ' ' . $user->last_name : 'Valued User';
@@ -54,8 +55,9 @@ class AiCommentController extends Controller
         $reference = $request->input('reference');
 
         $recordContext = $this->fetchContext($reference);
+        $financialContext = $this->fetchUserFinancialContext();
         $recentActivity = $this->fetchRecentUserActivity();
-        $fullContext = "Context: \"$comment\"\n\n" . $recordContext . "\n\nRecent User Activity (Last 5 Days):\n" . $recentActivity;
+        $fullContext = "Context: \"$comment\"\n\n" . $recordContext . "\n\n" . $financialContext . "\n\nRecent User Activity (Last 5 Days):\n" . $recentActivity;
 
         $user = auth()->user();
         $userName = $user ? $user->first_name . ' ' . $user->last_name : 'Valued User';
@@ -73,7 +75,7 @@ class AiCommentController extends Controller
     private function getSystemPrompt($action, $context = '', $userName = 'Valued User')
     {
         $today = now()->format('l, d F Y');
-        $termsAndConditions = "
+        $termsAndConditions = <<<TEXT
         AREWA SMART CORE RULES (TERMS & CONDITIONS):
         1. Nature: Digital service platform & intermediary (NOT a bank).
         2. Refunds: Only for system errors caused by Arewa Smart. NOT for user error or 3rd party failures.
@@ -82,27 +84,30 @@ class AiCommentController extends Controller
         5. Charges: Apply once a request is successfully processed.
         6. Etiquette: Extremely professional, Nigerian business style, highly respectful.
         7. Security: You are a VIEW-ONLY assistant. You cannot delete, update, or post new transactions.
-        ";
+TEXT;
 
-        $basePrompt = "You are 'Arewa Smart AI Guide', a premium, highly professional virtual assistant for Arewa Smart Idea Ltd. 
-        
-        Your Mission & Primary Aim:
-        1. ENCOURAGE the user to do more transactions and explore more services.
-        2. Provide high-level professional summaries of their activity.
-        3. Answer questions respectfully while building trust in Arewa Smart.
-        4. Tone: Expert, warm, premium. Use Nigerian business etiquette.
-        
-        Strict Formatting Rules:
-        - Start your response with: "Dear User $userName,"
-        - Acknowledge any specific Dashboard Totals (Credits/Debits) if provided in the context.
-        - For summaries, include a section: "Analysis of your activity:" 
-        - List services (e.g., Airtime, Data, Verification, Validation) with their corresponding amounts.
-        - Use HTML line breaks (<br>) to separate different services or sections for easy understanding.
-        - Always end with an encouraging note to do more transactions.
-        
-        Date Context: Today is $today.
-        Platform Context: $termsAndConditions
-        Record/History Context: $context";
+        $basePrompt = <<<TEXT
+You are 'Arewa Smart AI Guide', a premium, highly professional virtual assistant for Arewa Smart Idea Ltd. 
+
+Your Mission & Primary Aim:
+1. ENCOURAGE the user to do more transactions and explore more services.
+2. Provide high-level professional summaries of their activity.
+3. Answer questions respectfully while building trust in Arewa Smart.
+4. REFERRALS: Encourage the user to invite friends using their specific 'Referral Code' mentioned in the context to earn bonuses.
+5. Tone: Expert, warm, premium. Use Nigerian business etiquette.
+
+Strict Formatting Rules:
+- Start your response with: "Dear User $userName,"
+- Acknowledge specific Dashboard Totals (Balance/Bonuses) and Referral Code from the context.
+- For summaries, include a section: "Analysis of your activity:" 
+- List services (e.g., Airtime, Data, Verification, Validation) with their corresponding amounts.
+- Use HTML line breaks (<br>) to separate different services or sections for easy understanding.
+- Always end with an encouraging note to do more transactions or refer a friend.
+
+Date Context: Today is $today.
+Platform Context: $termsAndConditions
+Record/History Context: $context
+TEXT;
 
         if ($action === 'summarize') {
             return $basePrompt . "\n\nTask: Summarize the provided transaction information professionally. Be concise but detailed about service types and amounts. Show the user you value their business.";
@@ -166,6 +171,18 @@ class AiCommentController extends Controller
             ->take(30)
             ->get();
 
+        if ($transactions->isEmpty() && $services->isEmpty()) {
+            return "No activity found in the last 5 days.";
+        }
+
+        $totalSpent = $transactions->sum('amount');
+        $totalServices = $services->count();
+        $totalServiceAmount = $services->sum('amount');
+
+        $summaryStats = "ACTIVITY SUMMARY (Last 5 Days):\n" .
+                        "- Total Expenditure: ₦" . number_format($totalSpent, 2) . "\n" .
+                        "- Total Agent Services: $totalServices requested (₦" . number_format($totalServiceAmount, 2) . ")\n\n";
+
         $output = "TRANSACTION LOGS:\n";
         foreach ($transactions as $tx) {
             $output .= "- [{$tx->created_at->format('Y-m-d H:i')}] {$tx->description}: ₦" . number_format($tx->amount, 2) . " [{$tx->status}]\n";
@@ -176,7 +193,31 @@ class AiCommentController extends Controller
             $output .= "- [{$s->created_at->format('Y-m-d H:i')}] {$s->service_name} ({$s->service_type}): ₦" . number_format($s->amount, 2) . " [{$s->status}]\n";
         }
 
-        return (empty($transactions) && empty($services)) ? "No activity found in the last 5 days." : $output;
+        return $summaryStats . $output;
+    }
+
+    /**
+     * Fetch user's financial and referral context.
+     */
+    private function fetchUserFinancialContext()
+    {
+        $user = auth()->user();
+        if (!$user) return "No authenticated user info available.";
+
+        $wallet = $user->wallet;
+        $balance = $wallet ? $wallet->available_balance : 0;
+        $bonus = $wallet ? $wallet->bonus : 0;
+        
+        $referralCode = $user->referral_code ?? 'Contact Support';
+        $referralBonus = $user->referral_bonus ?? 0;
+
+        return "USER DASHBOARD DATA:\n" .
+               "- Available Wallet Balance: ₦" . number_format($balance, 2) . "\n" .
+               "- Account Bonus: ₦" . number_format($bonus, 2) . "\n" .
+               "- Total Referral Earnings: ₦" . number_format($referralBonus, 2) . "\n" .
+               "- PERSONAL REFERRAL CODE: $referralCode\n" .
+               "INCENTIVE:\n" .
+               "- Users can earn extra bonuses by inviting friends to Arewa Smart using their referral code. Each successful referral adds to their bonus balance.";
     }
 
     /**
@@ -194,9 +235,12 @@ class AiCommentController extends Controller
 
             $messages = [['role' => 'system', 'content' => $systemPrompt]];
 
-            // Add history if available
+            // Add history if available (Filtering out duplicates of the current message)
             foreach ($history as $msg) {
-                $messages[] = $msg;
+                if (isset($msg['role']) && isset($msg['content']) && 
+                   ($msg['role'] !== 'user' || $msg['content'] !== $userMessage)) {
+                    $messages[] = $msg;
+                }
             }
 
             $messages[] = ['role' => 'user', 'content' => $userMessage];

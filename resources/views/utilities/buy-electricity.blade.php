@@ -435,6 +435,7 @@
 
             window.askAi = (txt) => {
                 if(!txt.trim()) return;
+                const currentHistory = [...convHistory];
                 addBubble(txt, 'user');
                 aiIn.value = '';
                 typeInd.classList.remove('d-none');
@@ -445,7 +446,7 @@
                     body: JSON.stringify({
                         comment: "User is on the Electricity Bill page.",
                         question: txt,
-                        history: convHistory
+                        history: currentHistory
                     })
                 })
                 .then(r => r.json())
@@ -550,7 +551,9 @@
             document.getElementById('confirmAccountName').textContent = name || 'Electricity Customer';
             document.getElementById('confirmBankName').textContent = discoName + ' (' + meterType.toUpperCase() + ')';
             document.getElementById('confirmAccountNo').textContent = 'Meter: ' + meterNo;
-            document.getElementById('confirmAmount').textContent = '₦' + parseFloat(amount).toLocaleString();
+            const cleanAmount = String(amount).replace(/[^0-9.]/g, '');
+            const parsedAmount = parseFloat(cleanAmount);
+            document.getElementById('confirmAmount').textContent = '₦' + (isNaN(parsedAmount) ? '0.00' : parsedAmount.toLocaleString(undefined, {minimumFractionDigits: 0, maximumFractionDigits: 2}));
 
             const pinModal = new bootstrap.Modal(document.getElementById('pinModal'));
             pinModal.show();

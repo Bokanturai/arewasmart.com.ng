@@ -27,21 +27,22 @@
     @endpush
 
     @php
+        $token = $token ?? session('token');
+        $amount = $amount ?? session('amount') ?? 0;
+        $paid = $paid ?? session('paid') ?? $amount;
+        $discount = $amount - $paid;
+        $network = $network ?? session('network') ?? 'N/A';
+        $mobile = $mobile ?? session('mobile') ?? 'N/A';
+        $ref = $ref ?? session('ref') ?? 'N/A';
+
         $serviceName = 'Service Purchase';
-        if(session('token')) {
+        if($token) {
             $serviceName = 'Educational Pin';
-        } elseif (session('network') && str_contains(strtolower(session('network')), 'data')) {
+        } elseif ($network && str_contains(strtolower($network), 'data')) {
             $serviceName = 'Data Purchase';
-        } elseif (session('network')) {
+        } elseif ($network && $network !== 'N/A') {
             $serviceName = 'Airtime Purchase';
         }
-        
-        $amount = session('amount') ?? 0;
-        $paid = session('paid') ?? $amount;
-        $discount = $amount - $paid;
-        $network = session('network') ?? 'N/A';
-        $mobile = session('mobile') ?? 'N/A';
-        $ref = session('ref') ?? 'N/A';
     @endphp
 
     <div class="container-fluid px-0 px-md-3 py-3 py-sm-5 d-flex flex-column align-items-center bg-light min-vh-100">
@@ -103,10 +104,10 @@
                     </div>
                 </div>
 
-                @if(session('token'))
+                @if($token)
                 <div class="bg-primary bg-opacity-10 rounded-4 p-3 text-center mb-4 border border-primary border-opacity-10 shadow-sm">
                     <span class="text-primary small fw-bold text-uppercase ls-wider d-block mb-1">Examination PIN / Token</span>
-                    <div class="text-primary fs-12 fw-extrabold font-monospace letter-spacing-1">{{ session('token') }}</div>
+                    <div class="text-primary fs-12 fw-extrabold font-monospace letter-spacing-1">{{ $token }}</div>
                 </div>
                 @endif
 
@@ -123,20 +124,36 @@
 
                 <!-- Footer Section & Actions -->
                 <div class="no-print pb-3 pb-sm-4">
-                    <div class="row g-2 mb-3">
-                        <div class="col-6">
-                            <button onclick="window.print()" class="btn btn-outline-dark w-100 rounded-3 py-2 fw-bold extra-small shadow-sm d-flex align-items-center justify-content-center">
-                                <i class="bi bi-printer me-2"></i>Print
-                            </button>
+                    <!-- Action Buttons -->
+                    <div class="d-grid gap-3 mt-4 no-print">
+                        <button onclick="window.print()" class="btn btn-primary btn-lg rounded-pill shadow-sm fw-bold"> <i class="bi bi-printer me-2"></i> Print Receipt</button>
+                        <div class="row g-2">
+                            <div class="col-6">
+                                <a href="{{ route('dashboard') }}" class="btn btn-outline-secondary w-100 rounded-pill fw-semibold">
+                                    <i class="bi bi-house-door me-1"></i> Dashboard
+                                </a>
+                            </div>
+                            <div class="col-6">
+                                <a href="{{ url()->previous() }}" class="btn btn-outline-primary w-100 rounded-pill fw-semibold">
+                                    <i class="bi bi-plus-circle me-1"></i> Buy Another
+                                </a>
+                            </div>
                         </div>
-                        <div class="col-6">
+                    </div>
+
+                    <p class="text-center text-muted mt-4 small mb-0 no-print">
+                        Thank you for choosing <strong>Arewa Smart</strong>.
+                    </p>
+                    
+                    <div class="row g-2 mt-3">
+                        <div class="col-12">
                             <button onclick="shareAsPDF()" class="btn btn-outline-dark w-100 rounded-3 py-2 fw-bold extra-small shadow-sm d-flex align-items-center justify-content-center">
                                 <i class="bi bi-share me-2"></i>Share
                             </button>
                         </div>
-                        @if(session('token'))
+                        @if($token)
                         <div class="col-12">
-                            <button onclick="copyToClipboard('{{ session('token') }}')" class="btn btn-primary bg-gradient w-100 rounded-3 py-2 fw-bold extra-small shadow-sm mb-2 d-flex align-items-center justify-content-center border-0">
+                            <button onclick="copyToClipboard('{{ $token }}')" class="btn btn-primary bg-gradient w-100 rounded-3 py-2 fw-bold extra-small shadow-sm mb-2 d-flex align-items-center justify-content-center border-0">
                                 <i class="bi bi-clipboard-check me-2"></i>Copy PIN
                             </button>
                         </div>

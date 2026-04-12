@@ -2,6 +2,51 @@
     <title>Arewa Smart - Support Dashboard</title>
     @push('styles')
         <style>
+            /* Premium Banner & Animations */
+            .bg-mesh-primary {
+                background: linear-gradient(135deg, var(--bs-primary) 0%, #0a58ca 100%);
+                position: relative;
+                overflow: hidden;
+            }
+            .bg-mesh-primary::before {
+                content: '';
+                position: absolute;
+                top: -50%; left: -50%; width: 200%; height: 200%;
+                background: radial-gradient(circle at center, rgba(255,255,255,0.15) 0%, transparent 60%);
+                animation: mesh-rotate 20s linear infinite;
+            }
+            @keyframes mesh-rotate { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+
+            .online-indicator {
+                width: 12px; height: 12px;
+                animation: status-pulse 2s infinite;
+            }
+            @keyframes status-pulse {
+                0% { box-shadow: 0 0 0 0 rgba(25, 135, 84, 0.7); }
+                70% { box-shadow: 0 0 0 8px rgba(25, 135, 84, 0); }
+                100% { box-shadow: 0 0 0 0 rgba(25, 135, 84, 0); }
+            }
+
+            /* Table Enhancements */
+            .table-hover-custom tbody tr { transition: all 0.2s ease; cursor: pointer; }
+            .table-hover-custom tbody tr:hover { background-color: rgba(var(--bs-primary-rgb), 0.03) !important; transform: translateY(-1px); }
+            
+            /* Soft Badges */
+            .badge-soft-success { background: rgba(25, 135, 84, 0.1); color: #198754; border: 1px solid rgba(25, 135, 84, 0.1); }
+            .badge-soft-primary { background: rgba(13, 110, 253, 0.1); color: #0d6efd; border: 1px solid rgba(13, 110, 253, 0.1); }
+            .badge-soft-warning { background: rgba(255, 193, 7, 0.1); color: #997404; border: 1px solid rgba(255, 193, 7, 0.1); }
+            .badge-soft-secondary { background: rgba(108, 117, 125, 0.1); color: #6c757d; border: 1px solid rgba(108, 117, 125, 0.1); }
+
+            .animate-float { animation: float 3s ease-in-out infinite; }
+            @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+
+            .focus-within-primary { transition: all 0.3s ease; border: 1px solid #eee; }
+            .focus-within-primary:focus-within {
+                border-color: var(--bs-primary) !important;
+                box-shadow: 0 0 0 0.25rem rgba(var(--bs-primary-rgb), 0.15) !important;
+                background: #fff !important;
+            }
+
             @media (max-width: 768px) {
                 .responsive-table thead {
                     display: none;
@@ -18,7 +63,7 @@
                 .responsive-table tr {
                     margin-bottom: 15px;
                     border: 1px solid #eee;
-                    border-radius: 12px;
+                    border-radius: 0; /* Match edge-to-edge card */
                     padding: 10px;
                     background: #fdfdfd;
                     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
@@ -58,7 +103,7 @@
     @endpush
 
     <div class="page-body">
-        <div class="container-fluid">
+        <div class="container-fluid px-0 px-md-3">
             <!-- Header -->
             <div class="page-title mb-4">
                 <div class="row align-items-center">
@@ -71,17 +116,17 @@
             </div>
 
             <!-- AI Assistant Banner -->
-            <div class="row mb-4">
+            <div class="row g-0 g-md-4 mb-4">
                 <div class="col-12">
-                    <div class="card bg-primary text-white shadow-sm border-0 rounded-4 overflow-hidden">
+                    <div class="card bg-mesh-primary text-white shadow-lg border-0 rounded-0 rounded-md-4 overflow-hidden">
                         <div
-                            class="card-body d-flex flex-column flex-md-row align-items-center justify-content-between p-4">
+                            class="card-body d-flex flex-column flex-md-row align-items-center justify-content-between p-4"  style="position: relative; z-index: 1;">
                             <div class="d-flex align-items-center mb-3 mb-md-0">
                                 <div class="bg-white text-primary rounded-circle d-flex align-items-center justify-content-center me-3 position-relative shadow-sm"
                                     style="width: 60px; height: 60px; min-width: 60px;">
                                     <i class="ti ti-robot fs-1"></i>
                                     <span
-                                        class="position-absolute bottom-0 end-0 p-1 bg-success border border-2 border-white rounded-circle"
+                                        class="position-absolute bottom-0 end-0 bg-success border border-2 border-white rounded-circle online-indicator"
                                         style="width: 14px; height: 14px; transform: translate(5%, 5%);"
                                         title="AI Online"></span>
                                 </div>
@@ -105,19 +150,19 @@
             </div>
 
             <!-- Tickets Table -->
-            <div class="row">
+            <div class="row g-0 g-md-4">
                 <div class="col-12">
-                    <div class="card shadow-sm border-0 rounded-4 overflow-hidden">
+                    <div class="card shadow-lg border-0 rounded-0 rounded-md-4 overflow-hidden">
                         <div
-                            class="card-header bg-white border-bottom py-3 d-flex align-items-center justify-content-between">
+                            class="card-header bg-white border-bottom py-3 d-flex align-items-center justify-content-between rounded-0 rounded-top-md-4">
                             <h5 class="mb-0 fw-bold text-dark"><i class="ti ti-list me-2 text-primary"></i>Your Support
                                 Tickets</h5>
-                            <span class="badge bg-soft-primary text-primary rounded-pill">{{ $tickets->total() }}
+                            <span class="badge badge-soft-primary px-3 py-2 rounded-pill">{{ $tickets->total() }}
                                 Total</span>
                         </div>
                         <div class="card-body p-0">
                             <div class="table-responsive">
-                                <table class="table table-hover align-middle mb-0 responsive-table">
+                                <table class="table table-hover align-middle mb-0 responsive-table table-hover-custom">
                                     <thead class="bg-light">
                                         <tr class="text-uppercase text-muted small fw-bold"
                                             style="letter-spacing: 0.5px;">
@@ -131,7 +176,7 @@
                                     </thead>
                                     <tbody>
                                         @forelse($tickets as $ticket)
-                                                                                <tr>
+                                                                                <tr onclick="window.location='{{ route('support.show', $ticket->ticket_reference) }}'" class="position-relative">
                                                                                     <td class="ps-4 text-muted fw-bold d-mobile-none" data-label="S/N">
                                                                                         {{ $tickets->firstItem() + $loop->index }}
                                                                                     </td>
@@ -146,13 +191,13 @@
                                                                                             class="fw-medium text-dark">{{ Str::limit($ticket->subject, 40) }}</span>
                                                                                     </td>
                                                                                     <td data-label="Status">
-                                                                                        <span class="badge rounded-pill bg-{{ match ($ticket->status) {
+                                                                                        <span class="badge rounded-pill px-3 py-2 badge-soft-{{ match ($ticket->status) {
                                                 'open' => 'success',
                                                 'answered' => 'primary',
                                                 'customer_reply' => 'warning',
                                                 'closed' => 'secondary',
                                                 default => 'info'
-                                            } }} px-3 py-2">
+                                            } }}">
                                                                                             {{ ucfirst(str_replace('_', ' ', $ticket->status)) }}
                                                                                         </span>
                                                                                     </td>
@@ -162,7 +207,7 @@
                                                                                     </td>
                                                                                     <td class="text-end pe-4" data-label="Action">
                                                                                         <a href="{{ route('support.show', $ticket->ticket_reference) }}"
-                                                                                            class="btn btn-sm btn-outline-primary rounded-pill px-3">
+                                                                                            class="btn btn-sm btn-outline-primary rounded-pill px-3 stretched-link">
                                                                                             View <i class="ti ti-arrow-right ms-1"></i>
                                                                                         </a>
                                                                                     </td>
@@ -172,8 +217,8 @@
                                                 <td colspan="6" class="text-center py-5">
                                                     <div class="empty-state py-4">
                                                         <div class="mb-4">
-                                                            <div class="avatar bg-soft-primary text-primary rounded-circle d-inline-flex align-items-center justify-content-center shadow-sm"
-                                                                style="width: 100px; height: 100px; background-color: rgba(var(--bs-primary-rgb), 0.1);">
+                                                            <div class="avatar bg-soft-primary text-primary rounded-circle d-inline-flex align-items-center justify-content-center shadow-sm animate-float"
+                                                                style="width: 100px; height: 100px; background: rgba(var(--bs-primary-rgb), 0.1);">
                                                                 <i class="ti ti-ticket fs-1"></i>
                                                             </div>
                                                         </div>
@@ -195,7 +240,7 @@
                             </div>
                         </div>
                         @if($tickets->hasPages())
-                            <div class="card-footer bg-white border-top py-3">
+                            <div class="card-footer bg-white border-top py-3 rounded-0 rounded-bottom-md-4">
                                 {{ $tickets->links() }}
                             </div>
                         @endif
@@ -220,14 +265,17 @@
                 <form id="createTicketForm" action="{{ route('support.store') }}" method="POST"
                     enctype="multipart/form-data">
                     @csrf
+                    <div style="display: none;">
+                        <input type="text" name="honeypot_field" autocomplete="off">
+                    </div>
                     <div class="modal-body p-4">
                         <div class="mb-4">
                             <label class="form-label fw-bold text-dark">Subject <span
                                     class="text-danger">*</span></label>
-                            <div class="input-group">
-                                <span class="input-group-text bg-light border-end-0"><i
+                            <div class="input-group focus-within-primary rounded-3 overflow-hidden">
+                                <span class="input-group-text bg-light border-0"><i
                                         class="ti ti-edit text-primary"></i></span>
-                                <input type="text" name="subject" class="form-control border-start-0 ps-0"
+                                <input type="text" name="subject" class="form-control border-0 bg-transparent ps-0"
                                     placeholder="e.g., Payment Issue, Technical Error" required>
                             </div>
                         </div>
@@ -235,7 +283,7 @@
                         <div class="mb-4">
                             <label class="form-label fw-bold text-dark">Message <span
                                     class="text-danger">*</span></label>
-                            <textarea name="message" class="form-control" rows="5"
+                            <textarea name="message" class="form-control focus-within-primary" rows="5"
                                 placeholder="Please describe your issue in detail..." required
                                 style="border-radius: 12px;"></textarea>
                         </div>
@@ -272,6 +320,18 @@
                 const submitBtn = document.getElementById('submitTicketBtn');
                 const spinner = submitBtn.querySelector('.spinner-border');
                 const formData = new FormData(form);
+
+                // Client-side file size validation (2MB)
+                const attachment = form.querySelector('input[name="attachment"]');
+                if (attachment.files.length > 0 && attachment.files[0].size > 2 * 1024 * 1024) {
+                    Swal.fire({
+                        title: 'Error!',
+                        text: 'Attachment size exceeds 2MB limit.',
+                        icon: 'error',
+                        confirmButtonColor: '#F26522'
+                    });
+                    return;
+                }
 
                 // Show loading state
                 submitBtn.disabled = true;

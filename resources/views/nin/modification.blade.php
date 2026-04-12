@@ -14,14 +14,14 @@
             </div>
         </div>
 
-        <div class="container-fluid">
-            <div class="row mt-3">
+        <div class="container-fluid px-0 px-md-3">
+            <div class="row mt-3 g-0 g-md-4">
 
                 {{-- MODIFICATION REQUEST FORM --}}
-                <div class="col-xl-5 mb-4">
-                    <div class="card shadow-lg border-0 rounded-4">
+                <div class="col-12 col-xl-5 mb-4">
+                    <div class="card shadow-lg border-0 rounded-0 rounded-md-4">
                         <div
-                            class="card-header bg-primary text-white p-3 p-md-4 border-0 rounded-top-4 text-center text-sm-start">
+                            class="card-header bg-primary text-white p-3 p-md-4 border-0 rounded-0 rounded-top-md-4 text-center text-sm-start">
                             <h5 class="mb-0 fw-bold fs-15"><i class="bi bi-gear-fill me-2"></i>New Modification Request
                             </h5>
                             <p class="mb-0 small text-white-50 mt-1">Fees are non-refundable. Please verify all details.
@@ -387,15 +387,14 @@
                                     </div>
                                 </div>
 
-                                <!-- Terms & Conditions -->
+                                {{-- Warning --}}
                                 <div class="col-12">
-                                    <div class="form-check p-0 d-flex align-items-start gap-2">
-                                        <input class="form-check-input ms-0 mt-1" type="checkbox" id="termsCheckbox"
-                                            required>
-                                        <label class="form-check-label small fw-medium text-muted" for="termsCheckbox">
-                                            I confirm that the provided information is 100% accurate. I understand that
-                                            incorrect data will lead to automatic rejection without refund.
-                                        </label>
+                                    <div class="alert alert-success py-3 rounded-3 shadow-sm border-0 d-flex align-items-center">
+                                        <i class="bi bi-exclamation-circle text-warning fs-15 me-3"></i>
+                                        <div class="small">
+                                            <strong>Is- refundable Service</strong><br>
+                                            Please verify all details carefully before submission.
+                                        </div>
                                     </div>
                                 </div>
 
@@ -419,10 +418,10 @@
                 </div>
 
                 <!-- SUBMISSION HISTORY -->
-                <div class="col-xl-7">
-                    <div class="card shadow-lg border-0 rounded-4">
+                <div class="col-12 col-xl-7 mt-2 mt-md-0">
+                    <div class="card shadow-lg border-0 rounded-0 rounded-md-4">
                         <div
-                            class="card-header bg-white p-3 p-md-4 border-bottom d-flex justify-content-center justify-content-sm-between align-items-center rounded-top-4">
+                            class="card-header bg-white p-3 p-md-4 border-bottom d-flex justify-content-center justify-content-sm-between align-items-center rounded-0 rounded-top-md-4">
                             <h5 class="mb-0 fw-bold text-dark fs-15"><i
                                     class="bi bi-clock-history text-primary me-2"></i>Submission History</h5>
                         </div>

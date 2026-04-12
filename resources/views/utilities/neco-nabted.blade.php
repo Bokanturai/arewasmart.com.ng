@@ -1,5 +1,15 @@
 <x-app-layout>
-    <title>Arewa Smart - Buy Educational Pin</title>
+    <title>Arewa Smart - NECO & NABTED PIN</title>
+
+    @php
+        // Statistics calculation
+        $groupedHistory = $history->groupBy('network');
+        $chartLabels = $groupedHistory->keys()->toArray();
+        $chartValues = $groupedHistory->map(function($items) {
+            return $items->sum('amount');
+        })->values()->toArray();
+    @endphp
+
 
     @push('styles')
     <style>
@@ -90,13 +100,13 @@
                 <div class="card custom-card shadow-lg border-0 rounded-0 rounded-md-4 d-flex flex-column">
                     <div class="card-header justify-content-between bg-primary text-white rounded-0 rounded-top-md-4">
                         <div class="card-title fw-semibold">
-                            <i class="bi bi-credit-card me-2"></i> Buy Educational Pin
+                            <i class="bi bi-mortarboard-fill me-2"></i> NECO & NABTED
                         </div>
                     </div>
 
                     <div class="card-body">
                         <p class="text-center text-muted mb-4 small">
-                            Select your educational pin service, choose the type, and complete your purchase securely.
+                            Select your exam, enter your phone number, and complete your pin purchase securely.
                         </p>
 
                         {{-- Alert Messages --}}
@@ -114,63 +124,32 @@
                             </div>
                         @endif
 
-                        @if ($errors->any())
-                            <div class="alert alert-danger alert-dismissible fade show mb-3 py-2">
-                                <ul class="mb-0 small">
-                                    @foreach ($errors->all() as $error)
-                                        <li>{{ $error }}</li>
-                                    @endforeach
-                                </ul>
-                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                            </div>
-                        @endif
-
-                        <form id="buy-pin-form" method="POST" action="{{ route('buypin') }}">
+                        <form id="buy-pin-form" method="POST" action="{{ route('buy-neco-nabted') }}">
                             @csrf
                             
-                            {{-- Service Selection --}}
-                            <div class="network-selection mb-4">
-                                <label class="form-label fw-semibold text-dark small mb-3 text-center d-block w-100">Select Educational Service</label>
-                                <div class="row text-center g-2 g-sm-3 justify-content-center">
-                                    <div class="col-6">
-                                        <div class="network-card p-2 border rounded-3 text-center" 
-                                             id="service-waec"
-                                             onclick="selectService('waec', 'service-waec')">
-                                            <img src="{{ asset('assets/img/apps/waec.png') }}" alt="WAEC" class="mb-1" onerror="this.src='{{ asset('assets/img/apps/pin.png') }}'">
-                                            <span class="d-block small fw-bold" style="font-size: 10px;">WAEC Result Checker</span>
+                            {{-- Exam Selection --}}
+                            <div class="mb-4 network-selection">
+                                <label class="form-label fw-semibold small">Select Exam Type</label>
+                                <div class="row g-2 justify-content-center text-center">
+                                    @foreach($variations as $variation)
+                                        <div class="col-6">
+                                            <div class="network-card rounded-3 shadow-sm border p-3 h-100 d-flex flex-column align-items-center justify-content-center transition-all bg-white" 
+                                                 id="pkg-{{ $variation->field_code }}"
+                                                 onclick="selectPackage('{{ $variation->field_code }}', '{{ $variation->field_name }}', 'pkg-{{ $variation->field_code }}', '{{ $fieldPrices[$variation->field_code] ?? 0 }}')">
+                                                <img src="{{ asset('assets/img/apps/' . (strtolower($variation->field_name) == 'neco' ? 'neco.png' : 'waec.png')) }}" class="img-fluid mb-2" style="width: 40px; height: 40px;">
+                                                <div class="fw-bold fs-9 text-dark lh-1">{{ $variation->field_name }}</div>
+                                            </div>
                                         </div>
-                                    </div>
-                                    <div class="col-6">
-                                        <div class="network-card p-2 border rounded-3 text-center" 
-                                             id="service-waec-registration"
-                                             onclick="selectService('waec-registration', 'service-waec-registration')">
-                                            <img src="{{ asset('assets/img/apps/waec.png') }}" alt="WAEC Registration" class="mb-1" onerror="this.src='{{ asset('assets/img/apps/pin.png') }}'">
-                                            <span class="d-block small fw-bold" style="font-size: 10px;">WAEC Registration</span>
-                                        </div>
-                                    </div>
+                                    @endforeach
                                 </div>
                                 <input type="hidden" name="service" id="service_id" required>
-                                <input type="hidden" name="pin" id="service_pin" required>
-                            </div>
-
-                            {{-- Pin Type Selection --}}
-                            <div class="mb-4">
-                                <label class="form-label fw-semibold small">Select Type</label>
-                                <select name="type" id="type" class="form-select text-center shadow-sm" required>
-                                    <option value="">-- Choose Type --</option>
-                                    @foreach ($pins as $p)
-                                        <option value="{{ $p->variation_code }}" data-amount="{{ $p->variation_amount }}">
-                                            {{ strtoupper($p->name ?? $p->variation_code) }}
-                                        </option>
-                                    @endforeach
-                                </select>
                             </div>
 
                             {{-- Phone Number --}}
                             <div class="mb-4">
                                 <label class="form-label fw-semibold small">Phone Number</label>
                                 <input type="text" id="mobileno" name="mobileno" maxlength="11"
-                                       class="form-control text-center shadow-sm" placeholder="Enter 11-digit number" required>
+                                       class="form-control text-center shadow-sm" placeholder="08012345678" required>
                             </div>
 
                             {{-- Amount & Wallet --}}
@@ -184,12 +163,14 @@
                                         <i class="bi bi-eye-slash-fill ms-1" id="toggleBalance" style="cursor: pointer;" onclick="toggleBalanceVisibility()"></i>
                                     </small>
                                 </label>
-                                <input type="text" id="amountToPay" name="amount" readonly class="form-control text-center shadow-sm" placeholder="0.00" />
+                                <input type="text" id="amountToPay" name="amount" readonly class="form-control text-center shadow-sm" value="0.00" />
                             </div>
+
+                            <input type="hidden" name="pin" id="service_pin" required>
 
                             <div class="d-grid shadow-sm">
                                 <button type="button" class="btn btn-primary btn-lg fw-bold rounded-pill py-2"
-                                        id="proceed-btn" onclick="openPinModal()">
+                                        id="proceed-btn" disabled onclick="openPinModal()">
                                     Proceed to Buy <i class="bi bi-chevron-right ms-1"></i>
                                 </button>
                             </div>
@@ -219,56 +200,49 @@
                         </div>
                     </div>
 
-                    {{-- Unified Scrollable Section --}}
                     <div class="flex-grow-1 overflow-auto custom-scrollbar" id="aiScrollContainer">
                         
-                        {{-- Collapsible History Section --}}
-                        @php
-                            $historyItems = $history ?? collect();
-                            $eduData = $historyItems->groupBy(function($item) {
-                                return strtoupper($item->network ?? 'UNKNOWN');
-                            })->map(fn($group) => $group->sum('amount'));
-
-                            $chartLabels = $eduData->keys()->toArray();
-                            $chartValues = $eduData->values()->toArray();
-                        @endphp
-
                         <div class="collapse show" id="historyCollapse">
                             <div class="bg-white border-bottom shadow-sm">
-                                <div class="p-3 border-bottom d-flex justify-content-between align-items-center bg-light-subtle">
-                                    <div>
-                                        <small class="fw-bold text-muted text-uppercase mb-0 fs-11 px-2">
-                                            <i class="bi bi-bar-chart-fill me-2"></i>Spending Distribution
-                                        </small>
-                                    </div>
-                                    <div class="text-end px-2">
-                                        <h6 class="mb-0 fw-bold text-primary fs-13">₦{{ number_format($historyItems->sum('amount'), 0) }}</h6>
-                                        <small class="text-muted fs-9">Total History</small>
-                                    </div>
+                                {{-- Spending Statistics --}}
+                                <div class="px-3 py-4 border-bottom bg-light-subtle">
+                                    <h6 class="fs-11 fw-bold text-uppercase mb-3 d-flex align-items-center">
+                                        <i class="bi bi-pie-chart-fill me-2 text-primary"></i> Spending Distribution
+                                    </h6>
+                                    @if($history->count() > 0)
+                                        <div id="spendingChart" style="min-height: 200px;"></div>
+                                    @else
+                                        <div class="text-center py-4 text-muted small">No data for statistics.</div>
+                                    @endif
                                 </div>
 
-                                <div class="p-2">
-                                    <div id="spendingChart" style="min-height: 180px;"></div>
-                                </div>
+                                <div class="px-3 py-3 pb-3">
+                                    <small class="text-muted fw-bold text-uppercase fs-9 d-block mb-2">Recent NECO & NABTED Purchases</small>
 
-                                <div class="px-3 pb-3">
-                                    <small class="text-muted fw-bold text-uppercase fs-9 d-block mb-2">Recent PIN Purchases</small>
                                     <div class="transaction-list">
-                                        @forelse($historyItems->take(15) as $data)
-                                            @php
-                                                preg_match('/PIN: (.*)/', $data->description, $matches);
-                                                $token = $matches[1] ?? 'N/A';
-                                            @endphp
+                                        @forelse($history->take(15) as $data)
                                             <a href="{{ route('education.receipt', $data->ref) }}" class="text-decoration-none d-block mb-3">
                                                 <div class="d-flex align-items-center justify-content-between p-2 rounded-3 bg-light-subtle shadow-sm border-start border-3 border-primary" 
                                                      style="transition: all 0.2s ease;">
                                                     <div class="d-flex align-items-center gap-2">
                                                         <div class="bg-primary bg-opacity-10 text-primary rounded-circle d-flex align-items-center justify-content-center" style="width: 32px; height: 32px;">
-                                                            <i class="bi bi-mortarboard fs-12"></i>
+                                                            <i class="bi bi-book fs-12"></i>
                                                         </div>
                                                         <div>
-                                                            <h6 class="mb-0 fs-12 fw-bold text-dark">{{ $token }}</h6>
-                                                            <small class="text-muted fs-10 text-uppercase">{{ strtoupper($data->network ?? 'UNKNOWN') }} • {{ $data->created_at->diffForHumans() }}</small>
+                                                            <h6 class="mb-0 fs-12 fw-bold text-dark">{{ $data->phone_number }}</h6>
+                                                            @php
+                                                                $tokenVal = $data->token;
+                                                                if (!$tokenVal) {
+                                                                    preg_match('/PIN: (.*)/', $data->description, $matches);
+                                                                    $tokenVal = $matches[1] ?? 'Check Receipt';
+                                                                }
+                                                            @endphp
+                                                            <div class="d-flex align-items-center mt-1">
+                                                                <small class="badge bg-primary-subtle text-primary border-0 fs-8 fw-bold px-2 py-1">
+                                                                    PIN: {{ $tokenVal }}
+                                                                </small>
+                                                                <small class="text-muted fs-9 ms-2">{{ strtoupper($data->network ?? 'PIN') }} • {{ $data->created_at->diffForHumans() }}</small>
+                                                            </div>
                                                         </div>
                                                     </div>
                                                     <div class="text-end">
@@ -278,12 +252,12 @@
                                                 </div>
                                             </a>
                                         @empty
-                                            <div class="text-center py-4 text-muted small">No recent educational pin purchases.</div>
+                                            <div class="text-center py-4 text-muted small">No recent purchases found.</div>
                                         @endforelse
                                     </div>
-                                    @if($historyItems->count() > 0)
+                                    @if($history->count() > 0)
                                         <div class="d-flex justify-content-center mt-2">
-                                            {{ $historyItems->links('vendor.pagination.bootstrap-4') }}
+                                            {{ $history->links('vendor.pagination.bootstrap-4') }}
                                         </div>
                                     @endif
                                 </div>
@@ -295,19 +269,19 @@
                             <div class="d-flex gap-2 mb-4 animate-fade-in">
                                 <div class="bg-primary text-white rounded-circle p-1 align-self-start shadow-sm" style="width:28px;height:28px;font-size:12px;display:flex;align-items:center;justify-content:center; flex-shrink:0;">AS</div>
                                 <div class="bg-white p-3 rounded-4 rounded-start-0 shadow-sm border small shadow-hover" style="max-width: 85%;">
-                                    <p class="mb-0 text-dark">Hello! I'm your Educational Services assistant. Need help with WAEC or NECO pins? Just ask!</p>
+                                    <p class="mb-0 text-dark">Hello! I'm your Exam Pin assistant. Need help with NECO or NABTED pins? Just ask!</p>
                                 </div>
                             </div>
                         </div>
 
                         <div id="aiTypingIndicator" class="px-4 py-2 d-none">
-                            <small class="text-muted"><i class="bi bi-stars spin me-1"></i> Analyzing educational options...</small>
+                            <small class="text-muted"><i class="bi bi-stars spin me-1"></i> Analyzing details...</small>
                         </div>
                     </div>
 
                     <div class="card-footer bg-white border-top p-3 p-md-4 mt-auto rounded-0 rounded-bottom-md-4 shadow-sm">
                         <div class="input-group bg-light rounded-pill p-1 border shadow-sm focus-within-shadow">
-                            <input type="text" id="aiInput" class="form-control border-0 bg-transparent ps-3" placeholder="Ask about educational pins...">
+                            <input type="text" id="aiInput" class="form-control border-0 bg-transparent ps-3" placeholder="Ask about NECO/NABTED pins...">
                             <button class="btn btn-primary rounded-circle p-2 mx-1 shadow-sm d-flex align-items-center justify-content-center" id="sendAiBtn" style="width:38px;height:38px;">
                                 <i class="bi bi-send-fill fs-14"></i>
                             </button>
@@ -327,23 +301,18 @@
         let convHistory = [];
 
         $(document).ready(function () {
-            // Service Selection Logic
-            window.selectService = function(val, elementId) {
-                $('.network-card').removeClass('active');
-                $('#' + elementId).addClass('active');
-                $("#service_id").val(val);
-            };
+            const serviceIdInput = $('#service_id');
+            const proceedBtn = $('#proceed-btn');
+            const amountInput = $('#amountToPay');
 
-            // Handle Type Selection - Update Amount
-            $('#type').on('change', function() {
-                const selectedOption = $(this).find('option:selected');
-                const amount = selectedOption.data('amount');
-                if(amount) {
-                    $('#amountToPay').val(amount);
-                } else {
-                    $('#amountToPay').val('');
-                }
-            });
+            // Package Selection Helper
+            window.selectPackage = (code, name, elementId, price) => {
+                $('.network-card').removeClass('active border-primary').addClass('bg-white');
+                $('#' + elementId).addClass('active border-primary').removeClass('bg-white');
+                serviceIdInput.val(code);
+                amountInput.val(price);
+                proceedBtn.prop('disabled', false);
+            };
 
             // AI Chatbot Logic
             const aiWin = document.getElementById('aiChatWindow');
@@ -370,7 +339,7 @@
 
             window.askAi = (txt) => {
                 if(!txt.trim()) return;
-                const currentHistory = [...convHistory];
+                const currentHistory = [...convHistory]; // Capture history before adding new bubble
                 addBubble(txt, 'user');
                 aiIn.value = '';
                 typeInd.classList.remove('d-none');
@@ -379,7 +348,7 @@
                     method: "POST",
                     headers: { "Content-Type": "application/json", "X-CSRF-TOKEN": "{{ csrf_token() }}" },
                     body: JSON.stringify({
-                        comment: `User is on the Educational PIN purchase page. Selected Service: ${$('#service_id').val() || 'None'}.`,
+                        comment: `User is on the NECO & NABTED PIN purchase page. Selected: ${$('#service_id').val() || 'None'}.`,
                         question: txt,
                         history: currentHistory
                     })
@@ -392,55 +361,11 @@
                 })
                 .catch(() => {
                     typeInd.classList.add('d-none');
-                    addBubble("Network error. Please try again.", 'assistant');
                 });
             };
 
             $('#sendAiBtn').on('click', () => askAi(aiIn.value));
             $('#aiInput').on('keypress', (e) => { if(e.key === 'Enter') askAi(aiIn.value); });
-
-            // History Chart
-            const options = {
-                series: @json($chartValues),
-                chart: { type: 'donut', height: 200, sparkline: { enabled: true } },
-                labels: @json($chartLabels),
-                colors: ['#0d6efd', '#6610f2', '#6f42c1', '#d63384', '#dc3545', '#fd7e14', '#ffc107'],
-                plotOptions: {
-                    pie: {
-                        donut: {
-                            size: '75%',
-                            labels: {
-                                show: true,
-                                name: { show: true, fontSize: '12px', fontWeight: 600, offsetY: -10 },
-                                value: { 
-                                    show: true, 
-                                    fontSize: '16px', 
-                                    fontWeight: 700, 
-                                    offsetY: 5,
-                                    formatter: function(val) { return '₦' + parseInt(val).toLocaleString(); }
-                                },
-                                total: {
-                                    show: true,
-                                    label: 'Total',
-                                    fontSize: '12px',
-                                    fontWeight: 600,
-                                    formatter: function(w) {
-                                        return '₦' + w.globals.seriesTotals.reduce((a, b) => a + b, 0).toLocaleString();
-                                    }
-                                }
-                            }
-                        }
-                    }
-                },
-                dataLabels: { enabled: false },
-                legend: { show: true, position: 'bottom', fontSize: '10px' },
-                tooltip: { y: { formatter: function(val) { return '₦' + val.toLocaleString(); } } }
-            };
-
-            if (document.querySelector("#spendingChart")) {
-                const chart = new ApexCharts(document.querySelector("#spendingChart"), options);
-                chart.render();
-            }
         });
 
         // Global Helpers
@@ -466,20 +391,14 @@
         };
 
         window.openPinModal = function() {
-            const service = document.getElementById('service_id').value;
-            const type = document.getElementById('type').value;
-            const typeText = $('#type option:selected').text();
-            const phone = document.getElementById('mobileno').value;
+            const serviceId = $('#service_id').val();
+            const examName = $('#pkg-' + serviceId + ' .fw-bold').text();
             const amount = document.getElementById('amountToPay').value;
+            const mobile = document.getElementById('mobileno').value;
 
-            if (!service || !type || !phone || phone.length < 11 || !amount) {
-                Swal.fire({ icon: 'warning', title: 'Check Form', text: 'Please complete the form correctly.' });
-                return;
-            }
-
-            document.getElementById('confirmAccountName').textContent = 'Educational PIN Purchase';
-            document.getElementById('confirmBankName').textContent = typeText.trim();
-            document.getElementById('confirmAccountNo').textContent = 'Phone: ' + phone;
+            document.getElementById('confirmAccountName').textContent = 'Exam PIN Purchase';
+            document.getElementById('confirmBankName').textContent = examName;
+            document.getElementById('confirmAccountNo').textContent = 'Receiver: ' + mobile;
             const cleanAmount = String(amount).replace(/[^0-9.]/g, '');
             const parsedAmount = parseFloat(cleanAmount);
             document.getElementById('confirmAmount').textContent = '₦' + (isNaN(parsedAmount) ? '0.00' : parsedAmount.toLocaleString(undefined, {minimumFractionDigits: 0, maximumFractionDigits: 2}));
@@ -492,33 +411,33 @@
         $('#confirmPinBtn').on('click', function() {
             const btn = $(this);
             if(btn.prop('disabled')) return;
-            
-            const pin = $('#pinInput').val().trim();
-            if (!pin) return;
 
+            const pin = $('#pinInput').val().trim();
+            if(!pin) return;
+            
             btn.prop('disabled', true);
             $('#pinLoader').removeClass('d-none');
             
-            fetch("{{ route('verify.pin') }}", {
-                method: "POST",
-                headers: { "Content-Type": "application/json", "X-CSRF-TOKEN": "{{ csrf_token() }}" },
-                body: JSON.stringify({ pin })
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.valid) {
-                    $('#service_pin').val(pin);
-                    document.getElementById('buy-pin-form').submit();
-                } else {
-                    Swal.fire({ icon: 'error', title: 'Invalid PIN', text: 'Please check your transaction PIN.' });
+            $.ajax({
+                type: "POST",
+                url: "{{ route('verify.pin') }}",
+                data: { pin: pin, _token: "{{ csrf_token() }}" },
+                success: function(data) {
+                    if (data.valid) {
+                        $('#service_pin').val(pin);
+                        $('#confirmPinBtn').prop('disabled', true).html('<span class="spinner-border spinner-border-sm me-2"></span>Processing...');
+                        $('#buy-pin-form').submit();
+                    } else {
+                        Swal.fire({ icon: 'error', title: 'Invalid PIN', text: 'Please check your transaction PIN.' });
+                        btn.prop('disabled', false);
+                        $('#pinLoader').addClass('d-none');
+                    }
+                },
+                error: function() {
+                    Swal.fire({ icon: 'error', title: 'Error', text: 'Connection failed. Please try again.' });
                     btn.prop('disabled', false);
                     $('#pinLoader').addClass('d-none');
                 }
-            })
-            .catch(() => {
-                Swal.fire({ icon: 'error', title: 'Error', text: 'Connection failed. Please try again.' });
-                btn.prop('disabled', false);
-                $('#pinLoader').addClass('d-none');
             });
         });
 
@@ -533,6 +452,52 @@
                 }
             }
         });
+
+        // History Chart
+        document.addEventListener('DOMContentLoaded', function() {
+            const options = {
+                series: @json($chartValues),
+                chart: { type: 'donut', height: 200, sparkline: { enabled: true } },
+                labels: @json($chartLabels),
+                colors: ['#0d6efd', '#d47508ff', '#6610f2', '#6f42c1', '#d63384', '#dc3545', '#fd7e14', '#ffc107'],
+                plotOptions: {
+                    pie: {
+                        donut: {
+                            size: '75%',
+                            labels: {
+                                show: true,
+                                name: { show: true, fontSize: '10px', fontWeight: 600, offsetY: -10 },
+                                value: { 
+                                    show: true, 
+                                    fontSize: '14px', 
+                                    fontWeight: 700, 
+                                    offsetY: 5,
+                                    formatter: function(val) { return '₦' + parseInt(val).toLocaleString(); }
+                                },
+                                total: {
+                                    show: true,
+                                    label: 'Total',
+                                    fontSize: '10px',
+                                    fontWeight: 600,
+                                    formatter: function(w) {
+                                        return '₦' + w.globals.seriesTotals.reduce((a, b) => a + b, 0).toLocaleString();
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                dataLabels: { enabled: false },
+                legend: { show: true, position: 'bottom', fontSize: '10px' },
+                tooltip: { y: { formatter: function(val) { return '₦' + val.toLocaleString(); } } }
+            };
+
+            if (document.querySelector("#spendingChart")) {
+                const chart = new ApexCharts(document.querySelector("#spendingChart"), options);
+                chart.render();
+            }
+        });
     </script>
+
     @endpush
 </x-app-layout>

@@ -36,22 +36,6 @@
                         <div id="aiUnifiedSection"></div>
                     </div>
 
-                    <!-- Action Quick Links -->
-                    <div class="d-flex flex-wrap gap-2 mb-3 p-1">
-                        <a href="{{ route('bvn.verification.index') }}"
-                            class="btn btn-sm btn-light border rounded-pill px-3 py-2 text-primary fw-semibold shadow-sm transition-all hover-translate-y">
-                            <i class="bi bi-shield-check me-1"></i> Verify BVN
-                        </a>
-                        <a href="{{ route('nin.verification.index') }}"
-                            class="btn btn-sm btn-light border rounded-pill px-3 py-2 text-warning fw-semibold shadow-sm transition-all hover-translate-y">
-                            <i class="bi bi-person-badge me-1"></i> Verify NIN
-                        </a>
-                        <a href="{{ route('support.index') }}"
-                            class="btn btn-sm btn-light border rounded-pill px-3 py-2 text-info fw-semibold shadow-sm transition-all hover-translate-y">
-                            <i class="bi bi-headset me-1"></i> Help Center
-                        </a>
-                    </div>
-
                     <!-- AI Input Wrapper (Initially hidden) -->
                     <div id="aiInputWrapper" class="d-none mt-2 animate-fade-in">
                         <div

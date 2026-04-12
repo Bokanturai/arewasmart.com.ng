@@ -65,7 +65,7 @@
                     {{-- Warning --}}
                     <div class="alert alert-warning py-2 rounded-3 border-0 shadow-sm d-flex align-items-start gap-2 small mb-0">
                         <i class="bi bi-exclamation-triangle-fill text-warning mt-1 flex-shrink-0"></i>
-                        <span>Please verify all details carefully. Bank transfers <strong>cannot be reversed</strong> once authorized.</span>
+                        <span>Please verify all details carefully. Transactions <strong>cannot be reversed</strong> once authorized.</span>
                     </div>
 
                 </div>
@@ -90,7 +90,7 @@
                             </span>
                             <input type="password"
                                    id="pinInput"
-                                   class="form-control bg-light border-0 ps-0 text-center fw-bold fs-5"
+                                   class="form-control bg-light border-0 ps-0 text-center fw-bold fs-15"
                                    placeholder="• • • • •"
                                    maxlength="5"
                                    inputmode="numeric"
@@ -137,9 +137,6 @@
 
             {{-- Step 2 Footer --}}
             <div class="modal-footer border-0 px-4 pb-4 pt-0 gap-2 flex-nowrap d-none" id="pinStep_footer">
-                <button type="button" class="btn btn-light fw-semibold shadow-sm rounded-pill flex-fill" id="btnBackToConfirm">
-                    <i class="bi bi-chevron-left me-1"></i> Back
-                </button>
                 <button type="button" class="btn btn-success fw-bold shadow-sm rounded-pill flex-fill" id="confirmPinBtn">
                     <span id="pinLoader" class="spinner-border spinner-border-sm me-2 d-none" role="status" aria-hidden="true"></span>
                     <i class="bi bi-shield-lock-fill me-1" id="pinBtnIcon"></i>
