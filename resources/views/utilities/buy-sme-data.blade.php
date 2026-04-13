@@ -227,7 +227,7 @@
                     <div class="flex-grow-1 overflow-auto custom-scrollbar" id="aiScrollContainer">
                         @php
                             $networksData = $recentPurchases->groupBy(function($item) {
-                                $meta = json_decode($item->metadata, true);
+                                $meta = $item->metadata;
                                 return strtoupper($meta['network'] ?? 'DATA');
                             })->map(fn($group) => $group->sum('amount'));
 
@@ -269,7 +269,7 @@
                                     <div class="transaction-list">
                                         @forelse($recentPurchases->take(15) as $history)
                                             @php
-                                                $meta = json_decode($history->metadata, true);
+                                                $meta = $history->metadata;
                                                 $phone = $meta['phone'] ?? substr($history->description, -11);
                                                 $networkLabel = strtoupper($meta['network'] ?? 'DATA');
                                                 $networkColors = [

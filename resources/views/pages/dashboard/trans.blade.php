@@ -1,6 +1,6 @@
 <!-- Recent Transactions -->
-<div class="col-xxl-8 col-xl-7 d-flex">
-    <div class="card flex-fill border-0 shadow-sm rounded-4 overflow-hidden">
+<div class="col-12 col-xl-7 d-flex">
+    <div class="card flex-fill border-0 shadow-sm overflow-hidden" style="border-radius: 12px;">
         <div class="card-header bg-white py-3 d-flex align-items-center justify-content-between flex-wrap border-bottom-0">
             <h5 class="mb-0 fw-bold text-dark">Recent Transactions</h5>
             <div class="d-flex align-items-center">
@@ -82,8 +82,8 @@
 <!-- /Recent Transactions -->
 
 <!-- Transaction Statistics -->
-<div class="col-xxl-4 col-xl-5 d-none d-xl-flex">
-    <div class="card flex-fill border-0 shadow-sm rounded-4 overflow-hidden">
+<div class="col-12 col-xl-5 mt-2 mt-md-0 d-none d-xl-flex">
+    <div class="card flex-fill border-0 shadow-sm overflow-hidden" style="border-radius: 12px;">
         <div class="card-header bg-white py-3 border-bottom-0">
             <h5 class="mb-0 fw-bold text-dark">Transaction Statistics</h5>
         </div>

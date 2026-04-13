@@ -20,3 +20,22 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
 });
+
+// Global Helpers
+function copyToClipboard(text, btn) {
+    if (!text) return;
+    
+    const originalContent = btn.innerHTML;
+    
+    navigator.clipboard.writeText(text).then(() => {
+        btn.innerHTML = '<i class="fa-solid fa-check me-1"></i> Copied!';
+        btn.classList.remove('btn-light');
+        btn.classList.add('btn-success', 'text-white');
+        
+        setTimeout(() => {
+            btn.innerHTML = originalContent;
+            btn.classList.remove('btn-success', 'text-white');
+            btn.classList.add('btn-light');
+        }, 2000);
+    });
+}

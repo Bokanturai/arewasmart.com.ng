@@ -1,7 +1,7 @@
 <x-app-layout> 
     <title>Arewa Smart - {{ $title ?? 'SEND VNIN TO NIBSS Request Form' }}</title>
     <div class="page-body">
-        <div class="container-fluid">
+        <div class="container-fluid px-0 px-md-3">
             <div class="page-title mb-3">
                 <div class="row">
                     <div class="col-sm-6 col-12">
@@ -12,11 +12,11 @@
             </div>
         </div>
 
-        <div class="row mt-3">
+        <div class="row mt-3 g-0 g-md-4">
             <!-- SEND VNIN TO NIBSS Request Form -->
-            <div class="col-xl-6 mb-4">
-                <div class="card shadow-sm border-0 rounded-3">
-                    <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+            <div class="col-12 col-xl-6 mb-4">
+                <div class="card shadow-lg border-0 rounded-0 rounded-md-4">
+                    <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center rounded-0 rounded-top-md-4">
                         <h5 class="mb-0 fw-bold">
                             <i class="bi bi-send-fill me-2"></i> SEND VNIN TO NIBSS Request
                         </h5>
@@ -44,7 +44,7 @@
                         @endif
 
                         {{-- SEND VNIN Form --}}
-                        <form method="POST" action="{{ route('send-vnin.store') }}">
+                        <form method="POST" action="{{ route('send-vnin.store') }}" class="needs-validation" novalidate>
                             @csrf
                             <div class="row g-3">
 
@@ -72,29 +72,32 @@
 
                                 <!-- Request ID -->
                                 <div class="col-md-6">
-                                    <label class="form-label fw-semibold">Request ID <span class="text-danger">*</span></label>
-                                    <input class="form-control text-center" name="request_id" type="text" required
-                                           placeholder="Enter Request ID (7 digits)"
+                                    <label class="form-label fw-semibold" for="request_id">Request ID <span class="text-danger">*</span></label>
+                                    <input class="form-control text-center numeric-only" name="request_id" id="request_id" type="text" required
+                                           placeholder="Enter 7-digit Request ID"
                                            value="{{ old('request_id') }}" maxlength="7" minlength="7"
-                                           pattern="[0-9]{7}" title="7-digit Request ID">
+                                           inputmode="numeric" pattern="\d{7}" title="7-digit Request ID" aria-label="7-digit Request ID">
+                                    <div class="invalid-feedback">Please provide a valid 7-digit Request ID.</div>
                                 </div>
 
                                 <!-- BVN -->
                                 <div class="col-md-6">
-                                    <label class="form-label fw-semibold">BVN <span class="text-danger">*</span></label>
-                                    <input class="form-control text-center" name="bvn" type="text" required
+                                    <label class="form-label fw-semibold" for="bvn">BVN <span class="text-danger">*</span></label>
+                                    <input class="form-control text-center numeric-only" name="bvn" id="bvn" type="text" required
                                            placeholder="Enter 11-digit BVN"
                                            value="{{ old('bvn') }}" maxlength="11" minlength="11"
-                                           pattern="[0-9]{11}" title="11-digit BVN">
+                                           inputmode="numeric" pattern="\d{11}" title="11-digit BVN" aria-label="11-digit BVN">
+                                    <div class="invalid-feedback">Please provide a valid 11-digit BVN.</div>
                                 </div>
 
                                 <!-- NIN -->
                                 <div class="col-md-6">
-                                    <label class="form-label fw-semibold">NIN <span class="text-danger">*</span></label>
-                                    <input class="form-control text-center" name="nin" type="text" required
+                                    <label class="form-label fw-semibold" for="nin">NIN <span class="text-danger">*</span></label>
+                                    <input class="form-control text-center numeric-only" name="nin" id="nin" type="text" required
                                            placeholder="Enter 11-digit NIN"
                                            value="{{ old('nin') }}" maxlength="11" minlength="11"
-                                           pattern="[0-9]{11}" title="11-digit NIN">
+                                           inputmode="numeric" pattern="\d{11}" title="11-digit NIN" aria-label="11-digit NIN">
+                                    <div class="invalid-feedback">Please provide a valid 11-digit NIN.</div>
                                 </div>
 
                                 <!-- Modification Field -->
@@ -121,17 +124,21 @@
 
                                 <!-- Terms -->
                                 <div class="col-md-12">
-                                    <div class="form-check mt-2">
-                                        <input class="form-check-input" id="termsCheckbox" type="checkbox" required>
-                                        <label class="form-check-label fw-semibold small" for="termsCheckbox">
-                                            I confirm that the provided information is accurate and agree to the NIBSS policy.
-                                        </label>
+                                    <div class="p-3 bg-light rounded-3 border mt-2 shadow-sm">
+                                        <div class="form-check mb-0">
+                                            <input class="form-check-input" id="termsCheckbox" type="checkbox" required>
+                                            <label class="form-check-label fw-semibold small text-dark" for="termsCheckbox">
+                                                <i class="bi bi-shield-check text-primary me-2"></i>
+                                                I confirm that the provided information is accurate and agree to the NIBSS policy.
+                                            </label>
+                                            <div class="invalid-feedback">You must agree before submitting.</div>
+                                        </div>
                                     </div>
                                 </div>
 
                                 <!-- Submit -->
                                 <div class="col-md-12 d-grid mt-3">
-                                    <button type="submit" class="btn btn-primary btn-lg fw-semibold">
+                                    <button type="submit" class="btn btn-primary btn-lg fw-semibold" data-loading-text="Sending to NIBSS...">
                                         <i class="bi bi-send-fill me-2"></i> Submit Request
                                     </button>
                                 </div>
@@ -143,9 +150,9 @@
             </div>
 
             <!-- Submission History -->
-            <div class="col-xl-6">
-                <div class="card shadow-sm border-0">
-                    <div class="card-header bg-primary d-flex justify-content-between align-items-center">
+            <div class="col-12 col-xl-6 mt-2 mt-md-0">
+                <div class="card shadow-lg border-0 rounded-0 rounded-md-4">
+                    <div class="card-header bg-primary d-flex justify-content-between align-items-center rounded-0 rounded-top-md-4">
                         <h5 class="mb-0 fw-bold text-black">Submission History</h5>
                     </div>
                     <div class="card-body">

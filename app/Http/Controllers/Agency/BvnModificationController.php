@@ -11,6 +11,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Cache;
 use App\Http\Controllers\Controller;
 
 class BvnModificationController extends Controller
@@ -19,12 +20,15 @@ class BvnModificationController extends Controller
     {
         $user = auth()->user();
 
-        // Fetch only bank-related services
-        $bankServices = Service::with(['fields' => function ($query) {
-            $query->where('is_active', 1);
-        }])
-            ->where('name', 'like', '%BANK%')
-            ->get();
+        // Cache bank-related services for 1 hour to improve performance
+        $bankServices = Cache::remember('bank_services_list', 3600, function () {
+            return Service::where('name', 'like', '%BANK%')
+                ->where('is_active', 1)
+                ->with(['fields' => function ($query) {
+                    $query->where('is_active', 1);
+                }])
+                ->get();
+        });
 
         $query = AgentService::where('user_id', $user->id)
             ->where('service_type', 'bvn_modification');
@@ -60,12 +64,17 @@ class BvnModificationController extends Controller
             ['balance' => 0.00, 'status' => 'active']
         );
 
+        // Fetch Affidavit Fee from Database
+        $affidavitField = ServiceField::where('field_name', 'Affidavit')->first();
+        $affidavitFee = $affidavitField ? $affidavitField->getPriceForUserType($user->role ?? 'user') : 0;
+
         // Return view with data
         return view('bvn.modification', compact(
             'userBanks',
             'crmSubmissions',
             'bankServices',
-            'wallet'
+            'wallet',
+            'affidavitFee'
         ));
     }
 
@@ -133,7 +142,8 @@ class BvnModificationController extends Controller
             
             if ($affidavitUploaded) {
                 $file = $request->file('affidavit_file');
-                $fileName = 'affidavit_' . Str::slug($user->email) . '_' . time() . '.' . $file->getClientOriginalExtension();
+                // Use a secure, non-identifiable name
+                $fileName = 'aff_' . Str::random(16) . '_' . time() . '.' . $file->getClientOriginalExtension();
                 
                 // Store in storage/app/public/uploads/affidavits
                 $path = $file->storeAs('uploads/affidavits', $fileName, 'public');

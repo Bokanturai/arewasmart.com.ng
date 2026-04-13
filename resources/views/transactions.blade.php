@@ -324,7 +324,7 @@
                                 <p class="text-dark mb-0 fw-medium">{{ $transaction->description }}</p>
 
                                 @php
-                                    $metadata = json_decode($transaction->metadata, true);
+                                    $metadata = $transaction->metadata;
                                     $purchasedPin = $metadata['purchased_code'] ?? $metadata['purchased_pin'] ?? $metadata['pin'] ?? null;
                                 @endphp
 

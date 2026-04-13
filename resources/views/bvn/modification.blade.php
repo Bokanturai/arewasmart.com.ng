@@ -1,53 +1,67 @@
 <x-app-layout>
-    <title>Arewa Smart - {{ $title ?? 'Bvn Modification' }}</title>
+    <title>Arewa Smart - {{ $title ?? 'BVN Modification Request' }}</title>
+
     <div class="page-body">
+        <!-- Page Title -->
         <div class="container-fluid">
             <div class="page-title mb-3">
                 <div class="row">
-                    <div class="col-sm-6 col-12">
-                        <h3 class="fw-bold text-primary">BVN Modification Request Form</h3>
-                        <p class="text-muted small mb-0">Submit your request accurately to ensure smooth processing.</p>
+                    <div class="col-sm-6 col-12 text-center text-sm-start">
+                        <h3 class="fw-bold text-primary">BVN Modification Request</h3>
+                        <p class="text-muted small mb-0">Submit your request accurately following NIBSS standards.</p>
                     </div>
                 </div>
             </div>
         </div>
 
-        <div class="container-fluid">
-            <div class="row">
-                <!-- BVN Modification Form -->
-                <div class="col-xl-6 mb-4">
-                    <div class="card shadow-sm border-0">
-                        <div class="card-header bg-primary text-white">
-                            <h3 class="mb-1">BVN Modification Form</h3>
-                            <p class="mb-0 small">Request for BVN modification. This process follows NIBSS regulations.</p>
-                        </div>
+        <div class="container-fluid px-0 px-md-3">
+            <div class="row mt-3 g-0 g-md-4">
 
-                        <div class="card-body">
-                            @if (session('message'))
-                                <div class="alert alert-{{ session('status') === 'success' ? 'success' : 'danger' }} alert-dismissible fade show mt-3">
+                {{-- MODIFICATION REQUEST FORM --}}
+                <div class="col-12 col-xl-5 mb-4">
+                    <div class="card shadow-lg border-0 rounded-0 rounded-md-4">
+                        <div class="card-header bg-primary text-white p-3 p-md-4 border-0 rounded-0 rounded-top-md-4 text-center text-sm-start">
+                            <h5 class="mb-0 fw-bold fs-15"><i class="bi bi-shield-lock-fill me-2"></i>New Modification Request</h5>
+                            <p class="mb-0 small text-white-50 mt-1">Ensure all details match your verification slip.</p>
+                        </div>
+                        <div class="card-body p-3 p-md-4">
+                            {{-- Alerts --}}
+                            @if (session('status'))
+                                <div class="alert alert-{{ session('status') === 'success' ? 'success' : 'danger' }} alert-dismissible fade show rounded-3 shadow-sm border-0" role="alert">
+                                    <i class="bi bi-{{ session('status') === 'success' ? 'check-circle' : 'exclamation-triangle' }}-fill me-2"></i>
                                     {{ session('message') }}
-                                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                                 </div>
                             @endif
 
                             @if ($errors->any())
-                                <div class="alert alert-danger alert-dismissible fade show mt-3">
-                                    <ul class="mb-0">
+                                <div class="alert alert-danger alert-dismissible fade show rounded-3 shadow-sm border-0" role="alert">
+                                    <ul class="mb-0 small text-start">
                                         @foreach ($errors->all() as $error)
                                             <li>{{ $error }}</li>
                                         @endforeach
                                     </ul>
-                                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                                 </div>
                             @endif
 
-                            <form method="POST" action="{{ route('modification.store') }}" enctype="multipart/form-data" class="row g-3">
+                             <!-- Verification Advice -->
+                            <div class="alert alert-primary-subtle border-0 d-flex align-items-center mb-4 py-3 rounded-3 shadow-sm">
+                                <i class="bi bi-info-circle-fill text-primary fs-14 me-3"></i>
+                                <div class="small">
+                                    <strong class="text-primary d-block mb-1">Important: Verify first</strong>
+                                    Verify your current BVN details via <strong>*565*0#</strong> to ensure accuracy.
+                                    <a href="{{ route('bvn.verification.index') }}" class="fw-bold text-primary text-decoration-none ms-1">Verify Here <i class="bi bi-arrow-right"></i></a>
+                                </div>
+                            </div>
+
+                            <form method="POST" action="{{ route('modification.store') }}" enctype="multipart/form-data" class="row g-4">
                                 @csrf
 
                                 <!-- Bank Selection -->
-                                <div class="col-md-6">
-                                    <label for="enrolment_bank" class="form-label">Select Bank <span class="text-danger">*</span></label>
-                                    <select name="enrolment_bank" id="enrolment_bank" class="form-select" required>
+                                <div class="col-12">
+                                    <label for="enrolment_bank" class="form-label fw-semibold text-dark">Select Bank <span class="text-danger">*</span></label>
+                                    <select name="enrolment_bank" id="enrolment_bank" class="form-select form-select-lg bg-light border-0 shadow-sm" required>
                                         <option value="">-- Select Bank --</option>
                                         @foreach($bankServices as $service)
                                             <option value="{{ $service->id }}" {{ old('enrolment_bank') == $service->id ? 'selected' : '' }}>
@@ -57,251 +71,311 @@
                                     </select>
                                 </div>
 
-                                <!-- Service Field Selection -->
-                              <div class="col-md-6">
-                                    <label for="service_field" class="form-label">Select Modification Field <span class="text-danger">*</span></label>
-                                    <select name="service_field" id="service_field" class="form-select" required>
+                                <!-- Modification Field Selection -->
+                                <div class="col-12">
+                                    <label for="service_field" class="form-label fw-semibold text-dark">Modification Field <span class="text-danger">*</span></label>
+                                    <select name="service_field" id="service_field" class="form-select form-select-lg bg-light border-0 shadow-sm" required>
                                         <option value="">-- Select Field --</option>
-                                        <!-- Options will be loaded dynamically via AJAX -->
                                     </select>
                                     <div class="mt-2">
                                         <small class="text-muted" id="field-description"></small>
                                     </div>
                                 </div>
 
-                               <!-- BVN -->
                                 <div class="col-md-6">
-                                    <label class="form-label fw-semibold">BVN <span class="text-danger">*</span></label>
-                                    <input class="form-control text-center" name="bvn" type="text" required
-                                           placeholder="Enter 11-digit BVN"
-                                           value="{{ old('bvn') }}" maxlength="11" minlength="11"
-                                           pattern="[0-9]{11}" title="11-digit BVN">
+                                    <label class="form-label fw-semibold text-dark">BVN ID <span class="text-danger">*</span></label>
+                                    <div class="input-group shadow-sm">
+                                        <span class="input-group-text bg-white border-0"><i class="bi bi-person-vcard text-primary"></i></span>
+                                        <input type="text" name="bvn" class="form-control bg-light border-0 ps-0 text-center" placeholder="BVN Num" value="{{ old('bvn') }}" maxlength="11" minlength="11" pattern="[0-9]{11}" required>
+                                    </div>
                                 </div>
 
-                                <!-- NIN -->
                                 <div class="col-md-6">
-                                    <label class="form-label fw-semibold">NIN <span class="text-danger">*</span></label>
-                                    <input class="form-control text-center" name="nin" type="text" required
-                                           placeholder="Enter 11-digit NIN"
-                                           value="{{ old('nin') }}" maxlength="11" minlength="11"
-                                           pattern="[0-9]{11}" title="11-digit NIN">
+                                    <label class="form-label fw-semibold text-dark">NIN ID <span class="text-danger">*</span></label>
+                                    <div class="input-group shadow-sm">
+                                        <span class="input-group-text bg-white border-0"><i class="bi bi-person-badge text-primary"></i></span>
+                                        <input type="text" name="nin" class="form-control bg-light border-0 ps-0 text-center" placeholder="NIN Num" value="{{ old('nin') }}" maxlength="11" minlength="11" pattern="[0-9]{11}" required>
+                                    </div>
                                 </div>
 
-                                <!-- New Data Description -->
+                                <!-- Data Description -->
                                 <div class="col-12">
-                                    <label class="form-label">
-                                        New Data Information <span class="text-danger">*</span>
-                                        <button type="button" class="btn btn-outline-primary btn-sm ms-2" data-bs-toggle="modal" data-bs-target="#sampleInfoModal">View Sample</button>
-                                    </label>
-                                    <textarea name="description" rows="4" class="form-control" placeholder="Enter new information" required>{{ old('description') }}</textarea>
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <label class="form-label fw-semibold text-dark mb-0">New Data Information <span class="text-danger">*</span></label>
+                                        <button type="button" class="btn btn-outline-primary btn-sm py-0 border-0" data-bs-toggle="modal" data-bs-target="#sampleInfoModal">
+                                            <i class="bi bi-info-circle"></i> View Samples
+                                        </button>
+                                    </div>
+                                    <textarea name="description" id="description-field" class="form-control bg-light border-0 shadow-sm" rows="3" placeholder="Describe the modification needed..." required>{{ old('description') }}</textarea>
                                 </div>
 
                                 <!-- Affidavit Selection -->
                                 <div class="col-12">
-                                    <label class="form-label text-warning">Affidavit fee is ₦2000 only if the affidavit is not available</label>
-                                    <select name="affidavit" id="affidavit" class="form-select" required>
-                                        <option value="">-- Select Affidavit Type --</option>
-                                        <option value="available" {{ old('affidavit') === 'available' ? 'selected' : '' }}>Affidavit is Available</option>
-                                        <option value="not_available" {{ old('affidavit') === 'not_available' ? 'selected' : '' }}>Affidavit Not Available</option>
+                                    <label for="affidavit" class="form-label fw-semibold text-dark">Do you have an Affidavit? <span class="text-danger">*</span></label>
+                                    <select name="affidavit" id="affidavit" class="form-select bg-light border-0 shadow-sm" required>
+                                        <option value="">-- Select Option --</option>
+                                        <option value="available" {{ old('affidavit') === 'available' ? 'selected' : '' }}>Yes, I will upload mine</option>
+                                        <option value="not_available" {{ old('affidavit') === 'not_available' ? 'selected' : '' }}>No, please provide one for me</option>
                                     </select>
+                                    <div id="affidavit-hint" class="mt-2 d-none">
+                                        <div class="alert alert-warning-subtle border-0 py-2 small mb-0 rounded-3">
+                                            <i class="bi bi-exclamation-triangle-fill text-warning me-1"></i> A fee of <strong>₦{{ number_format($affidavitFee, 2) }}</strong> will be charged.
+                                        </div>
+                                    </div>
                                 </div>
 
                                 <!-- Affidavit Upload -->
-                                <div class="col-12" id="affidavit_upload_wrapper" style="display: none;">
-                                    <label class="form-label">Upload Affidavit (PDF only)</label>
-                                    <input type="file" name="affidavit_file" accept="application/pdf" class="form-control">
+                                <div class="col-12 d-none" id="affidavit_upload_wrapper">
+                                    <label class="form-label fw-semibold text-dark">Upload Affidavit (PDF)</label>
+                                    <input type="file" name="affidavit_file" accept="application/pdf" class="form-control bg-light border-0 shadow-sm">
                                 </div>
 
-                                <!-- Service Fee -->
-                                <div class="col-md-6">
-                                    <label class="form-label fw-semibold">Service Fee</label>
-                                    <div class="alert alert-info py-2 mb-0 text-center">
-                                        <strong id="field-price">₦0.00</strong>
+                                <!-- Fee & Balance Section -->
+                                <div class="col-12">
+                                    <div class="card border-0 bg-light rounded-4 p-3 shadow-sm">
+                                        <div class="d-flex justify-content-between mb-2">
+                                            <span class="text-muted small">Modification Fee</span>
+                                            <strong id="price-mod" class="text-dark">₦0.00</strong>
+                                        </div>
+                                        <div class="d-flex justify-content-between mb-2 d-none" id="price-aff-wrapper">
+                                            <span class="text-muted small">Affidavit Fee</span>
+                                            <strong id="price-aff" class="text-dark">₦0.00</strong>
+                                        </div>
+                                        <hr class="my-2 opacity-10">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <span class="fw-bold text-dark">Total Payable</span>
+                                            <h5 id="price-total" class="fw-bold text-primary mb-0">₦0.00</h5>
+                                        </div>
+                                        <div class="mt-3 text-end">
+                                            <small class="text-muted">Available: <span class="text-success fw-bold">₦{{ number_format($wallet->balance ?? 0, 2) }}</span></small>
+                                        </div>
                                     </div>
-                                    <small class="text-muted">
-                                        Balance:
-                                        <strong class="text-success">
-                                            ₦{{ number_format($wallet->balance ?? 0, 2) }}
-                                        </strong>
-                                    </small>
                                 </div>
 
-                                <!-- Total Amount Display -->
-                                <div class="col-md-6">
-                                    <label class="form-label fw-semibold">Total Amount</label>
-                                    <div class="alert alert-warning py-2 mb-0 text-center">
-                                        <strong id="total-amount">₦0.00</strong>
-                                    </div>
-                                    <small class="text-muted" id="fee-breakdown"></small>
-                                </div>
-
-                                <!-- Terms Checkbox -->
-                                <div class="col-12 form-check mt-3">
-                                    <input type="checkbox" class="form-check-input" id="termsCheck" required>
-                                    <label class="form-check-label" for="termsCheck">I agree to the BVN modification policies</label>
-                                </div>
-
-                                <!-- Submit Button -->
-                                <div class="col-12 mt-3">
-                                    <button type="submit" class="btn btn-primary w-100">Submit</button>
+                                 <!-- Action Button -->
+                                <div class="col-12">
+                                    <button type="submit" id="submit-btn" class="btn btn-primary btn-lg w-100 rounded-pill fw-bold shadow-sm d-flex justify-content-center align-items-center gap-2">
+                                        <span id="btn-text">Submit Request</span>
+                                        <i class="bi bi-arrow-right-circle" id="btn-icon"></i>
+                                        <div id="btn-spinner" class="spinner-border spinner-border-sm d-none" role="status"></div>
+                                    </button>
                                 </div>
                             </form>
                         </div>
                     </div>
                 </div>
 
-              <!-- Submission History -->
-            <div class="col-xl-6">
-                <div class="card shadow-sm border-0">
-                    <div class="card-header bg-primary d-flex justify-content-between align-items-center">
-                        <h5 class="mb-0 fw-bold text-black">Submission History</h5>
-                    </div>
-                    <div class="card-body">
-                        <form class="row g-3 mb-3" method="GET" action="{{ route('send-vnin') }}">
-                            <div class="col-md-6">
-                                <input class="form-control" name="search" type="text" placeholder="Search by Request ID" value="{{ request('search') }}">
-                            </div>
-                            <div class="col-md-4">
-                                <select class="form-control" name="status">
-                                    <option value="">All Status</option>
-                                    @foreach(['pending', 'processing', 'successful', 'query', 'resolved', 'rejected', 'remark'] as $status)
-                                        <option value="{{ $status }}" {{ request('status') == $status ? 'selected' : '' }}>
-                                            {{ ucfirst($status) }}
-                                        </option>
-                                    @endforeach
-                                </select>
-                            </div>
-                            <div class="col-md-2">
-                                <button class="btn btn-primary w-100" type="submit">Filter</button>
-                            </div>
-                        </form>
+                <!-- SUBMISSION HISTORY -->
+                <div class="col-12 col-xl-7 mt-2 mt-md-0">
+                    <div class="card shadow-lg border-0 rounded-0 rounded-md-4">
+                        <div class="card-header bg-white p-3 p-md-4 border-bottom d-flex justify-content-center justify-content-sm-between align-items-center rounded-0 rounded-top-md-4">
+                            <h5 class="mb-0 fw-bold text-dark fs-15"><i class="bi bi-clock-history text-primary me-2"></i>Submission History</h5>
+                        </div>
 
-                        <div class="table-responsive">
-                            <table class="table table-bordered align-middle">
-                                <thead class="table-light">
-                                    <tr>
-                                        <th>#</th>
-                                        <th>Reference</th>
-                                        <th>Bank</th>
-                                        <th>BVN</th>
-                                        <th>Status</th>
-                                        <th>Action</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @forelse($crmSubmissions as $submission)
+                        <div class="card-body p-3 p-md-4">
+                            {{-- Filters --}}
+                            <div class="row g-3 mb-4">
+                                <div class="col-12 col-md-5">
+                                    <form method="GET" action="{{ route('modification') }}">
+                                        <div class="input-group shadow-sm">
+                                            <span class="input-group-text bg-white border-0"><i class="bi bi-search text-muted"></i></span>
+                                            <input type="text" name="search" class="form-control bg-light border-0 ps-0" placeholder="Search by BVN..." value="{{ request('search') }}">
+                                        </div>
+                                    </form>
+                                </div>
+
+                                <div class="col-12 col-md-4">
+                                    <form method="GET" action="{{ route('modification') }}">
+                                        <select name="status" class="form-select bg-light border-0 shadow-sm" onchange="this.form.submit()">
+                                            <option value="">All Statuses</option>
+                                            @foreach (['pending', 'query', 'processing', 'resolved', 'successful', 'rejected'] as $status)
+                                                <option value="{{ $status }}" {{ request('status') == $status ? 'selected' : '' }}>
+                                                    {{ ucfirst($status) }}
+                                                </option>
+                                            @endforeach
+                                        </select>
+                                    </form>
+                                </div>
+                                <div class="col-12 col-md-3">
+                                    <a href="{{ route('modification') }}" class="btn btn-light w-100 rounded-pill border-0 shadow-sm fw-medium text-muted">Reset</a>
+                                </div>
+                            </div>
+
+                            {{-- History Table --}}
+                            <div class="table-responsive rounded-3 border">
+                                <table class="table table-hover table-borderless align-middle mb-0 text-nowrap">
+                                    <thead class="table-light border-bottom">
                                         <tr>
-                                            <td>{{ $loop->iteration + $crmSubmissions->firstItem() - 1 }}</td>
-                                            <td>{{ $submission->reference }}</td>
-                                            <td>{{ $submission->bank }}</td>
-                                            <td>{{ $submission->bvn }}</td>
-                                            <td>
-                                                <span class="badge bg-{{ match($submission->status) {
-                                                    'resolved', 'successful' => 'success',
-                                                    'processing' => 'primary',
-                                                    'query' => 'info',
-                                                    'rejected' => 'danger',
-                                                    'remark' => 'secondary',
-                                                    default => 'warning'
-                                                } }}">{{ ucfirst($submission->status) }}</span>
-                                            </td>
-                                            <td>
-                                                @php
-                                                    $fileUrl = '';
-                                                    if (!empty($submission->file_url)) {
-                                                        $f = $submission->file_url;
-                                                        if (preg_match('/^https?:\/\//', $f)) {
-                                                            $fileUrl = $f;
-                                                        } elseif (str_starts_with($f, '/storage') || str_starts_with($f, 'storage')) {
-                                                            $fileUrl = asset(ltrim($f, '/'));
-                                                        } else {
-                                                            $fileUrl = \Illuminate\Support\Facades\Storage::url($f);
-                                                        }
-                                                    }
-                                                @endphp
+                                            <th class="ps-4">S/N</th>
+                                            <th>Reference / BVN</th>
+                                            <th>Bank</th>
+                                            <th>Status</th>
+                                            <th>Action</th>
+                                        </tr>
+                                    </thead>
 
-                                                <button type="button"
-                                                        class="btn btn-sm btn-outline-primary"
-                                                        data-bs-toggle="modal"
-                                                        data-bs-target="#commentModal"
+                                    <tbody>
+                                        @forelse ($crmSubmissions as $submission)
+                                            <tr class="border-bottom">
+                                                <td class="ps-4 text-muted small">
+                                                    {{ $loop->iteration + ($crmSubmissions->currentPage() - 1) * $crmSubmissions->perPage() }}
+                                                </td>
+                                                <td>
+                                                    <span class="fw-bold text-dark d-block mb-1">{{ $submission->bvn }}</span>
+                                                    <small class="text-muted" style="font-size: 0.7rem;">Ref: {{ $submission->reference }}</small>
+                                                </td>
+                                                <td>
+                                                    <span class="small text-muted">{{ $submission->bank }}</span>
+                                                    <br>
+                                                    <small class="text-primary fw-medium">{{ $submission->submission_date->format('M d, Y') }}</small>
+                                                </td>
+
+                                                {{-- Status Badge --}}
+                                                <td>
+                                                    @php
+                                                        $stat = strtolower($submission->status);
+                                                        $badge = match ($stat) {
+                                                            'resolved', 'successful' => ['c' => 'success', 'i' => 'check-circle'],
+                                                            'processing' => ['c' => 'info', 'i' => 'arrow-repeat'],
+                                                            'rejected' => ['c' => 'danger', 'i' => 'x-circle'],
+                                                            'query', 'remark', 'pending' => ['c' => 'warning', 'i' => 'exclamation-circle'],
+                                                            default => ['c' => 'secondary', 'i' => 'hourglass-split'],
+                                                        };
+                                                    @endphp
+                                                    <span class="badge bg-{{ $badge['c'] }}-subtle text-{{ $badge['c'] }} px-3 py-2 rounded-pill fw-semibold border border-{{ $badge['c'] }}-subtle">
+                                                        <i class="bi bi-{{ $badge['i'] }} me-1"></i>
+                                                        {{ ucfirst($submission->status) }}
+                                                    </span>
+                                                </td>
+
+                                                <td>
+                                                    @php
+                                                        $fileUrl = '';
+                                                        if (!empty($submission->file_url)) {
+                                                            $f = $submission->file_url;
+                                                            $fileUrl = preg_match('/^https?:\/\//', $f) ? $f : asset(ltrim($f, '/'));
+                                                        }
+                                                    @endphp
+
+                                                    <button type="button"
+                                                        class="btn btn-sm btn-light text-primary shadow-sm rounded-circle d-flex align-items-center justify-content-center"
+                                                        data-bs-toggle="modal" data-bs-target="#commentModal"
                                                         data-comment="{{ $submission->comment ?? 'No comment yet.' }}"
                                                         data-reference="{{ $submission->reference }}"
-                                                        data-file-url="{{ $fileUrl }}">
-                                                    <i class="bi bi-chat-left-text"></i> View
-                                                </button>
-                                            </td>
-                                        </tr>
-                                    @empty
-                                        <tr>
-                                            <td colspan="5" class="text-center text-muted">No submissions found.</td>
-                                        </tr>
-                                    @endforelse
-                                </tbody>
-                            </table>
-                        </div>
+                                                        data-file-url="{{ $fileUrl }}"
+                                                        title="View Response" style="width: 35px; height: 35px;">
+                                                        <i class="bi bi-chat-left-text-fill fs-15"></i>
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                        @empty
+                                            <tr>
+                                                <td colspan="5" class="text-center text-muted py-5">
+                                                    <div class="d-flex flex-column align-items-center">
+                                                        <div class="bg-light rounded-circle d-flex align-items-center justify-content-center mb-3" style="width: 60px; height: 60px;">
+                                                            <i class="bi bi-inbox fs-1 d-block text-muted"></i>
+                                                        </div>
+                                                        <h6 class="fw-semibold">No requests found</h6>
+                                                        <p class="small text-muted mb-0">Your submitted BVN requests will appear here.</p>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        @endforelse
+                                    </tbody>
+                                </table>
+                            </div>
 
-                        <div class="mt-3">
-                            {{ $crmSubmissions->withQueryString()->links('vendor.pagination.custom') }}
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    {{-- Comment Modal --}}
-    @include('pages.comment')
-
-        <!-- Sample Info Modal -->
-        <div class="modal fade" id="sampleInfoModal" tabindex="-1" aria-labelledby="sampleInfoModalLabel" aria-hidden="true">
-            <div class="modal-dialog modal-dialog-centered modal-lg">
-                <div class="modal-content shadow-lg rounded-4">
-                    <div class="modal-header bg-primary text-white py-3 rounded-top-4">
-                        <h4 class="modal-title fw-bold">
-                            <i class="bi bi-pencil-square me-2"></i> BVN Modification Guidelines
-                        </h4>
-                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-                    </div>
-                    <div class="modal-body px-4 py-4">
-                        <p class="fs-6 text-muted mb-3">
-                            Please follow the steps below when submitting a request to modify your BVN details.
-                        </p>
-                        <div class="bg-light p-4 rounded-3 mb-4 border-start border-4 border-primary">
-                            <h6 class="fw-semibold mb-3 text-primary">
-                                <i class="bi bi-list-check me-2"></i> Modification Instructions
-                            </h6>
-                            <ul class="fw-semibold mb-3 text-primary">
-                                <li><i class="bi bi-check-circle-fill text-success me-2"></i> Clearly state the specific information to modify.</li>
-                                <li><i class="bi bi-arrow-repeat text-warning me-2"></i> Provide the correct and updated information.</li>
-                                <li><i class="bi bi-chat-left-text-fill text-info me-2"></i> Include a valid reason for the request.</li>
-                            </ul>
-                        </div>
-
-                        <div class="p-4 mb-4 bg-white border rounded-3 shadow-sm">
-                            <h6 class="fw-bold text-secondary mb-3">
-                                <i class="bi bi-lightbulb-fill me-2 text-warning"></i> Example: Name Correction
-                            </h6>
-                            <p><strong>New First Name:</strong> ADEBAYO</p>
-                            <p><strong>New Surname:</strong> ADEKUNLE</p>
-                            <p><strong>New Middle Name:</strong> BOLA</p>
-                            <p><strong>Reason:</strong> Spelling error during initial registration</p>
-                        </div>
-
-                        <div class="alert alert-info d-flex align-items-center py-3 px-4 rounded-3">
-                            <i class="bi bi-info-circle-fill me-3 fs-4"></i>
-                            <div>
-                                <strong>Note:</strong> All modification requests are thoroughly reviewed by NIBSS.
+                            <div class="mt-4 d-flex justify-content-end">
+                                {{ $crmSubmissions->withQueryString()->links('vendor.pagination.custom') }}
                             </div>
                         </div>
                     </div>
-                    <div class="modal-footer py-3">
-                        <button type="button" class="btn btn-outline-primary rounded-pill px-4" data-bs-dismiss="modal">
-                            <i class="bi bi-check-circle me-2"></i> Understood
-                        </button>
+                </div>
+            </div>
+        </div>
+
+        {{-- Comment Modal --}}
+        @include('pages.comment')
+
+        <!-- Sample Info Modal -->
+        <div class="modal fade" id="sampleInfoModal" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered modal-lg">
+                <div class="modal-content shadow-lg border-0 rounded-4">
+                    <div class="modal-header bg-primary text-white py-3 rounded-top-4 border-0">
+                        <h5 class="modal-title fw-bold fs-18">
+                            <i class="bi bi-info-square-fill me-2"></i> Modification Guidelines
+                        </h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body p-4">
+                        <div class="row g-4">
+                            <div class="col-md-6">
+                                <div class="card h-100 border-0 bg-light rounded-4 p-3 shadow-sm">
+                                    <h6 class="fw-bold text-primary mb-3"><i class="bi bi-person-badge me-2"></i>Name Correction</h6>
+                                    <div class="p-2 small">
+                                        <p class="mb-1"><strong>New Data:</strong>Firstname: ADEBAYO, lastname: ADEKUNLE, Middlename: BOLA</p>
+                                        <p class="mb-0 text-muted fst-italic">Requires Court Affidavit.</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="card h-100 border-0 bg-light rounded-4 p-3 shadow-sm">
+                                    <h6 class="fw-bold text-info mb-3"><i class="bi bi-calendar-event me-2"></i>Date of Birth</h6>
+                                    <div class="p-2 small">
+                                        <p class="mb-1"><strong>New Data:</strong> 15-05-1992</p>
+                                        <p class="mb-0 text-muted fst-italic">Requires Birth Certificate.</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-12">
+                                <div class="card border-0 bg-light rounded-4 p-3 shadow-sm">
+                                    <h6 class="fw-bold text-dark mb-3"><i class="bi bi-bank2 me-2"></i>Enrollment Banks & Codes</h6>
+                                    <div class="table-responsive" style="max-height: 250px; overflow-y: auto;">
+                                        <table class="table table-hover table-sm align-middle small bg-white rounded-3 overflow-hidden">
+                                            <thead class="table-dark">
+                                                <tr>
+                                                    <th class="ps-2">Code</th>
+                                                    <th>Bank Name</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr><td class="ps-2">044</td><td>Access Bank Nigeria Plc</td></tr>
+                                                <tr><td class="ps-2">063</td><td>Diamond Bank Plc</td></tr>
+                                                <tr><td class="ps-2">050</td><td>Ecobank Nigeria</td></tr>
+                                                <tr><td class="ps-2">084</td><td>Enterprise Bank Plc</td></tr>
+                                                <tr><td class="ps-2">070</td><td>Fidelity Bank Plc</td></tr>
+                                                <tr><td class="ps-2">011</td><td>First Bank of Nigeria Plc</td></tr>
+                                                <tr><td class="ps-2">214</td><td>First City Monument Bank</td></tr>
+                                                <tr><td class="ps-2">058</td><td>Guaranty Trust Bank Plc</td></tr>
+                                                <tr><td class="ps-2">030</td><td>Heritage Banking Company Ltd</td></tr>
+                                                <tr><td class="ps-2">301</td><td>Jaiz Bank</td></tr>
+                                                <tr><td class="ps-2">082</td><td>Keystone Bank Ltd</td></tr>
+                                                <tr><td class="ps-2">014</td><td>Mainstreet Bank Plc</td></tr>
+                                                <tr><td class="ps-2">076</td><td>Skye Bank Plc</td></tr>
+                                                <tr><td class="ps-2">039</td><td>Stanbic IBTC Plc</td></tr>
+                                                <tr><td class="ps-2">232</td><td>Sterling Bank Plc</td></tr>
+                                                <tr><td class="ps-2">032</td><td>Union Bank Nigeria Plc</td></tr>
+                                                <tr><td class="ps-2">033</td><td>United Bank for Africa Plc</td></tr>
+                                                <tr><td class="ps-2">215</td><td>Unity Bank Plc</td></tr>
+                                                <tr><td class="ps-2">035</td><td>WEMA Bank Plc</td></tr>
+                                                <tr><td class="ps-2">057</td><td>Zenith Bank International</td></tr>
+                                                <tr><td class="ps-2">000</td><td>Agency Banking/NIBSS</td></tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer border-0 pb-4 px-4">
+                        <button type="button" class="btn btn-primary w-100 rounded-pill fw-bold" data-bs-dismiss="modal">I Understood</button>
                     </div>
                 </div>
             </div>
         </div>
+
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
     </div>
 
     <!-- Scripts -->
@@ -310,96 +384,115 @@
             const bankSelect = document.getElementById('enrolment_bank');
             const fieldSelect = document.getElementById('service_field');
             const fieldDescription = document.getElementById('field-description');
-            const fieldPriceDisplay = document.getElementById('field-price'); // Shows modification fee
             const affidavitSelect = document.getElementById('affidavit');
+            const affidavitHint = document.getElementById('affidavit-hint');
             const affidavitUploadWrapper = document.getElementById('affidavit_upload_wrapper');
-            const totalAmountDisplay = document.getElementById('total-amount');
-            const feeBreakdown = document.getElementById('fee-breakdown');
-            const walletBalance = {{ $wallet->balance ?? 0 }};
-
-            let modificationFee = 0;
-            let affidavitFee = 0; // This will trigger only if affidavit is NOT available
             
-            // Hardcoded affidavit fee for now since controller fetches it dynamically, 
-            // but for UI responsiveness we can estimate or fetch it.
-            // Best practice: Pass it from controller to view.
-            // For now, let's assume standard from logic or fetch via AJAX if possible.
-            // To simplify, let's just use the modification fee dynamics first.
+            const priceModDisplay = document.getElementById('price-mod');
+            const priceAffDisplay = document.getElementById('price-aff');
+            const priceAffWrapper = document.getElementById('price-aff-wrapper');
+            const priceTotalDisplay = document.getElementById('price-total');
+
+            const dbAffidavitFee = {{ (float)$affidavitFee }};
+            let currentModFee = 0;
+            let currentAffFee = 0;
+
+            const form = bankSelect.closest('form');
+            const submitBtn = document.getElementById('submit-btn');
+            const btnText = document.getElementById('btn-text');
+            const btnIcon = document.getElementById('btn-icon');
+            const btnSpinner = document.getElementById('btn-spinner');
+
+            form.addEventListener('submit', function (e) {
+                // Determine if it's an AJAX submission or standard
+                // Based on previous code, this project uses standard form submission with alerts, 
+                // but let's lock the UI regardless.
+                
+                submitBtn.disabled = true;
+                btnText.textContent = 'Processing...';
+                btnIcon.classList.add('d-none');
+                btnSpinner.classList.remove('d-none');
+            });
+
+            const formatMoney = (amount) => '₦' + new Intl.NumberFormat('en-NG').format(amount);
 
             bankSelect.addEventListener('change', function () {
                 const bankId = this.value;
                 fieldSelect.innerHTML = '<option value="">Loading...</option>';
                 
                 if (bankId) {
-                    fetch(`/bvn/get-service-fields/${bankId}`)
+                    fetch("{{ route('modification.fields', ['serviceId' => ':id']) }}".replace(':id', bankId))
                         .then(response => response.json())
                         .then(data => {
                             fieldSelect.innerHTML = '<option value="">-- Select Field --</option>';
                             data.forEach(field => {
                                 const option = document.createElement('option');
                                 option.value = field.id;
-                                option.textContent = `${field.field_name} - ₦${new Intl.NumberFormat().format(field.price)}`;
+                                option.textContent = `${field.field_name}`;
                                 option.dataset.price = field.price;
                                 option.dataset.description = field.description;
                                 fieldSelect.appendChild(option);
                             });
                         })
-                        .catch(error => {
-                            console.error('Error:', error);
+                        .catch(() => {
                             fieldSelect.innerHTML = '<option value="">Error loading fields</option>';
                         });
                 } else {
                     fieldSelect.innerHTML = '<option value="">-- Select Field --</option>';
-                    resetFields();
+                    resetTotal();
                 }
             });
 
             fieldSelect.addEventListener('change', function () {
                 const selected = this.options[this.selectedIndex];
                 if (selected.value) {
-                    modificationFee = parseFloat(selected.dataset.price);
+                    currentModFee = parseFloat(selected.dataset.price);
                     fieldDescription.textContent = selected.dataset.description || '';
-                    fieldPriceDisplay.textContent = '₦' + new Intl.NumberFormat().format(modificationFee);
+                    priceModDisplay.textContent = formatMoney(currentModFee);
                 } else {
-                    resetFields();
+                    currentModFee = 0;
+                    fieldDescription.textContent = '';
+                    priceModDisplay.textContent = formatMoney(0);
                 }
                 calculateTotal();
             });
 
             affidavitSelect.addEventListener('change', function () {
                 if (this.value === 'not_available') {
-                    affidavitUploadWrapper.style.display = 'none';
-                    // We assume a standard fee for affidavit if not available, OR we should fetch it.
-                    // Given the controller logic: $affidavitFee = ...
-                    // We can pass this fee to the view:
-                    affidavitFee = 2000; // As per text warning in blade
+                    affidavitUploadWrapper.classList.add('d-none');
+                    affidavitHint.classList.remove('d-none');
+                    priceAffWrapper.classList.remove('d-none');
+                    currentAffFee = dbAffidavitFee;
                 } else if (this.value === 'available') {
-                    affidavitUploadWrapper.style.display = 'block';
-                    affidavitFee = 0;
+                    affidavitUploadWrapper.classList.remove('d-none');
+                    affidavitHint.classList.add('d-none');
+                    priceAffWrapper.classList.add('d-none');
+                    currentAffFee = 0;
                 } else {
-                    affidavitUploadWrapper.style.display = 'none';
-                    affidavitFee = 0;
+                    affidavitUploadWrapper.classList.add('d-none');
+                    affidavitHint.classList.add('d-none');
+                    priceAffWrapper.classList.add('d-none');
+                    currentAffFee = 0;
                 }
+                priceAffDisplay.textContent = formatMoney(currentAffFee);
                 calculateTotal();
             });
 
             function calculateTotal() {
-                const total = modificationFee + affidavitFee;
-                totalAmountDisplay.textContent = '₦' + new Intl.NumberFormat().format(total);
-                
-                let breakdown = `Modification: ₦${new Intl.NumberFormat().format(modificationFee)}`;
-                if (affidavitFee > 0) {
-                    breakdown += ` + Affidavit: ₦${new Intl.NumberFormat().format(affidavitFee)}`;
-                }
-                feeBreakdown.textContent = breakdown;
+                const total = currentModFee + currentAffFee;
+                priceTotalDisplay.textContent = formatMoney(total);
             }
 
-            function resetFields() {
-                modificationFee = 0;
-                fieldDescription.textContent = '';
-                fieldPriceDisplay.textContent = '₦0.00';
+            function resetTotal() {
+                currentModFee = 0;
+                currentAffFee = 0;
+                priceModDisplay.textContent = formatMoney(0);
+                priceAffDisplay.textContent = formatMoney(0);
+                priceTotalDisplay.textContent = formatMoney(0);
+                priceAffWrapper.classList.add('d-none');
+                affidavitHint.classList.add('d-none');
+                affidavitUploadWrapper.classList.add('d-none');
             }
         });
     </script>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
 </x-app-layout>

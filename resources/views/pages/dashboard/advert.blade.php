@@ -71,14 +71,6 @@
                                     </p>
                                 </div>
                             @endif
-
-
-                            <!-- HOT Badge - Enhanced -->
-                            <div class="position-absolute top-0 end-0 p-3">
-                                <span class="badge hot-badge bg-danger shadow-lg px-3 py-2 rounded-pill fw-bold d-flex align-items-center" style="font-size: 0.8rem; border: 2px solid rgba(255,255,255,0.2);">
-                                    <span class="pulse-dot me-1"></span>
-                                    <span class="hot-text">HOT</span>
-                                </span>
                             </div>
                         </div>
                     </div>

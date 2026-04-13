@@ -1,5 +1,5 @@
 <x-app-layout>
-    <div class="container py-4">
+    <div class="container-fluid px-0 px-md-3 py-4">
 
         <!-- Page Title -->
         <div class="mb-4 text-center">
@@ -12,9 +12,9 @@
         </div>
 
         <!-- Card Preview -->
-        <div class="card shadow border-0 rounded-4 overflow-hidden">
+        <div class="card shadow-lg border-0 rounded-0 rounded-md-4 overflow-hidden">
             <div class="card-body p-4">
-                <div class="row g-4">
+                <div class="row g-0 g-md-4">
                     <!-- Left Column -->
                     <div class="col-md-6">
                         <p class="mb-2">

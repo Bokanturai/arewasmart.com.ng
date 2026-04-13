@@ -477,7 +477,7 @@
 
                     <h6 class="fw-bold">Submitted Information</h6>
                     @php 
-                        $details = json_decode($submission->field, true); 
+                        $details = $submission->field; 
                     @endphp
                     <div class="row mb-3">
                         <div class="col-md-6">

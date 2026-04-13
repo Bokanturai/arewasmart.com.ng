@@ -1,7 +1,7 @@
 <x-app-layout>
  <title>Arewa Smart - {{ $title ?? 'CRM Request Form' }}</title>
     <div class="page-body">
-        <div class="container-fluid">
+        <div class="container-fluid px-0 px-md-3">
             <div class="page-title mb-3">
                 <div class="row">
                     <div class="col-sm-6 col-12">
@@ -12,12 +12,12 @@
             </div>
         </div>
 
-        <div class="row mt-3">
+        <div class="row mt-3 g-0 g-md-4">
 
             <!-- BVN CRM Form -->
-            <div class="col-xl-6 mb-4">
-                <div class="card shadow-sm border-0 rounded-3">
-                    <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+            <div class="col-12 col-xl-6 mb-4">
+                <div class="card shadow-lg border-0 rounded-0 rounded-md-4">
+                    <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center rounded-0 rounded-top-md-4">
                         <h5 class="mb-0 fw-bold"><i class="bi bi-gear me-2"></i>BVN CRM Request</h5>
                         <span class="badge bg-light text-primary fw-semibold">Arewa Smart</span>
                     </div>
@@ -49,7 +49,7 @@
                         @endif
 
                         {{-- BVN CRM Request Form --}}
-                        <form method="POST" action="{{ route('crm.store') }}">
+                        <form method="POST" action="{{ route('crm.store') }}" class="needs-validation" novalidate>
                             @csrf
                             <div class="row g-3">
 
@@ -77,25 +77,27 @@
 
                                 <!-- Batch ID -->
                                 <div class="col-md-6">
-                                    <label class="form-label fw-semibold d-flex justify-content-between">
-                                        <span>Batch ID</span>
+                                    <label class="form-label fw-semibold d-flex justify-content-between" for="batch_id">
+                                        <span>Batch ID <span class="text-danger">*</span></span>
                                         <button type="button" class="btn btn-outline-primary btn-sm py-0" data-bs-toggle="modal" data-bs-target="#sampleInfoModal">
                                             <i class="bi bi-info-circle"></i> Guide
                                         </button>
                                     </label>
-                                    <input class="form-control text-center" name="batch_id" type="text" required
-                                           placeholder="Enter Batch ID (7 digits)"
+                                    <input class="form-control text-center numeric-only" name="batch_id" id="batch_id" type="text" required
+                                           placeholder="Enter 7-digit Batch ID"
                                            value="{{ old('batch_id') }}" maxlength="7" minlength="7"
-                                           pattern="[0-9]{7}" title="7-digit Batch ID">
+                                           inputmode="numeric" pattern="\d{7}" title="7-digit Batch ID" aria-label="7-digit Batch ID">
+                                    <div class="invalid-feedback">Please provide a valid 7-digit Batch ID.</div>
                                 </div>
 
                                 <!-- Ticket ID -->
                                 <div class="col-md-6">
-                                    <label class="form-label fw-semibold">Ticket ID <span class="text-danger">*</span></label>
-                                    <input class="form-control text-center" name="ticket_id" type="text" required
-                                           placeholder="Enter Ticket ID (8 digits)"
+                                    <label class="form-label fw-semibold" for="ticket_id">Ticket ID <span class="text-danger">*</span></label>
+                                    <input class="form-control text-center numeric-only" name="ticket_id" id="ticket_id" type="text" required
+                                           placeholder="Enter 8-digit Ticket ID"
                                            value="{{ old('ticket_id') }}" maxlength="8" minlength="8"
-                                           pattern="[0-9]{8}" title="8-digit Ticket ID">
+                                           inputmode="numeric" pattern="\d{8}" title="8-digit Ticket ID" aria-label="8-digit Ticket ID">
+                                    <div class="invalid-feedback">Please provide a valid 8-digit Ticket ID.</div>
                                 </div>
 
                                 <!-- Service Fee -->
@@ -114,17 +116,21 @@
 
                                 <!-- Terms -->
                                 <div class="col-md-12">
-                                    <div class="form-check mt-2">
-                                        <input class="form-check-input" id="termsCheckbox" type="checkbox" required>
-                                        <label class="form-check-label fw-semibold small" for="termsCheckbox">
-                                            I confirm that the provided information is accurate and agree to the CRM policy.
-                                        </label>
+                                    <div class="p-3 bg-light rounded-3 border mt-2 shadow-sm">
+                                        <div class="form-check mb-0">
+                                            <input class="form-check-input" id="termsCheckbox" type="checkbox" required>
+                                            <label class="form-check-label fw-semibold small text-dark" for="termsCheckbox">
+                                                <i class="bi bi-shield-check text-primary me-2"></i>
+                                                I confirm that the provided information is accurate and agree to the CRM policy.
+                                            </label>
+                                            <div class="invalid-feedback">You must agree before submitting.</div>
+                                        </div>
                                     </div>
                                 </div>
 
                                 <!-- Submit -->
                                 <div class="col-md-12 d-grid mt-3">
-                                    <button type="submit" class="btn btn-primary btn-lg fw-semibold">
+                                    <button type="submit" class="btn btn-primary btn-lg fw-semibold" data-loading-text="Submitting Request...">
                                         <i class="bi bi-send-fill me-2"></i> Submit Request
                                     </button>
                                 </div>
@@ -136,10 +142,10 @@
             </div>
 
     <!-- Submission History -->
-<div class="col-xl-6">
-    <div class="card shadow-sm border-0 rounded-3">
+<div class="col-12 col-xl-6 mt-2 mt-md-0">
+    <div class="card shadow-lg border-0 rounded-0 rounded-md-4">
 
-        <div class="card-header bg-primary d-flex justify-content-between align-items-center">
+        <div class="card-header bg-primary d-flex justify-content-between align-items-center rounded-0 rounded-top-md-4">
             <h5 class="fw-bold mb-0">
                 <i class="bi bi-clock-history me-2"></i> CRM Submission History
             </h5>
@@ -262,48 +268,86 @@
     <!-- BVN CRM Guidelines Modal -->
     <div class="modal fade" id="sampleInfoModal" tabindex="-1" aria-labelledby="sampleInfoModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered modal-lg">
-            <div class="modal-content shadow-lg rounded-4">
-                <div class="modal-header bg-primary text-white py-3 rounded-top-4">
-                    <h4 class="modal-title fw-bold" id="sampleInfoModalLabel">
-                        <i class="bi bi-person-badge-fill me-2"></i> BVN CRM Submission Guidelines
-                    </h4>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            <div class="modal-content shadow-lg border-0 rounded-4 overflow-hidden">
+                <div class="modal-header bg-primary bg-gradient text-white py-4 px-4 border-0">
+                    <div class="d-flex align-items-center">
+                        <div class="bg-white bg-opacity-25 rounded-circle p-2 me-3">
+                            <i class="bi bi-info-circle-fill fs-3 text-white"></i>
+                        </div>
+                        <div>
+                            <h4 class="modal-title fw-bold mb-0" id="sampleInfoModalLabel">CRM Submission Guide</h4>
+                            <p class="mb-0 small opacity-75">Learn how to retrieve your Batch and Ticket IDs</p>
+                        </div>
+                    </div>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
 
-                <div class="modal-body px-4 py-4">
-                    <p class="fs-6 text-muted mb-3">
-                        Please follow the instructions below to locate your <strong>Enrollment Batch ID</strong> and <strong>Ticket ID</strong> before submitting your CRM request.
-                    </p>
-
-                    <div class="bg-light p-4 rounded-3 mb-4 border-start border-4 border-primary">
-                        <h6 class="fw-semibold mb-3 text-primary">
-                            <i class="bi bi-list-check me-2"></i> Steps to Retrieve Required IDs
-                        </h6>
-                        <ul class="fw-semibold mb-3 text-primary">
-                            <li class="mb-2"><i class="bi bi-arrow-return-right text-success me-2"></i> Navigate to the <strong>failed BVN enrollment</strong> on your system or portal.</li>
-                            <li class="mb-2"><i class="bi bi-chat-dots-fill text-warning me-2"></i> Check the response or error message — your <strong>Batch ID</strong> and <strong>Ticket ID</strong> will be clearly displayed there.</li>
-                            <li><i class="bi bi-clipboard-check-fill text-info me-2"></i> Copy the displayed IDs accurately and proceed to submit your <strong>BVN CRM request</strong>.</li>
-                        </ul>
+                <div class="modal-body p-4 p-md-5">
+                    <div class="row align-items-center mb-5">
+                        <div class="col-lg-7">
+                            <h5 class="fw-bold text-dark mb-3">Where to find your IDs?</h5>
+                            <p class="text-muted">IDs are generated automatically by NIBSS when an enrollment fails. You can find them in the error response on your enrollment portal.</p>
+                        </div>
+                        <div class="col-lg-5 text-center d-none d-lg-block">
+                            <i class="bi bi-file-earmark-text text-primary opacity-25" style="font-size: 5rem;"></i>
+                        </div>
                     </div>
 
-                    <div class="p-4 mb-4 bg-white border rounded-3 shadow-sm">
-                        <h6 class="fw-bold text-secondary mb-2">
-                            <i class="bi bi-lightbulb-fill me-2 text-warning"></i> Tips
-                        </h6>
-                        <p class="mb-0 text-muted">Ensure there are no typos in the Batch or Ticket ID to avoid delays or rejection of your CRM request.</p>
+                    <div class="instructions-timeline">
+                        <!-- Step 1 -->
+                        <div class="d-flex mb-4">
+                            <div class="me-4 text-center" style="width: 40px;">
+                                <div class="bg-primary text-white rounded-circle fw-bold d-flex align-items-center justify-content-center mx-auto" style="width: 40px; height: 40px;">1</div>
+                                <div class="vr mt-2 opacity-25" style="height: 30px; width: 2px;"></div>
+                            </div>
+                            <div>
+                                <h6 class="fw-bold text-dark mb-1">Locate Enrollment</h6>
+                                <p class="small text-muted mb-0">Navigate to the <strong>failed BVN enrollment</strong> record on your system or bank portal.</p>
+                            </div>
+                        </div>
+
+                        <!-- Step 2 -->
+                        <div class="d-flex mb-4">
+                            <div class="me-4 text-center" style="width: 40px;">
+                                <div class="bg-primary text-white rounded-circle fw-bold d-flex align-items-center justify-content-center mx-auto" style="width: 40px; height: 40px;">2</div>
+                                <div class="vr mt-2 opacity-25" style="height: 30px; width: 2px;"></div>
+                            </div>
+                            <div>
+                                <h6 class="fw-bold text-dark mb-1">Check Error Details</h6>
+                                <p class="small text-muted mb-0">Open the response or error details. Look for lines labeled <strong>Batch ID</strong> or <strong>Ticket ID</strong>.</p>
+                                <div class="mt-2 p-2 bg-light border rounded-3 d-flex gap-2">
+                                    <code class="badge bg-white border text-primary px-2 py-1">Batch: 1234567</code>
+                                    <code class="badge bg-white border text-primary px-2 py-1">Ticket: 87654321</code>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Step 3 -->
+                        <div class="d-flex">
+                            <div class="me-4 text-center" style="width: 40px;">
+                                <div class="bg-primary text-white rounded-circle fw-bold d-flex align-items-center justify-content-center mx-auto" style="width: 40px; height: 40px;">3</div>
+                            </div>
+                            <div>
+                                <h6 class="fw-bold text-dark mb-1">Submit CRM</h6>
+                                <p class="small text-muted mb-0">Copy these exactly into the form and submit. Ensure they are <strong>7 and 8 digits</strong> respectively.</p>
+                            </div>
+                        </div>
                     </div>
 
-                    <div class="alert alert-info d-flex align-items-center py-3 px-4 rounded-3">
-                        <i class="bi bi-info-circle-fill me-3 fs-4"></i>
-                        <div>
-                            <strong>Note:</strong> All CRM requests are subject to verification and final approval by the Nigeria Inter-Bank Settlement System (NIBSS).
+                    <div class="mt-5 p-4 bg-primary bg-opacity-10 rounded-4 border border-primary border-opacity-25">
+                        <div class="d-flex align-items-center">
+                            <i class="bi bi-lightbulb-fill text-warning fs-3 me-3"></i>
+                            <div>
+                                <h6 class="fw-bold text-primary mb-1">Pro Tip</h6>
+                                <p class="small text-dark mb-0 opacity-75">All CRM requests are subject to NIBSS verification. Double-check IDs to prevent rejection.</p>
+                            </div>
                         </div>
                     </div>
                 </div>
 
-                <div class="modal-footer py-3">
-                    <button type="button" class="btn btn-outline-primary rounded-pill px-4" data-bs-dismiss="modal">
-                        <i class="bi bi-check-circle me-2"></i> Understood
+                <div class="modal-footer bg-light border-0 py-4 px-5 justify-content-center">
+                    <button type="button" class="btn btn-primary px-5 py-2 rounded-pill fw-bold shadow-sm" data-bs-dismiss="modal">
+                        <i class="bi bi-check2-circle me-2"></i> I've got it
                     </button>
                 </div>
             </div>

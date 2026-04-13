@@ -56,17 +56,19 @@
 </div>
 
 <div class="col-md-4">
-    <label class="form-label fw-semibold">BVN <span class="text-danger">*</span></label>
-    <input class="form-control" name="bvn" type="text" minlength="11" maxlength="11" required
-        placeholder="Enter your BVN" value="{{ old('bvn') }}">
-    <div class="invalid-feedback">Please provide your BVN.</div>
+    <label class="form-label fw-semibold" for="bvn_field">BVN <span class="text-danger">*</span></label>
+    <input class="form-control numeric-only" id="bvn_field" name="bvn" type="text" minlength="11" maxlength="11" required
+        placeholder="Enter your 11-digit BVN" value="{{ old('bvn') }}"
+        inputmode="numeric" pattern="\d{11}" aria-label="11-digit BVN">
+    <div class="invalid-feedback">Please provide a valid 11-digit BVN.</div>
 </div>
 
 <div class="col-md-4">
-    <label class="form-label fw-semibold">Account Number <span class="text-danger">*</span></label>
-    <input class="form-control" name="account_no" type="text" minlength="10" maxlength="10" required
-        placeholder="Enter your account number" value="{{ old('account_no') }}">
-    <div class="invalid-feedback">Please provide your account number.</div>
+    <label class="form-label fw-semibold" for="account_no">Account Number <span class="text-danger">*</span></label>
+    <input class="form-control numeric-only" id="account_no" name="account_no" type="text" minlength="10" maxlength="10" required
+        placeholder="Enter your 10-digit account number" value="{{ old('account_no') }}"
+        inputmode="numeric" pattern="\d{10}" aria-label="10-digit Account Number">
+    <div class="invalid-feedback">Please provide a valid 10-digit account number.</div>
 </div>
 
 <div class="col-md-4">
@@ -98,10 +100,11 @@
 </div>
 
 <div class="col-md-6">
-    <label class="form-label fw-semibold">Phone Number <span class="text-danger">*</span></label>
-    <input class="form-control" name="phone_no" type="tel" minlength="11" maxlength="11" required
-        placeholder="Enter your phone number" value="{{ old('phone_no') }}">
-    <div class="invalid-feedback">Please provide your phone number.</div>
+    <label class="form-label fw-semibold" for="phone_no">Phone Number <span class="text-danger">*</span></label>
+    <input class="form-control numeric-only" id="phone_no" name="phone_no" type="tel" minlength="11" maxlength="11" required
+        placeholder="Enter your 11-digit phone number" value="{{ old('phone_no') }}"
+        inputmode="tel" pattern="\d{11}" aria-label="11-digit Phone Number">
+    <div class="invalid-feedback">Please provide a valid 11-digit phone number.</div>
 </div>
 
 <div class="col-md-6">
@@ -263,20 +266,4 @@ document.getElementById('service_field').addEventListener('change', function() {
     document.getElementById('field-description').textContent = description || '';
 });
 
-// Form validation
-(function() {
-    'use strict';
-    window.addEventListener('load', function() {
-        var forms = document.getElementsByClassName('needs-validation');
-        var validation = Array.prototype.filter.call(forms, function(form) {
-            form.addEventListener('submit', function(event) {
-                if (form.checkValidity() === false) {
-                    event.preventDefault();
-                    event.stopPropagation();
-                }
-                form.classList.add('was-validated');
-            }, false);
-        });
-    }, false);
-})();
 </script>

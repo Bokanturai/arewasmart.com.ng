@@ -1,7 +1,7 @@
 <!-- Quick Services Section -->
-<section class="py-3 py-md-4">
-    <div class="container px-0 px-sm-3">
-        <div class="card border-0 shadow-sm mobile-flush rounded-4 overflow-hidden">
+<section class="py-1 py-md-2">
+    <div class="container-fluid px-0 px-md-3">
+        <div class="card border-0 shadow-sm overflow-hidden" style="border-radius: 12px;">
             <div class="card-body p-3 p-md-4">
                 <div class="d-flex align-items-center gap-2 mb-1">
                     <i class="fas fa-bolt text-warning"></i>
@@ -490,14 +490,7 @@
     }
 }
 
-/* Mobile First - Optimized */
 @media (max-width: 575px) {
-    .mobile-flush {
-        border-radius: 0 !important;
-        margin-left: -12px;
-        margin-right: -12px;
-    }
-    
     .service-icon {
         width: 45px;
         height: 45px;

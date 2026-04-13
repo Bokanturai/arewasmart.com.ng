@@ -261,5 +261,35 @@
     align-items: center;
     justify-content: center;
   }
+  
+  /* Dashboard Hero Enhancements */
+  .fs-xs { font-size: 0.7rem; }
+  .tracking-wider { letter-spacing: 0.05em; }
+  .fw-extrabold { font-weight: 800; }
+  
+  .avatar-wrapper img {
+      transition: transform 0.3s ease;
+  }
+  .avatar-wrapper:hover img {
+      transform: scale(1.05);
+  }
+  
+  #toggle-balance:hover i {
+      color: var(--primary);
+  }
+  
+  .balance-text {
+      letter-spacing: -0.02em;
+  }
+  
+  @media (max-width: 991.98px) {
+      .greeting-content h2 {
+          font-size: 1.5rem;
+      }
+      .avatar-wrapper img {
+          width: 65px !important;
+          height: 65px !important;
+      }
+  }
 
 

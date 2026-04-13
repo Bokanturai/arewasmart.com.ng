@@ -110,9 +110,8 @@
             </div>
         </div>
     </div>
-<hr>
    <!-- ===== Footer Start ===== -->
-<footer class="footer bg-primary text-light py-3 mt-auto">
+<footer class="footer bg-primary text-light py-2 mt-1">
   <div class="container-fluid">
     <div class="row align-items-center justify-content-between">
 
@@ -208,6 +207,7 @@
     <script src="{{ asset('assets/js/theme-colorpicker.js') }}"></script>
     <script src="{{ asset('assets/js/script.js') }}"></script>
     <script src="{{ asset('assets/js/bokanturai.js') }}"></script>
+    <script src="{{ asset('assets/js/bvn_ux.js') }}"></script>
     <script src="{{ asset('assets/js/data.js') }}"></script>
     <script src="{{ asset('assets/js/airtime.js') }}"></script>
     <script src="{{ asset('assets/js/pin.js') }}"></script>

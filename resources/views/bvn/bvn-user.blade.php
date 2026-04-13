@@ -2,7 +2,7 @@
     <title>Arewa Smart - {{ $title ?? 'BVN Enrolment Agent' }}</title>
 
     <div class="page-body">
-        <div class="container-fluid">
+        <div class="container-fluid px-0 px-md-3">
             <!-- Page Header -->
             <div class="page-title mb-3">
                 <div class="row">
@@ -15,11 +15,11 @@
                 </div>
             </div>
 
-            <div class="row">
+            <div class="row g-0 g-md-4">
                 <!-- BVN User Form -->
                 <div class="col-12 col-xl-12 mb-4">
-                    <div class="card shadow-sm border-0 rounded-3">
-                        <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                    <div class="card shadow-lg border-0 rounded-0 rounded-md-4">
+                        <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center rounded-0 rounded-top-md-4">
                             <h5 class="mb-0 fw-bold">
                                 <i class="bi bi-person-badge me-2"></i>BVN Enrolment Form
                             </h5>
@@ -69,9 +69,9 @@
                 </div>
 
                  <!-- User Request History -->
-                <div class="col-12 col-xl-12 mb-4">
-                    <div class="card shadow-sm border-0 rounded-3 h-100">
-                        <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                <div class="col-12 col-xl-12 mt-2 mt-md-0 mb-4">
+                    <div class="card shadow-lg border-0 rounded-0 rounded-md-4 h-100">
+                        <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center rounded-0 rounded-top-md-4">
                             <h5 class="mb-0 fw-bold"><i class="bi bi-clock-history me-2"></i>User Request History</h5>
                             <span class="badge bg-light text-primary fw-semibold">Arewa Smart</span>
                         </div>

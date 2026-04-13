@@ -2,11 +2,11 @@
     <title>Arewa Smart - 0% Interest Loans</title>
     
     <div class="page-body">
-        <div class="container-fluid">
+        <div class="container-fluid px-0 px-md-3">
             <!-- Hero Advert Section -->
-            <div class="row mb-4">
+            <div class="row g-0 g-md-4 mb-4">
                 <div class="col-12">
-                    <div class="card border-0 rounded-4 overflow-hidden shadow-lg position-relative" style="background: linear-gradient(135deg, #8dacf3ff 0%, #F26522 100%);">
+                    <div class="card border-0 overflow-hidden shadow-lg position-relative" style="border-radius: 12px; background: linear-gradient(135deg, #8dacf3ff 0%, #F26522 100%);">
                         <div class="card-body p-4 p-md-5">
                             <div class="row align-items-center">
                                 <div class="col-lg-7 text-white animate__animated animate__fadeInLeft">
@@ -42,12 +42,12 @@
                 </div>
             </div>
 
-            <div class="row">
+            <div class="row g-0 g-md-4">
                 <!-- Main Content -->
-                <div class="col-xl-7">
+                <div class="col-12 col-xl-7">
                     @if(!$isEligible)
                         <!-- Ineligible State -->
-                        <div class="card border-0 shadow-sm rounded-4 mb-4 overflow-hidden animate__animated animate__fadeInUp">
+                        <div class="card border-0 shadow-sm mb-4 overflow-hidden animate__animated animate__fadeInUp" style="border-radius: 12px;">
                             <div class="card-header bg-white border-0 py-3">
                                 <h5 class="fw-bold mb-0 d-flex align-items-center gap-2">
                                     <i class="ti ti-shield-alert text-warning fs-3"></i>
@@ -90,7 +90,7 @@
                         </div>
                     @else
                         <!-- Eligible State - Application Form -->
-                        <div class="card border-0 shadow-sm rounded-4 mb-4 animate__animated animate__fadeInUp">
+                        <div class="card border-0 shadow-sm mb-4 animate__animated animate__fadeInUp" style="border-radius: 12px;">
                             <div class="card-header bg-white border-0 py-3">
                                 <h5 class="fw-bold mb-0 d-flex align-items-center gap-2">
                                     <i class="ti ti-edit text-primary fs-3"></i>
@@ -154,8 +154,8 @@
                 </div>
 
                 <!-- History Section -->
-                <div class="col-xl-5">
-                    <div class="card border-0 shadow-sm rounded-4 overflow-hidden animate__animated animate__fadeInUp animate__delay-1s">
+                <div class="col-12 col-xl-5 mt-2 mt-md-0">
+                    <div class="card border-0 shadow-sm overflow-hidden animate__animated animate__fadeInUp animate__delay-1s" style="border-radius: 12px;">
                         <div class="card-header bg-primary py-3">
                             <h5 class="fw-bold mb-0 text-white d-flex align-items-center gap-2">
                                 <i class="ti ti-history fs-3"></i>

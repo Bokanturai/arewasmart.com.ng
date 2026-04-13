@@ -1,78 +1,54 @@
 <!-- Financial Metrics Section -->
-<div class="container-fluid mb-4">
-    <div class="row g-3 mt-4">
-        <div class="col-12">
-            <div class="d-flex align-items-center justify-content-between mb-3">
-                <h4 class="mb-0 fw-bold text-dark">
-                    <i class="ti ti-currency-naira me-2 text-primary"></i>Financial Overview
-                </h4>
-                <span class="badge bg-white text-dark shadow-sm border px-3 py-2 text-uppercase">
-                    @if($isFiltered ?? false)
-                        {{ $startDate->format('M d') }} - {{ $endDate->format('M d') }}
-                    @else
-                        {{ date('F Y') }}
-                    @endif
-                </span>
-            </div>
-        </div>
-
+<div class="container-fluid mb-2">
+    <div class="row g-2 mt-2">
         <!-- Total Transactions (Debit) -->
-        <div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 fade-in-up" style="animation-delay: 0.1s;">
-            <div class="financial-card shadow-sm h-100 p-3" style="background: var(--danger-gradient);">
-                <div class="d-flex justify-content-between align-items-start position-relative z-1">
-                    <div>
-                        <p class="stats-label mb-1" style="color: rgba(255,255,255,0.8);">Total Transactions</p>
-                        <h3 class="stats-value mb-0 text-white">₦{{ number_format($totalTransactionAmount ?? 0, 2) }}</h3>
-                    </div>
-                    <div class="avatar avatar-lg bg-white bg-opacity-25 rounded-3 d-flex align-items-center justify-content-center">
-                        <i class="ti ti-arrow-up-circle fs-24 text-white"></i>
-                    </div>
+        <div class="col-6 col-md-3 fade-in-up" style="animation-delay: 0.1s;">
+            <div class="financial-card-sm shadow-sm h-100 p-2 d-flex align-items-center" style="background: #fff; border-left: 4px solid #e74a3b;">
+                <div class="icon-box-sm bg-danger-subtle text-danger rounded-3 me-2 d-flex align-items-center justify-content-center">
+                    <i class="bi bi-cart-dash fs-15"></i>
+                </div>
+                <div>
+                    <p class="stats-label-sm mb-0 text-muted">Transactions</p>
+                    <h6 class="stats-value-sm mb-0 text-dark fw-bold">₦{{ number_format($totalTransactionAmount ?? 0, 0) }}</h6>
                 </div>
             </div>
         </div>
 
         <!-- Total Funded (Credit) -->
-        <div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 fade-in-up" style="animation-delay: 0.2s;">
-            <div class="financial-card shadow-sm h-100 p-3" style="background: var(--success-gradient);">
-                <div class="d-flex justify-content-between align-items-start position-relative z-1">
-                    <div>
-                        <p class="stats-label mb-1" style="color: rgba(255,255,255,0.8);">Total Funded</p>
-                        <h3 class="stats-value mb-0 text-white">₦{{ number_format($totalFundedAmount ?? 0, 2) }}</h3>
-                    </div>
-                    <div class="avatar avatar-lg bg-white bg-opacity-25 rounded-3 d-flex align-items-center justify-content-center">
-                        <i class="ti ti-wallet fs-24 text-white"></i>
-                    </div>
+        <div class="col-6 col-md-3 fade-in-up" style="animation-delay: 0.2s;">
+            <div class="financial-card-sm shadow-sm h-100 p-2 d-flex align-items-center" style="background: #fff; border-left: 4px solid #1cc88a;">
+                <div class="icon-box-sm bg-success-subtle text-success rounded-3 me-2 d-flex align-items-center justify-content-center">
+                    <i class="bi bi-wallet2 fs-15"></i>
+                </div>
+                <div>
+                    <p class="stats-label-sm mb-0 text-muted">Funded</p>
+                    <h6 class="stats-value-sm mb-0 text-dark fw-bold">₦{{ number_format($totalFundedAmount ?? 0, 0) }}</h6>
                 </div>
             </div>
         </div>
 
         <!-- Agency Requests -->
-        <div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 fade-in-up" style="animation-delay: 0.3s;">
-            <div class="financial-card shadow-sm h-100 p-3" style="background: var(--primary-gradient);">
-                <div class="d-flex justify-content-between align-items-start position-relative z-1">
-                    <div>
-                        <p class="stats-label mb-1" style="color: rgba(255,255,255,0.8);">Agency Requests</p>
-                        <h3 class="stats-value mb-0 text-white">{{ number_format($totalAgencyRequests ?? 0) }}</h3>
-                    </div>
-                    <div class="avatar avatar-lg bg-white bg-opacity-25 rounded-3 d-flex align-items-center justify-content-center">
-                        <i class="ti ti-building-bank fs-24 text-white"></i>
-                    </div>
+        <div class="col-6 col-md-3 fade-in-up" style="animation-delay: 0.3s;">
+            <div class="financial-card-sm shadow-sm h-100 p-2 d-flex align-items-center" style="background: #fff; border-left: 4px solid #4e73df;">
+                <div class="icon-box-sm bg-primary-subtle text-primary rounded-3 me-2 d-flex align-items-center justify-content-center">
+                    <i class="bi bi-bank fs-15"></i>
+                </div>
+                <div>
+                    <p class="stats-label-sm mb-0 text-muted">Agency</p>
+                    <h6 class="stats-value-sm mb-0 text-dark fw-bold">{{ number_format($totalAgencyRequests ?? 0) }}</h6>
                 </div>
             </div>
         </div>
 
-        <!-- Total Referrals -->
-        <div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 fade-in-up" style="animation-delay: 0.4s;">
-            <div class="financial-card shadow-sm h-100 p-3" style="background: var(--info-gradient);">
-                <div class="d-flex justify-content-between align-items-start position-relative z-1">
-                    <div>
-                        <p class="stats-label mb-1" style="color: rgba(255,255,255,0.8);">Referral Earnings</p>
-                        <h3 class="stats-value mb-0 text-white">₦{{ number_format($totalReferralEarnings ?? 0, 2) }}</h3>
-                        <small class="text-white opacity-75">{{ number_format($totalReferrals ?? 0) }} Invitations</small>
-                    </div>
-                    <div class="avatar avatar-lg bg-white bg-opacity-25 rounded-3 d-flex align-items-center justify-content-center">
-                        <i class="ti ti-users fs-24 text-white"></i>
-                    </div>
+        <!-- Referral Earnings -->
+        <div class="col-6 col-md-3 fade-in-up" style="animation-delay: 0.4s;">
+            <div class="financial-card-sm shadow-sm h-100 p-2 d-flex align-items-center" style="background: #fff; border-left: 4px solid #36b9cc;">
+                <div class="icon-box-sm bg-info-subtle text-info rounded-3 me-2 d-flex align-items-center justify-content-center">
+                    <i class="bi bi-people fs-15"></i>
+                </div>
+                <div>
+                    <p class="stats-label-sm mb-0 text-muted">Referrals</p>
+                    <h6 class="stats-value-sm mb-0 text-dark fw-bold">₦{{ number_format($totalReferralEarnings ?? 0, 0) }}</h6>
                 </div>
             </div>
         </div>
@@ -80,60 +56,46 @@
 </div>
 
 <style>
-    :root {
-        --primary-gradient: linear-gradient(135deg, #4e73df 0%, #224abe 100%);
-        --success-gradient: linear-gradient(135deg, #1cc88a 0%, #13855c 100%);
-        --danger-gradient: linear-gradient(135deg, #e74a3b 0%, #be2617 100%);
-        --info-gradient: linear-gradient(135deg, #36b9cc 0%, #258391 100%);
-    }
-
-    .financial-card {
-        border-radius: 16px;
-        border: none;
-        overflow: hidden;
-        position: relative;
+    .financial-card-sm {
+        border-radius: 12px;
         transition: all 0.3s ease;
+        border: 1px solid rgba(0,0,0,0.05);
     }
 
-    .financial-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 10px 20px rgba(0,0,0,0.1) !important;
+    .financial-card-sm:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(0,0,0,0.08) !important;
     }
 
-    .financial-card::before {
-        content: "";
-        position: absolute;
-        top: -20%;
-        right: -10%;
-        width: 100px;
-        height: 100px;
-        background: rgba(255, 255, 255, 0.1);
-        border-radius: 50%;
-        z-index: 0;
+    .icon-box-sm {
+        width: 38px;
+        height: 38px;
+        min-width: 38px;
     }
 
-    .stats-label {
-        font-size: 0.82rem;
+    .stats-label-sm {
+        font-size: 0.7rem;
         font-weight: 600;
         text-transform: uppercase;
-        letter-spacing: 0.5px;
+        letter-spacing: 0.3px;
+        line-height: 1;
+        margin-bottom: 2px !important;
     }
 
-    .stats-value {
-        font-size: 1.4rem;
-        font-weight: 700;
-        letter-spacing: -0.5px;
+    .stats-value-sm {
+        font-size: 0.95rem;
+        letter-spacing: -0.3px;
     }
 
-    .avatar-lg {
-        width: 48px;
-        height: 48px;
-    }
+    .bg-primary-subtle { background-color: rgba(78, 115, 223, 0.1) !important; }
+    .bg-success-subtle { background-color: rgba(28, 200, 138, 0.1) !important; }
+    .bg-danger-subtle { background-color: rgba(231, 74, 59, 0.1) !important; }
+    .bg-info-subtle { background-color: rgba(54, 185, 204, 0.1) !important; }
 
     @keyframes fadeInUp {
         from {
             opacity: 0;
-            transform: translateY(20px);
+            transform: translateY(10px);
         }
         to {
             opacity: 1;
@@ -142,7 +104,13 @@
     }
 
     .fade-in-up {
-        animation: fadeInUp 0.5s ease forwards;
+        animation: fadeInUp 0.4s ease forwards;
         opacity: 0;
+    }
+    
+    @media (max-width: 576px) {
+        .stats-value-sm {
+            font-size: 0.85rem;
+        }
     }
 </style>

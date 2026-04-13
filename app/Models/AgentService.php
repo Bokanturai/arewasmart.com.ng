@@ -77,6 +77,7 @@ class AgentService extends Model
     protected $casts = [
         'submission_date' => 'datetime',
         'modification_data' => 'array',
+        'field' => 'array',
     ];
 
     /** Relationships */

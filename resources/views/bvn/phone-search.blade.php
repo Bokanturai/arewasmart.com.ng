@@ -2,7 +2,7 @@
      <title>Arewa Smart - {{ $title ?? 'Search Bvn Using Phone Number' }}</title>
 
     <div class="page-body">
-        <div class="container-fluid">
+        <div class="container-fluid px-0 px-md-3">
             <div class="page-title mb-3">
                 <div class="row">
                     <div class="col-sm-6 col-12">
@@ -15,11 +15,11 @@
             </div>
         </div>
 
-        <div class="row mt-3">
+        <div class="row mt-3 g-0 g-md-4">
             <!-- Phone Validation Form -->
-            <div class="col-xl-6 mb-4">
-                <div class="card shadow-sm border-0 rounded-3">
-                    <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+            <div class="col-12 col-xl-6 mb-4">
+                <div class="card shadow-lg border-0 rounded-0 rounded-md-4">
+                    <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center rounded-0 rounded-top-md-4">
                         <h5 class="mb-0 fw-bold"><i class="bi bi-phone me-2"></i>Phone Validation Request</h5>
                         <span class="badge bg-light text-primary fw-semibold">Arewa Smart</span>
                     </div>
@@ -45,7 +45,7 @@
                         @endif
 
                         {{-- Request Form --}}
-                        <form method="POST" action="{{ route('phone.search.store') }}">
+                        <form method="POST" action="{{ route('phone.search.store') }}" class="needs-validation" novalidate>
                             @csrf
                             <div class="row g-3">
 
@@ -71,17 +71,18 @@
 
                                 <!-- Phone Number -->
                                 <div class="col-md-6">
-                                    <label class="form-label fw-semibold d-flex justify-content-between">
-                                        <span>Phone Number</span>
+                                    <label class="form-label fw-semibold d-flex justify-content-between" for="number">
+                                        <span>Phone Number <span class="text-danger">*</span></span>
                                         <button type="button" class="btn btn-outline-primary btn-sm py-0"
                                             data-bs-toggle="modal" data-bs-target="#sampleInfoModal">
                                             <i class="bi bi-info-circle"></i> Guide
                                         </button>
                                     </label>
-                                    <input class="form-control text-center" name="number" type="text" required
-                                        placeholder="Enter Phone Number (11 digits)"
+                                    <input class="form-control text-center numeric-only" name="number" id="number" type="text" required
+                                        placeholder="Enter 11-digit Phone Number"
                                         value="{{ old('number') }}" maxlength="11" minlength="11"
-                                        pattern="[0-9]{11}" title="11-digit Phone Number">
+                                        inputmode="tel" pattern="\d{11}" title="11-digit Phone Number" aria-label="11-digit Phone Number">
+                                    <div class="invalid-feedback">Please provide a valid 11-digit phone number.</div>
                                 </div>
 
                                 <!-- Service Fee -->
@@ -100,17 +101,21 @@
 
                                 <!-- Terms -->
                                 <div class="col-md-12">
-                                    <div class="form-check mt-2">
-                                        <input class="form-check-input" id="termsCheckbox" type="checkbox" required>
-                                        <label class="form-check-label fw-semibold small" for="termsCheckbox">
-                                            I confirm that the provided information is accurate and agree to the phone validation policy.
-                                        </label>
+                                    <div class="p-3 bg-light rounded-3 border mt-2 shadow-sm">
+                                        <div class="form-check mb-0">
+                                            <input class="form-check-input" id="termsCheckbox" type="checkbox" required>
+                                            <label class="form-check-label fw-semibold small text-dark" for="termsCheckbox">
+                                                <i class="bi bi-shield-check text-primary me-2"></i>
+                                                I confirm that the provided information is accurate and agree to the phone validation policy.
+                                            </label>
+                                            <div class="invalid-feedback">You must agree before submitting.</div>
+                                        </div>
                                     </div>
                                 </div>
 
                                 <!-- Submit -->
                                 <div class="col-md-12 d-grid mt-3">
-                                    <button type="submit" class="btn btn-primary btn-lg fw-semibold">
+                                    <button type="submit" class="btn btn-primary btn-lg fw-semibold" data-loading-text="Processing Validation...">
                                         <i class="bi bi-send-fill me-2"></i> Submit Request
                                     </button>
                                 </div>
@@ -122,9 +127,9 @@
             </div>
 
             <!-- Submission History -->
-            <div class="col-xl-6">
-                <div class="card shadow-sm border-0 rounded-3">
-                    <div class="card-header bg-primary d-flex justify-content-between align-items-center text-white">
+            <div class="col-12 col-xl-6 mt-2 mt-md-0">
+                <div class="card shadow-lg border-0 rounded-0 rounded-md-4">
+                    <div class="card-header bg-primary d-flex justify-content-between align-items-center text-white rounded-0 rounded-top-md-4">
                         <h5 class="fw-bold mb-0"><i class="bi bi-clock-history me-2"></i>Submission History</h5>
                     </div>
 

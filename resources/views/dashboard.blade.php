@@ -4,7 +4,7 @@
     
     @if(isset($announcement) && $announcement)
     <div class="notification-container mt-3 mb-2">
-        <div class="scrolling-text-container bg-primary text-white shadow-sm rounded-3 py-2">
+        <div class="scrolling-text-container bg-primary text-white shadow-sm py-2" style="border-radius: 12px;">
             <div class="scrolling-text">
                 <span class="fw-bold me-3"><i class="fas fa-bullhorn"></i> ANNOUNCEMENT:</span>
                 {{ $announcement->message }}
@@ -59,9 +59,11 @@
         $displayName = empty($fullName) ? 'BOSS' : $fullName;
     @endphp
 
-    <div class="mt-4">
+    <div class="container-fluid px-0 px-md-3 mt-4">
     <!-- User + Wallet Section -->
-     <div class="card border-0 shadow-sm rounded-4 mb-3">
+    <div class="row g-0 g-md-4">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm mb-3" style="border-radius: 12px;">
         <div class="card-body user-wallet-wrap">
             <div class="d-flex align-items-center gap-3 flex-wrap">
             <!-- User Image -->
@@ -106,6 +108,7 @@
                     <i class="fas fa-wallet wallet-icon text-primary"></i>
                 </a>
             </div>
+            </div>
         </div>
     </div>
 </div>
@@ -120,12 +123,12 @@
             @include('pages.dashboard.wedget')
         </div>
 
-        <div class="row">
+        <div class="row g-0 g-md-4">
             @include('pages.dashboard.services')
         </div>
 
           <!-- advert section for mobile Users -->
-        <div class="row">
+        <div class="row g-0 g-md-4">
          @include('pages.dashboard.advert')
         </div>
 

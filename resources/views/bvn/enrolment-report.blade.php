@@ -1,7 +1,7 @@
 <x-app-layout>
     <title>Arewa Smart - {{ $title ?? 'Enrolment Report' }}</title>
     <div class="page-body">
-        <div class="container-fluid">
+        <div class="container-fluid px-0 px-md-3">
             <div class="page-title mb-3">
                 <div class="row">
                     <div class="col-sm-6 col-12">
@@ -12,12 +12,12 @@
             </div>
         </div>
 
-        <div class="container-fluid">
-            <div class="row">
+        <div class="container-fluid px-0 px-md-3">
+            <div class="row g-0 g-md-4">
                 <!-- Filter Section -->
                 <div class="col-12 mb-4">
-                    <div class="card shadow-sm border-0">
-                        <div class="card-header bg-primary text-white">
+                    <div class="card shadow-lg border-0 rounded-0 rounded-md-4">
+                        <div class="card-header bg-primary text-white rounded-0 rounded-top-md-4">
                             <h5 class="mb-0">Filter Enrolments</h5>
                         </div>
                         <div class="card-body">
@@ -49,7 +49,7 @@
 
                 <!-- Stats Section -->
                 @if(request('agent_code') && $stats['agent_name'])
-                <div class="col-12 mb-4">
+                <div class="col-12 mt-2 mt-md-0 mb-4">
                     <div class="row g-3">
                         <div class="col-md-3">
                             <div class="card bg-primary text-white h-100">
@@ -89,9 +89,9 @@
                 @endif
 
                 <!-- Table Section -->
-                <div class="col-12">
-                    <div class="card shadow-sm border-0">
-                        <div class="card-header bg-white border-bottom-0">
+                <div class="col-12 mt-2 mt-md-0">
+                    <div class="card shadow-lg border-0 rounded-0 rounded-md-4">
+                        <div class="card-header bg-white border-bottom-0 rounded-0 rounded-top-md-4">
                              <h5 class="mb-0 fw-bold text-primary">Enrolment List</h5>
                         </div>
                         <div class="card-body p-0">
@@ -153,7 +153,7 @@
                                 </table>
                             </div>
                         </div>
-                         <div class="card-footer bg-white">
+                         <div class="card-footer bg-white rounded-0 rounded-bottom-md-4">
                             {{ $enrollments->links('vendor.pagination.custom') }}
                         </div>
                     </div>
