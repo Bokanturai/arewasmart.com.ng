@@ -49,7 +49,7 @@ class WithdrawController extends Controller
             ['field_code' => 'WDL_002', 'description' => 'Minimum transaction volume for eligibility', 'base_price' => 2000000, 'is_active' => true]
         );
 
-        $banks = Bank::where('is_active', true)->orderBy('bankName')->get();
+        $banks = Bank::where('is_active', true)->orderBy('bank_name')->get();
 
         // Calculate total transaction volume
         $totalVolume = Transaction::where('user_id', $user->id)
@@ -68,17 +68,17 @@ class WithdrawController extends Controller
             ->orderBy('created_at', 'desc')
             ->get()
             ->map(function ($report) use ($banks) {
-                $bank = $banks->firstWhere('bankCode', $report->bankCode);
+                $bank = $banks->firstWhere('bank_code', $report->bank_code);
                 return [
-                    'bankCode' => $report->bankCode,
+                    'bank_code' => $report->bank_code,
                     'account_no' => $report->account_number,
                     'account_name' => $report->account_name,
-                    'bankName' => $report->bankName ?? 'Bank',
-                    'bank_url' => $bank->bankUrl ?? null
+                    'bank_name' => $report->bank_name ?? 'Bank',
+                    'bank_url' => $bank->bank_url ?? null
                 ];
             })
-            ->filter(fn($item) => !empty($item['bankCode']) && !empty($item['account_no']))
-            ->unique(fn($item) => $item['bankCode'] . $item['account_no'])
+            ->filter(fn($item) => !empty($item['bank_code']) && !empty($item['account_no']))
+            ->unique(fn($item) => $item['bank_code'] . $item['account_no'])
             ->values()
             ->take(15);
 
@@ -101,11 +101,11 @@ class WithdrawController extends Controller
 
             foreach ($banksData as $bank) {
                 Bank::updateOrCreate(
-                    ['bankCode' => $bank['bankCode']],
+                    ['bank_code' => $bank['bankCode']],
                     [
-                        'bankName' => $bank['bankName'],
-                        'bankUrl' => $bank['bankUrl'] ?? null,
-                        'bgUrl' => $bank['bgUrl'] ?? null,
+                        'bank_name' => $bank['bankName'],
+                        'bank_url' => $bank['bankUrl'] ?? null,
+                        'bg_url' => $bank['bgUrl'] ?? null,
                         'is_active' => true,
                     ]
                 );
@@ -123,11 +123,11 @@ class WithdrawController extends Controller
     public function verifyAccount(Request $request)
     {
         $request->validate([
-            'bankCode' => 'required|string',
+            'bank_code' => 'required|string',
             'account_no' => 'required|string|digits:10',
         ]);
 
-        $response = $this->palmPay->queryBankAccount($request->bankCode, $request->account_no);
+        $response = $this->palmPay->queryBankAccount($request->bank_code, $request->account_no);
 
         if (isset($response['respCode']) && $response['respCode'] === '00000000') {
             if ($response['data']['Status'] === 'Success') {
@@ -154,7 +154,7 @@ class WithdrawController extends Controller
     public function processWithdrawal(Request $request)
     {
         $request->validate([
-            'bankCode' => 'required|exists:banks,bankCode',
+            'bank_code' => 'required|exists:banks,bank_code',
             'account_no' => 'required|digits:10',
             'account_name' => 'required|string',
             'amount' => 'required|numeric|min:100', // Minimum 100 NGN
@@ -192,7 +192,7 @@ class WithdrawController extends Controller
                 ->first();
 
             if ($recentDuplicate) {
-                $bankName = Bank::where('bankCode', $request->bankCode)->value('bankName') ?? 'Bank';
+                $bankName = Bank::where('bank_code', $request->bank_code)->value('bank_name') ?? 'Bank';
                 return view('thankyou2', [
                     'transaction' => $recentDuplicate,
                     'sender' => $user,
@@ -297,7 +297,7 @@ class WithdrawController extends Controller
                     'performed_by' => $performedBy,
                     'metadata' => [
                         'service' => 'withdrawal',
-                        'bankCode' => $request->bankCode,
+                        'bank_code' => $request->bank_code,
                         'account_no' => $request->account_no,
                         'account_name' => $request->account_name,
                         'user_role' => $user->role,
@@ -310,15 +310,15 @@ class WithdrawController extends Controller
                 ]);
 
                 // 7. Create Report Record (Pending)
-                $bankName = Bank::where('bankCode', $request->bankCode)->value('bankName') ?? 'Bank';
+                $bankName = Bank::where('bank_code', $request->bank_code)->value('bank_name') ?? 'Bank';
 
                 $report = \App\Models\Report::create([
                     'user_id' => $user->id,
                     'phone_number' => $request->account_no,
                     'account_number' => $request->account_no,
                     'account_name' => $request->account_name,
-                    'bankCode' => $request->bankCode,
-                    'bankName' => $bankName,
+                    'bank_code' => $request->bank_code,
+                    'bank_name' => $bankName,
                     'network' => 'Withdrawal',
                     'ref' => $transactionRef,
                     'amount' => $totalCharge,
@@ -347,7 +347,7 @@ class WithdrawController extends Controller
                 $payoutResponse = $this->palmPay->transfer([
                     'orderId' => $transactionRef,
                     'payeeName' => $request->account_name,
-                    'payeeBankCode' => $request->bankCode,
+                    'payeeBankCode' => $request->bank_code,
                     'payeeBankAccNo' => $request->account_no,
                     'payeePhoneNo' => $user->phone_number ?? '0000000000',
                     'amount' => (int) ($request->amount * 100), // Convert to unit (e.g., kobo for NGN)

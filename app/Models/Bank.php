@@ -7,10 +7,10 @@ use Illuminate\Database\Eloquent\Model;
 class Bank extends Model
 {
     protected $fillable = [
-        'bankCode',
-        'bankName',
-        'bankUrl',
-        'bgUrl',
+        'bank_code',
+        'bank_name',
+        'bank_url',
+        'bg_url',
         'is_active',
     ];
 
