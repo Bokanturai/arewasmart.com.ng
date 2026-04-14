@@ -116,11 +116,21 @@
                                                 <td class="fw-bold text-primary">{{ session('verification')['data']['bvn'] }}</td>
                                             </tr>
                                             <tr>
-                                                <th class="bg-light">Full Name</th>
+                                                <th class="bg-light">First Name</th>
                                                 <td>
                                                     {{ session('verification')['data']['firstName'] }} 
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <th class="bg-light">Last Name</th>
+                                                <td>
+                                                    {{ session('verification')['data']['lastName'] }} 
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <th class="bg-light">Middle Name</th>
+                                                <td>
                                                     {{ session('verification')['data']['middleName'] ?? '' }} 
-                                                    {{ session('verification')['data']['lastName'] }}
                                                 </td>
                                             </tr>
                                             <tr>
