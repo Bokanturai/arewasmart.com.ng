@@ -3,7 +3,7 @@
     <div class="modal fade" id="biometricModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static"
         data-bs-keyboard="false">
         <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content shadow-lg border-0 rounded-4 overflow-hidden">
+            <div class="modal-content shadow-lg border-0 rounded-20px overflow-hidden">
                 <div class="modal-header bg-primary text-white border-0 py-3">
                     <h5 class="modal-title d-flex align-items-center">
                         <i class="ti ti-fingerprint fs-22 me-2"></i>

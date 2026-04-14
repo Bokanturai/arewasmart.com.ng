@@ -15,8 +15,8 @@
             <div class="row g-0 g-md-4">
                 <!-- Left Column: Verification Form -->
                 <div class="col-12 col-lg-6 col-xl-6 mb-4">
-                    <div class="card shadow-lg border-0 rounded-0 rounded-md-4 h-100">
-                        <div class="card-header bg-white border-bottom py-3 rounded-0 rounded-top-md-4">
+                    <div class="card shadow-lg border-0 h-100" style="border-radius: 20px; overflow: hidden;">
+                        <div class="card-header bg-white border-bottom py-3" style="border-top-left-radius: 20px; border-top-right-radius: 20px;">
                             <h5 class="mb-0 fw-bold text-primary"><i class="bi bi-file-earmark-person me-2"></i>Verification Details</h5>
                         </div>
 
@@ -162,8 +162,8 @@
 
                 <!-- Right Column: Verification Result -->
                 <div class="col-12 col-lg-6 col-xl-6 mt-2 mt-md-0">
-                    <div class="card shadow-lg border-0 rounded-0 rounded-md-4 h-100">
-                        <div class="card-header bg-success text-white d-flex justify-content-between align-items-center rounded-0 rounded-top-md-4">
+                    <div class="card shadow-lg border-0 h-100" style="border-radius: 20px; overflow: hidden;">
+                        <div class="card-header bg-success text-white d-flex justify-content-between align-items-center" style="border-top-left-radius: 20px; border-top-right-radius: 20px;">
                             <h5 class="mb-0 fw-bold"><i class="bi bi-person-lines-fill me-2"></i>Verification Result</h5>
                         </div>
 

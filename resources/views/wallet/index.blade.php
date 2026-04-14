@@ -9,7 +9,7 @@
                     
                     <!-- Left Part: Marketing & Encouragement -->
                     <div class="col-12 col-xl-5 order-2 order-lg-1 mt-2 mt-md-0">
-                        <div class="card border-0 rounded-0 rounded-md-4 overflow-hidden shadow-sm bg-dark text-white hero-card h-100">
+                        <div class="card border-0 overflow-hidden shadow-sm bg-dark text-white hero-card h-100" style="border-radius: 20px;">
                             <div class="card-body p-4 p-md-5 d-flex flex-column justify-content-center">
                                 <h1 class="h2 h1-lg fw-bold mb-3 text-primary">Power Up Your Digital Life</h1>
                                 <p class="lead mb-4 opacity-75 small">
@@ -51,8 +51,8 @@
 
                     <!-- Right Part: Automatic Wallet Funding -->
                     <div class="col-12 col-xl-7 order-1 order-lg-2">
-                        <div class="card shadow border-0 rounded-0 rounded-md-4 overflow-hidden h-100">
-                            <div class="card-header border-0 py-3 bg-gradient text-white rounded-0 rounded-top-md-4">
+                        <div class="card shadow border-0 overflow-hidden h-100" style="border-radius: 20px;">
+                            <div class="card-header border-0 py-3 bg-gradient text-white" style="border-radius: 20px 20px 0 0;">
                                 <div class="d-flex align-items-center">
                                     <div class="bg-white bg-opacity-25 rounded-circle p-2 me-3">
                                         <i class="bi bi-bank fs-4"></i>
@@ -89,7 +89,7 @@
                                     @endif
 
                                     @if($virtualAccount)
-                                        <div class="bg-light p-3 rounded-4 mb-4">
+                                        <div class="bg-light p-3 mb-4" style="border-radius: 20px;">
                                             <div class="mb-3">
                                                 <label class="form-label text-uppercase small fw-bold text-muted mb-1">Account Name</label>
                                                 <div class="d-flex align-items-center">
@@ -147,7 +147,7 @@
     <!-- Virtual Account Modal -->
     <div class="modal fade" id="virtualAccountModal" tabindex="-1" aria-labelledby="virtualAccountModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable mx-2 mx-lg-auto">
-            <div class="modal-content shadow rounded-4">
+            <div class="modal-content shadow" style="border-radius: 20px;">
                 <div class="modal-header bg-primary text-white">
                     <h5 class="modal-title">Create Virtual Account</h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>

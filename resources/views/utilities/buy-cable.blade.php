@@ -50,7 +50,7 @@
             width: 45px;
             height: 45px;
             object-fit: contain;
-            border-radius: 5px;
+            border-radius: 12px;
             margin-bottom: 8px;
         }
 
@@ -87,8 +87,8 @@
 
             {{-- Left Column: Cable TV Form --}}
             <div class="col-12 col-xl-5 mb-4">
-                <div class="card custom-card shadow-lg border-0 rounded-0 rounded-md-4 d-flex flex-column">
-                    <div class="card-header justify-content-between bg-primary text-white rounded-0 rounded-top-md-4">
+                <div class="card custom-card shadow-lg border-0 rounded-20px d-flex flex-column">
+                    <div class="card-header justify-content-between bg-primary text-white rounded-20px rounded-bottom-0">
                         <div class="card-title fw-semibold">
                             <i class="bi bi-tv me-2"></i> Pay Cable TV
                         </div>
@@ -131,7 +131,7 @@
                                     @endphp
                                     @foreach($providers as $val => $name)
                                         <div class="col-3">
-                                            <div class="network-card p-2 border rounded-3 text-center" 
+                                            <div class="network-card p-2 border rounded-20px text-center" 
                                                  id="provider-{{ $val }}"
                                                  onclick="selectProvider('{{ $val }}', 'provider-{{ $val }}')">
                                                 <img src="{{ asset('assets/img/apps/tv.png') }}" alt="{{ $name }}" class="mb-1" onerror="this.src='{{ asset('assets/img/apps/tv.jpg') }}'">
@@ -227,8 +227,8 @@
 
             {{-- Right Column: AI Guide & History --}}
             <div class="col-12 col-xl-7">
-                <div class="card shadow-lg border-0 rounded-0 rounded-md-4 overflow-hidden d-flex flex-column shadow-hover transition-all" style="height: 750px;">
-                    <div class="card-header bg-white text-dark p-3 p-md-4 d-flex align-items-center justify-content-between rounded-0 rounded-top-md-4 flex-shrink-0">
+                <div class="card shadow-lg border-0 rounded-20px overflow-hidden d-flex flex-column shadow-hover transition-all" style="height: 750px;">
+                    <div class="card-header bg-white text-dark p-3 p-md-4 d-flex align-items-center justify-content-between rounded-20px rounded-bottom-0 flex-shrink-0">
                         <div class="d-flex align-items-center gap-3">
                             <div class="bg-primary rounded-circle p-2 shadow-sm" style="width: 42px; height: 42px; display: flex; align-items: center; justify-content: center;">
                                 <i class="bi bi-robot fs-15 text-white"></i>
@@ -328,7 +328,7 @@
                         </div>
                     </div>
 
-                    <div class="card-footer bg-white border-top p-3 p-md-4 mt-auto rounded-0 rounded-bottom-md-4 shadow-sm">
+                    <div class="card-footer bg-white border-top p-3 p-md-4 mt-auto rounded-20px rounded-top-0 shadow-sm">
                         <div class="input-group bg-light rounded-pill p-1 border shadow-sm focus-within-shadow">
                             <input type="text" id="aiInput" class="form-control border-0 bg-transparent ps-3" placeholder="Ask about cable subscriptions...">
                             <button class="btn btn-primary rounded-circle p-2 mx-1 shadow-sm d-flex align-items-center justify-content-center" id="sendAiBtn" style="width:38px;height:38px;">

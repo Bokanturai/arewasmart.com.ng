@@ -54,10 +54,10 @@
         <div class="container-fluid px-0 px-md-3">
             <div class="row g-0 g-md-4">
                 <div class="col-12 col-xl-5 mb-0 mb-md-4">
-                    <div class="card shadow-lg border-0 rounded-0 rounded-md-4">
+                    <div class="card shadow-lg border-0" style="border-radius: 20px;">
 
                         {{-- Card Header --}}
-                        <div class="card-header bg-primary text-white p-3 p-md-4 border-0 rounded-0 rounded-top-md-4">
+                        <div class="card-header bg-primary text-white p-3 p-md-4 border-0" style="border-radius: 20px 20px 0 0;">
                             <h5 class="mb-0 fw-bold fs-15">
                                 <i class="bi bi-send-fill me-2"></i>New Payout
                             </h5>
@@ -156,8 +156,8 @@
 
                                         {{-- Dropdown Panel --}}
                                         <div id="bankPickerDropdown"
-                                             class="d-none position-absolute start-0 end-0 rounded-4 shadow-lg border-0 bg-white"
-                                             style="z-index:3000; top:calc(100% + 6px); overflow:hidden;">
+                                             class="d-none position-absolute start-0 end-0 shadow-lg border-0 bg-white"
+                                             style="z-index:3000; top:calc(100% + 6px); overflow:hidden; border-radius: 20px;">
 
                                             {{-- Search --}}
                                             <div class="p-2 border-bottom bg-light">
@@ -304,11 +304,11 @@
                 </div>
 
              <!--header -->
-                <div class="col-12 col-xl-7 mt-2 mt-md-0">
-                    <div class="card shadow-lg border-0 rounded-0 rounded-md-4 h-100">
+                 <div class="col-12 col-xl-7 mt-2 mt-md-0">
+                    <div class="card shadow-lg border-0 h-100" style="border-radius: 20px;">
 
                         {{-- Header --}}
-                        <div class="card-header bg-white p-3 p-md-4 border-bottom d-flex align-items-center rounded-0 rounded-top-md-4">
+                        <div class="card-header bg-white p-3 p-md-4 border-bottom d-flex align-items-center" style="border-radius: 20px 20px 0 0;">
                             <i class="bi bi-clock-history text-primary me-2 fs-15"></i>
                             <div>
                                 <h5 class="mb-0 fw-bold text-dark fs-15">Recent Recipients</h5>
@@ -364,7 +364,7 @@
 
                         </div>
 
-                        <div class="card-footer bg-white border-top text-center py-3 rounded-0 rounded-bottom-md-4">
+                        <div class="card-footer bg-white border-top text-center py-3" style="border-radius: 0 0 20px 20px;">
                             <small class="text-muted d-flex align-items-center justify-content-center gap-2">
                                 <i class="bi bi-patch-check-fill text-primary"></i>
                                 Protected by Arewa Smart Multi-Factor Authentication

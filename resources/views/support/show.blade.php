@@ -157,9 +157,9 @@
         <div class="container-fluid px-0 px-md-3">
             <div class="row g-0 g-md-4">
                 <div class="col-12 col-lg-12">
-                    <div class="card shadow-lg border-0 rounded-0 rounded-md-4 chat-wrapper">
+                    <div class="card shadow-lg border-0 chat-wrapper" style="border-radius: 20px; overflow: hidden;">
                         <!-- Chat Header -->
-                        <div class="card-header bg-white border-bottom py-3 rounded-0 rounded-top-md-4">
+                        <div class="card-header bg-white border-bottom py-3" style="border-top-left-radius: 20px; border-top-right-radius: 20px;">
                             <div class="d-flex justify-content-between align-items-center">
                                 <div class="d-flex align-items-center">
                                     <div class="avatar bg-soft-primary text-primary rounded-circle d-flex align-items-center justify-content-center me-3"
@@ -274,7 +274,7 @@
                         </div>
 
                         <!-- Reply Area -->
-                        <div class="card-footer p-3 p-md-4 rounded-0 rounded-bottom-md-4 glass-footer">
+                        <div class="card-footer p-3 p-md-4 glass-footer" style="border-bottom-left-radius: 20px; border-bottom-right-radius: 20px;">
                             @if($ticket->status !== 'closed')
                                 <form id="reply-form" action="{{ route('support.reply', $ticket->ticket_reference) }}"
                                     method="POST" enctype="multipart/form-data" class="w-100">

@@ -4,7 +4,24 @@
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
 
-        <title>Arewa Smart - Utility & Identity Services</title>
+        <title>Arewa Smart - Instant Utility, Data & Identity Services in Nigeria</title>
+        <meta name="description" content="Pay electricity bills, buy cheap data, airtime, and access instant identity verification (BVN/NIN) services in Nigeria. Fast, secure, and automated.">
+        <meta name="keywords" content="Arewa Smart, data, airtime, electricity bill, BVN search, NIN modification, Nigeria utility, cheap data, gift cards">
+        <meta name="author" content="Arewa Smart">
+        
+        <!-- Open Graph / Facebook -->
+        <meta property="og:type" content="website">
+        <meta property="og:url" content="{{ url('/') }}">
+        <meta property="og:title" content="Arewa Smart - Instant Utility & Identity Services">
+        <meta property="og:description" content="The ultimate platform for automated utility payments and fast identity verification in Nigeria.">
+        <meta property="og:image" content="{{ asset('assets/img/logo/app-logo.png') }}">
+
+        <!-- Twitter -->
+        <meta property="twitter:card" content="summary_large_image">
+        <meta property="twitter:url" content="{{ url('/') }}">
+        <meta property="twitter:title" content="Arewa Smart - Instant Utility & Identity Services">
+        <meta property="twitter:description" content="Pay bills and verify identity instantly on Arewa Smart.">
+        <meta property="twitter:image" content="{{ asset('assets/img/logo/app-logo.png') }}">
 
         <!-- Fonts -->
         <link rel="preconnect" href="https://fonts.bunny.net">
@@ -12,7 +29,12 @@
         
         <!-- FontAwesome for icons -->
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-            <link rel="shortcut icon" type="image/x-icon" href="{{ asset('assets/img/logo/app-logo.png') }}">
+        
+        <!-- Favicons -->
+        <link rel="shortcut icon" type="image/x-icon" href="{{ asset('assets/img/logo/app-logo.png') }}">
+        <link rel="apple-touch-icon" sizes="180x180" href="{{ asset('assets/img/logo/app-logo.png') }}">
+        <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('assets/img/logo/app-logo.png') }}">
+        <link rel="icon" type="image/png" sizes="16x16" href="{{ asset('assets/img/logo/app-logo.png') }}">
 
         <!-- Custom Styles -->
         <link rel="stylesheet" href="{{ asset('assets/css/welcome.css') }}">

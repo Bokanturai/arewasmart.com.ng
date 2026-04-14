@@ -256,9 +256,8 @@
     <div class="container-fluid px-0 px-md-3 py-4">
         <div class="row g-0 g-md-4">
             
-            <!-- Left: Customization Form -->
             <div class="col-12 col-xl-5 mb-4">
-                <div class="card shadow-lg border-0 rounded-0 rounded-md-4 p-4 p-xl-5">
+                <div class="card shadow-lg border-0 p-4 p-xl-5" style="border-radius: 20px;">
                     <div class="d-flex align-items-center gap-3 mb-4">
                         <div class="avatar-sm bg-primary-soft rounded-3 p-2">
                             <i class="ti ti-gift fs-1 text-primary"></i>
@@ -499,7 +498,7 @@
     <!-- PIN Modal -->
     <div class="modal fade" id="pinModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
         <div class="modal-dialog modal-dialog-centered" style="max-width: 380px;">
-            <div class="modal-content border-0 rounded-4 shadow-lg overflow-hidden">
+            <div class="modal-content border-0 shadow-lg overflow-hidden" style="border-radius: 20px;">
                 <div class="modal-body p-4 p-md-5 text-center">
                     <div class="bg-primary-soft rounded-circle d-inline-flex p-3 mb-4">
                         <i class="ti ti-shield-lock text-primary fs-1"></i>
@@ -523,7 +522,7 @@
     @if(session('generated_code'))
     <div class="modal fade" id="successModal" tabindex="-1">
         <div class="modal-dialog modal-xl modal-dialog-centered">
-            <div class="modal-content border-0 rounded-4 overflow-hidden shadow-2xl">
+            <div class="modal-content border-0 overflow-hidden shadow-2xl" style="border-radius: 20px;">
                 <div class="row g-0">
                     <div class="col-lg-5 bg-gradient-success text-white p-5 d-flex flex-column justify-content-center" style="background: linear-gradient(135deg, #10b981, #059669);">
                         <div class="mb-4 text-center text-lg-start">
@@ -547,7 +546,7 @@
                         </div>
                     </div>
                     <div class="col-lg-7 p-4 p-md-5 d-flex align-items-center justify-content-center bg-light">
-                        <div id="capture_area" style="padding: 30px; background: #f8fafc; border-radius: 24px; width: 100%; max-width: 550px;">
+                        <div id="capture_area" style="padding: 30px; background: #f8fafc; border-radius: 20px; width: 100%; max-width: 550px;">
                             <!-- The card will be re-rendered here for the success state -->
                             <div class="gift-card-main shadow-lg" id="success_card_final" style="height: auto !important; min-height: 280px; aspect-ratio: 1.6/1;">
                                 <div class="card-inner-overlay"></div>
@@ -562,7 +561,7 @@
                                 </div>
                                 <div class="card-footer-section">
                                     <div class="code-placeholder" style="opacity: 1; letter-spacing: 1px; font-weight: 800;">CODE: {{ session('generated_code') }}</div>
-                                    <div id="success_qr" style="background:#ffffff; padding: 5px; border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.1);"></div>
+                                    <div id="success_qr" style="background:#ffffff; padding: 5px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.1);"></div>
                                 </div>
                             </div>
                         </div>
@@ -704,9 +703,15 @@
                 pinModal.show();
             });
 
-            document.getElementById('submit_form_btn').addEventListener('click', () => {
+            document.getElementById('submit_form_btn').addEventListener('click', function() {
                 const pin = document.getElementById('pin_entry').value;
                 if(pin.length < 4) return Swal.fire('Error', 'Please enter a valid PIN', 'error');
+                
+                const btn = this;
+                const originalText = btn.innerHTML;
+                btn.disabled = true;
+                btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span> Processing...';
+                
                 document.getElementById('pinConfirmation').value = pin;
                 generateForm.submit();
             });

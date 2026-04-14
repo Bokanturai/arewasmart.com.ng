@@ -49,9 +49,20 @@ class SupportController extends Controller
             return back()->with('success', 'Your message has been sent. A support ticket (#' . $ticket->ticket_reference . ') has been created for you.');
         }
 
-        // For guest users, we just show a success message as a fallback 
-        // because the existing support_tickets table requires a user_id.
-        // TODO: In a future update, modify DB to allow guest tickets or send an email.
+        // For guest users, send an email to the admin
+        try {
+            \Illuminate\Support\Facades\Mail::to(config('mail.from.address'))
+                ->send(new \App\Mail\GuestContactMail([
+                    'name' => $request->name,
+                    'email' => $request->email,
+                    'subject' => $request->subject,
+                    'message' => $request->message,
+                ]));
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error('Guest Contact Email Failed: ' . $e->getMessage());
+            // We still return success to the user as they've done their part, 
+            // but log the error for admin investigation.
+        }
 
         return back()->with('success', 'Thank you for contacting us! Our team will review your message and get back to you soon.');
     }

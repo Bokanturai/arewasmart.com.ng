@@ -16,8 +16,8 @@
             <div class="row g-0 g-md-4">
                 <!-- Filter Section -->
                 <div class="col-12 mb-4">
-                    <div class="card shadow-lg border-0 rounded-0 rounded-md-4">
-                        <div class="card-header bg-primary text-white rounded-0 rounded-top-md-4">
+                    <div class="card shadow-lg border-0" style="border-radius: 20px; overflow: hidden;">
+                        <div class="card-header bg-primary text-white" style="border-top-left-radius: 20px; border-top-right-radius: 20px;">
                             <h5 class="mb-0">Filter Enrolments</h5>
                         </div>
                         <div class="card-body">
@@ -52,7 +52,7 @@
                 <div class="col-12 mt-2 mt-md-0 mb-4">
                     <div class="row g-3">
                         <div class="col-md-3">
-                            <div class="card bg-primary text-white h-100">
+                            <div class="card bg-primary text-white h-100" style="border-radius: 20px;">
                                 <div class="card-body">
                                     <h6 class="card-title text-white-50">Total Enrolment</h6>
                                     <h2 class="mb-0">{{ $stats['total'] }}</h2>
@@ -61,7 +61,7 @@
                             </div>
                         </div>
                         <div class="col-md-3">
-                            <div class="card bg-success text-white h-100">
+                            <div class="card bg-success text-white h-100" style="border-radius: 20px;">
                                 <div class="card-body">
                                     <h6 class="card-title text-white-50">Successful</h6>
                                     <h2 class="mb-0">{{ $stats['successful'] }}</h2>
@@ -69,7 +69,7 @@
                             </div>
                         </div>
                         <div class="col-md-3">
-                            <div class="card bg-danger text-white h-100">
+                            <div class="card bg-danger text-white h-100" style="border-radius: 20px;">
                                 <div class="card-body">
                                     <h6 class="card-title text-white-50">Failed</h6>
                                     <h2 class="mb-0">{{ $stats['failed'] }}</h2>
@@ -77,7 +77,7 @@
                             </div>
                         </div>
                         <div class="col-md-3">
-                            <div class="card bg-warning text-dark h-100">
+                            <div class="card bg-warning text-dark h-100" style="border-radius: 20px;">
                                 <div class="card-body">
                                     <h6 class="card-title text-muted">Ongoing</h6>
                                     <h2 class="mb-0">{{ $stats['ongoing'] }}</h2>
@@ -90,8 +90,8 @@
 
                 <!-- Table Section -->
                 <div class="col-12 mt-2 mt-md-0">
-                    <div class="card shadow-lg border-0 rounded-0 rounded-md-4">
-                        <div class="card-header bg-white border-bottom-0 rounded-0 rounded-top-md-4">
+                    <div class="card shadow-lg border-0" style="border-radius: 20px; overflow: hidden;">
+                        <div class="card-header bg-white border-bottom-0" style="border-top-left-radius: 20px; border-top-right-radius: 20px;">
                              <h5 class="mb-0 fw-bold text-primary">Enrolment List</h5>
                         </div>
                         <div class="card-body p-0">
@@ -153,7 +153,7 @@
                                 </table>
                             </div>
                         </div>
-                         <div class="card-footer bg-white rounded-0 rounded-bottom-md-4">
+                         <div class="card-footer bg-white" style="border-bottom-left-radius: 20px; border-bottom-right-radius: 20px;">
                             {{ $enrollments->links('vendor.pagination.custom') }}
                         </div>
                     </div>

@@ -19,8 +19,8 @@
 
                 {{-- MODIFICATION REQUEST FORM --}}
                 <div class="col-12 col-xl-5 mb-4">
-                    <div class="card shadow-lg border-0 rounded-0 rounded-md-4">
-                        <div class="card-header bg-primary text-white p-3 p-md-4 border-0 rounded-0 rounded-top-md-4 text-center text-sm-start">
+                    <div class="card shadow-lg border-0" style="border-radius: 20px; overflow: hidden;">
+                        <div class="card-header bg-primary text-white p-3 p-md-4 border-0 text-center text-sm-start" style="border-top-left-radius: 20px; border-top-right-radius: 20px;">
                             <h5 class="mb-0 fw-bold fs-15"><i class="bi bi-shield-lock-fill me-2"></i>New Modification Request</h5>
                             <p class="mb-0 small text-white-50 mt-1">Ensure all details match your verification slip.</p>
                         </div>
@@ -167,8 +167,8 @@
 
                 <!-- SUBMISSION HISTORY -->
                 <div class="col-12 col-xl-7 mt-2 mt-md-0">
-                    <div class="card shadow-lg border-0 rounded-0 rounded-md-4">
-                        <div class="card-header bg-white p-3 p-md-4 border-bottom d-flex justify-content-center justify-content-sm-between align-items-center rounded-0 rounded-top-md-4">
+                    <div class="card shadow-lg border-0" style="border-radius: 20px; overflow: hidden;">
+                        <div class="card-header bg-white p-3 p-md-4 border-bottom d-flex justify-content-center justify-content-sm-between align-items-center" style="border-top-left-radius: 20px; border-top-right-radius: 20px;">
                             <h5 class="mb-0 fw-bold text-dark fs-15"><i class="bi bi-clock-history text-primary me-2"></i>Submission History</h5>
                         </div>
 
@@ -301,7 +301,7 @@
         <div class="modal fade" id="sampleInfoModal" tabindex="-1" aria-hidden="true">
             <div class="modal-dialog modal-dialog-centered modal-lg">
                 <div class="modal-content shadow-lg border-0 rounded-4">
-                    <div class="modal-header bg-primary text-white py-3 rounded-top-4 border-0">
+                    <div class="modal-header bg-primary text-white py-3 border-0" style="border-top-left-radius: 20px; border-top-right-radius: 20px;">
                         <h5 class="modal-title fw-bold fs-18">
                             <i class="bi bi-info-square-fill me-2"></i> Modification Guidelines
                         </h5>
@@ -310,7 +310,7 @@
                     <div class="modal-body p-4">
                         <div class="row g-4">
                             <div class="col-md-6">
-                                <div class="card h-100 border-0 bg-light rounded-4 p-3 shadow-sm">
+                                <div class="card h-100 border-0 bg-light p-3 shadow-sm" style="border-radius: 20px;">
                                     <h6 class="fw-bold text-primary mb-3"><i class="bi bi-person-badge me-2"></i>Name Correction</h6>
                                     <div class="p-2 small">
                                         <p class="mb-1"><strong>New Data:</strong>Firstname: ADEBAYO, lastname: ADEKUNLE, Middlename: BOLA</p>
@@ -319,7 +319,7 @@
                                 </div>
                             </div>
                             <div class="col-md-6">
-                                <div class="card h-100 border-0 bg-light rounded-4 p-3 shadow-sm">
+                                <div class="card h-100 border-0 bg-light p-3 shadow-sm" style="border-radius: 20px;">
                                     <h6 class="fw-bold text-info mb-3"><i class="bi bi-calendar-event me-2"></i>Date of Birth</h6>
                                     <div class="p-2 small">
                                         <p class="mb-1"><strong>New Data:</strong> 15-05-1992</p>
@@ -329,7 +329,7 @@
                             </div>
 
                             <div class="col-12">
-                                <div class="card border-0 bg-light rounded-4 p-3 shadow-sm">
+                                <div class="card border-0 bg-light p-3 shadow-sm" style="border-radius: 20px;">
                                     <h6 class="fw-bold text-dark mb-3"><i class="bi bi-bank2 me-2"></i>Enrollment Banks & Codes</h6>
                                     <div class="table-responsive" style="max-height: 250px; overflow-y: auto;">
                                         <table class="table table-hover table-sm align-middle small bg-white rounded-3 overflow-hidden">

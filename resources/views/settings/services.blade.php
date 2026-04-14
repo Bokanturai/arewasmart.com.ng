@@ -224,7 +224,7 @@
         
         <!-- Alerts -->
         @if (session('status'))
-            <div class="alert alert-success alert-dismissible fade show rounded-0 rounded-md-4 shadow-sm border-0 d-flex align-items-center mb-4" role="alert">
+            <div class="alert alert-success alert-dismissible fade show shadow-sm border-0 d-flex align-items-center mb-4" role="alert" style="border-radius: 20px;">
                 <i class="ti ti-circle-check fs-13 me-2"></i>
                 <div>{{ session('status') }}</div>
                 <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert"></button>
@@ -232,7 +232,7 @@
         @endif
 
         <!-- Tabbed Navigation -->
-        <div class="settings-nav nav rounded-0 rounded-md-4" role="tablist">
+        <div class="settings-nav nav" role="tablist" style="border-radius: 20px;">
             <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#overview" type="button">
                 <i class="ti ti-layout-dashboard"></i> Overview
             </button>
@@ -250,11 +250,11 @@
         <div class="tab-content mt-4">
             <!-- OVERVIEW TAB -->
             <div class="tab-pane fade show active" id="overview" role="tabpanel">
-                <div class="profile-hero rounded-0 rounded-md-4">
-                    <div class="profile-hero-bg rounded-0 rounded-md-4">
+                <div class="profile-hero" style="border-radius: 20px;">
+                    <div class="profile-hero-bg" style="border-radius: 20px;">
                         <div class="profile-hero-pattern"></div>
                     </div>
-                    <div class="profile-content-header rounded-0 rounded-md-4">
+                    <div class="profile-content-header" style="border-radius: 20px;">
                         <div class="avatar-container">
                             <img src="{{ $user->photo ? (str_starts_with($user->photo, 'http') ? $user->photo : asset($user->photo)) : asset('assets/img/profiles/avatar-01.jpg') }}" 
                                  class="profile-avatar-main" id="profileImagePreview">
@@ -282,7 +282,7 @@
 
                 <div class="row g-0 g-md-4 mt-1">
                     <div class="col-12 col-md-3 mb-3 mb-md-0">
-                        <div class="stat-card rounded-0 rounded-md-4 shadow-sm">
+                        <div class="stat-card shadow-sm" style="border-radius: 20px;">
                             <div class="stat-icon bg-primary-subtle text-primary">
                                 <i class="ti ti-crown"></i>
                             </div>
@@ -291,7 +291,7 @@
                         </div>
                     </div>
                     <div class="col-12 col-md-3 mb-3 mb-md-0">
-                        <div class="stat-card rounded-0 rounded-md-4 shadow-sm">
+                        <div class="stat-card shadow-sm" style="border-radius: 20px;">
                             <div class="stat-icon bg-success-subtle text-success">
                                 <i class="ti ti-calendar-event"></i>
                             </div>
@@ -300,7 +300,7 @@
                         </div>
                     </div>
                     <div class="col-12 col-md-3 mb-3 mb-md-0">
-                        <div class="stat-card rounded-0 rounded-md-4 shadow-sm">
+                        <div class="stat-card shadow-sm" style="border-radius: 20px;">
                             <div class="stat-icon bg-warning-subtle text-warning">
                                 <i class="ti ti-wallet"></i>
                             </div>
@@ -309,7 +309,7 @@
                         </div>
                     </div>
                     <div class="col-12 col-md-3">
-                        <div class="stat-card rounded-0 rounded-md-4 shadow-sm">
+                        <div class="stat-card shadow-sm" style="border-radius: 20px;">
                             <div class="stat-icon bg-info-subtle text-info">
                                 <i class="ti ti-device-mobile"></i>
                             </div>
@@ -321,7 +321,7 @@
 
                 <!-- Support Banner -->
                 <div class="mt-5">
-                    <div class="card border-0 rounded-0 rounded-md-4 overflow-hidden shadow-lg" style="background: linear-gradient(135deg, #198754 0%, #1a4d2e 100%);">
+                    <div class="card border-0 overflow-hidden shadow-lg" style="background: linear-gradient(135deg, #198754 0%, #1a4d2e 100%); border-radius: 20px;">
                         <div class="card-body p-4 text-white">
                             <div class="d-flex align-items-center justify-content-between flex-wrap gap-4">
                                 <div class="d-flex align-items-center gap-3">
@@ -344,8 +344,8 @@
 
             <!-- PROFILE DETAILS TAB -->
             <div class="tab-pane fade" id="profile" role="tabpanel">
-                <div class="card shadow-lg border-0 rounded-0 rounded-md-4">
-                    <div class="card-header bg-white border-0 py-4 px-4 rounded-0 rounded-top-md-4">
+                <div class="card shadow-lg border-0" style="border-radius: 20px; overflow: hidden;">
+                    <div class="card-header bg-white border-0 py-4 px-4" style="border-top-left-radius: 20px; border-top-right-radius: 20px;">
                         <h4 class="fw-bold mb-0 text-primary d-flex align-items-center">
                             <i class="ti ti-user-scan me-2 text-primary"></i> Personal Information
                         </h4>
@@ -406,7 +406,7 @@
             <div class="tab-pane fade" id="security" role="tabpanel">
                 <div class="row g-0 g-md-4">
                     <div class="col-12 col-md-6 mb-3 mb-md-0">
-                        <div class="card shadow-lg border-0 rounded-0 rounded-md-4 h-100">
+                        <div class="card shadow-lg border-0 h-100" style="border-radius: 20px; overflow: hidden;">
                             <div class="card-body p-4">
                                 <div class="stat-icon bg-primary-subtle text-primary mb-3">
                                     <i class="ti ti-lock"></i>
@@ -420,7 +420,7 @@
                         </div>
                     </div>
                     <div class="col-12 col-md-6 mt-2 mt-md-0">
-                        <div class="card shadow-lg border-0 rounded-0 rounded-md-4 h-100">
+                        <div class="card shadow-lg border-0 h-100" style="border-radius: 20px; overflow: hidden;">
                             <div class="card-body p-4">
                                 <div class="stat-icon bg-danger-subtle text-danger mb-3">
                                     <i class="ti ti-key"></i>
@@ -435,10 +435,10 @@
                     </div>
                     
                     <div class="col-12 mt-4">
-                        <div class="card shadow-lg border-0 rounded-0 rounded-md-4">
+                        <div class="card shadow-lg border-0" style="border-radius: 20px; overflow: hidden;">
                             <div class="card-body p-4">
                                 <h5 class="fw-bold mb-3">Login Sessions & Security</h5>
-                                <div class="d-flex align-items-center gap-3 p-3 bg-light rounded-4">
+                                <div class="d-flex align-items-center gap-3 p-3 bg-light" style="border-radius: 20px;">
                                     <div class="icon-circle bg-white shadow-sm rounded-circle">
                                         <i class="ti ti-device-laptop text-primary"></i>
                                     </div>
@@ -456,8 +456,8 @@
 
             <!-- ACTIVITY TAB -->
             <div class="tab-pane fade" id="activity" role="tabpanel">
-                <div class="card shadow-lg border-0 rounded-0 rounded-md-4">
-                    <div class="card-header bg-white border-0 py-4 px-4 d-flex justify-content-between align-items-center rounded-0 rounded-top-md-4">
+                <div class="card shadow-lg border-0" style="border-radius: 20px; overflow: hidden;">
+                    <div class="card-header bg-white border-0 py-4 px-4 d-flex justify-content-between align-items-center" style="border-top-left-radius: 20px; border-top-right-radius: 20px;">
                         <h4 class="fw-bold mb-0 text-primary">Recent Operations</h4>
                         <button class="btn btn-sm btn-light rounded-pill px-3">View All</button>
                     </div>
@@ -509,7 +509,7 @@
     <!-- Photo Modal -->
     <div class="modal fade" id="photoModal" tabindex="-1" data-bs-backdrop="static">
         <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content modal-content-premium shadow-lg">
+            <div class="modal-content modal-content-premium shadow-lg" style="border-radius: 20px; overflow: hidden;">
                 <div class="modal-header border-0 pb-0">
                     <h5 class="modal-title fw-bold">Change Profile Picture</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
@@ -543,7 +543,7 @@
     <!-- Password Modal -->
     <div class="modal fade" id="passwordModal" tabindex="-1">
         <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content modal-content-premium shadow-lg">
+            <div class="modal-content modal-content-premium shadow-lg" style="border-radius: 20px; overflow: hidden;">
                 <div class="modal-header border-0">
                     <h5 class="modal-title fw-bold d-flex align-items-center gap-2">
                         <i class="ti ti-lock text-primary"></i> Change Password
@@ -588,7 +588,7 @@
     <!-- PIN Modal -->
     <div class="modal fade" id="pinModal" tabindex="-1">
         <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content modal-content-premium shadow-lg">
+            <div class="modal-content modal-content-premium shadow-lg" style="border-radius: 20px; overflow: hidden;">
                 <div class="modal-header border-0">
                     <h5 class="modal-title fw-bold text-danger d-flex align-items-center gap-2">
                         <i class="ti ti-shield-security"></i> Reset Transaction PIN

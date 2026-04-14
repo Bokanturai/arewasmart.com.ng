@@ -1,7 +1,7 @@
 <!-- Force Profile Modal -->
 <div class="modal fade" id="forceProfileModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
     <div class="modal-dialog modal-dialog-centered modal-lg">
-        <div class="modal-content shadow-lg border-0 rounded-3">
+        <div class="modal-content shadow-lg border-0 rounded-20px">
             <div class="modal-header bg-primary text-white">
                 <h5 class="modal-title"><i class="fas fa-user-check me-2"></i>Complete Your Profile</h5>
             </div>
@@ -20,7 +20,7 @@
                     @csrf
                     
                     <!-- Personal Information Section -->
-                    <div class="card border-0 shadow-sm mb-4" style="border-radius: 12px;">
+                    <div class="card border-0 shadow-sm mb-4 rounded-20px">
                         <div class="card-body">
                             <h6 class="text-primary mb-3 d-flex align-items-center">
                                 <i class="fas fa-user-circle me-2"></i>Personal Details
@@ -67,7 +67,7 @@
                     </div>
 
                     <!-- Address Section -->
-                    <div class="card border-0 shadow-sm mb-4" style="border-radius: 12px;">
+                    <div class="card border-0 shadow-sm mb-4 rounded-20px">
                         <div class="card-body">
                             <h6 class="text-primary mb-3 d-flex align-items-center">
                                 <i class="fas fa-map-marker-alt me-2"></i>Address Information
@@ -122,7 +122,7 @@
 
                     <!-- Verification Section -->
                     @if(!Auth::user()->bvn)
-                    <div class="card border-0 shadow-sm mb-4" style="border-radius: 12px;">
+                    <div class="card border-0 shadow-sm mb-4 rounded-20px">
                         <div class="card-body">
                             <h6 class="text-primary mb-3 d-flex align-items-center">
                                 <i class="fas fa-shield-alt me-2"></i>Verification Details

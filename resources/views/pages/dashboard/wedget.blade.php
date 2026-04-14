@@ -1,5 +1,4 @@
-<!-- Financial Metrics Section -->
-<div class="container-fluid mb-2">
+<div class="col-12 mb-2">
     <div class="row g-2 mt-2">
         <!-- Total Transactions (Debit) -->
         <div class="col-6 col-md-3 fade-in-up" style="animation-delay: 0.1s;">
@@ -57,7 +56,7 @@
 
 <style>
     .financial-card-sm {
-        border-radius: 12px;
+        border-radius: 20px;
         transition: all 0.3s ease;
         border: 1px solid rgba(0,0,0,0.05);
     }

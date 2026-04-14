@@ -72,9 +72,9 @@
             
             {{-- Left Column: Airtime Form --}}
             <div class="col-12 col-xl-5 mb-4">
-                <div class="card shadow-lg border-0 rounded-0 rounded-md-4 h-100">
+                <div class="card shadow-lg border-0 rounded-20px h-100">
 
-                    <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center p-3 p-md-4 rounded-0 rounded-top-md-4">
+                    <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center p-3 p-md-4 rounded-20px rounded-bottom-0">
                         <div class="card-title fw-bold mb-0 fs-12 fs-md-5">
                             <i class="bi bi-phone me-2"></i> Buy Airtime
                         </div>
@@ -226,7 +226,7 @@
                                 </form>
                             </div>
 
-                    <div class="card-footer bg-white border-top text-center py-3 rounded-0 rounded-bottom-md-4">
+                    <div class="card-footer bg-white border-top text-center py-3 rounded-20px rounded-top-0">
                         <small class="text-muted d-flex align-items-center justify-content-center gap-2">
                             <i class="bi bi-shield-lock-fill text-primary"></i>
                             Secure 256-bit Encrypted Transaction
@@ -237,9 +237,9 @@
 
             {{-- Recent Recipients Column --}}
             <div class="col-12 col-xl-7 mt-2 mt-md-0">
-                <div class="card shadow-lg border-0 rounded-0 rounded-md-4 h-100">
+                <div class="card shadow-lg border-0 rounded-20px h-100">
                             {{-- Header --}}
-                            <div class="card-header bg-white p-3 p-md-4 border-bottom d-flex align-items-center rounded-0 rounded-top-md-4">
+                            <div class="card-header bg-white p-3 p-md-4 border-bottom d-flex align-items-center rounded-20px rounded-bottom-0">
                                 <i class="bi bi-clock-history text-primary me-2 fs-15"></i>
                                 <div>
                                     <h5 class="mb-0 fw-bold text-dark fs-15">Recent Recipients</h5>
@@ -291,7 +291,7 @@
                                 @endif
                             </div>
 
-                            <div class="card-footer bg-white border-top text-center py-3 rounded-0 rounded-bottom-md-4">
+                            <div class="card-footer bg-white border-top text-center py-3 rounded-20px rounded-top-0">
                                 <small class="text-muted d-flex align-items-center justify-content-center gap-2">
                                     <i class="bi bi-patch-check-fill text-primary"></i>
                                     Protected by Arewa Smart Multi-Factor Authentication

@@ -293,7 +293,7 @@
         @media (max-width: 768px) {
             .live-card {
                 max-width: 100%;
-                border-radius: 15px;
+                border-radius: 20px;
             }
             .card-amount-hero .amount-value { font-size: 3rem; }
             .card-amount-hero .amount-currency { font-size: 1.6rem; }
@@ -331,7 +331,7 @@
 
         /* ── Redemption Modal Styles ─────────────────────── */
         .redeem-modal-content {
-            border-radius: 24px !important;
+            border-radius: 20px !important;
             border: none !important;
             box-shadow: 0 50px 100px -20px rgba(0, 0, 0, 0.25);
         }
@@ -359,11 +359,11 @@
         #qr-reader {
             border: 2px dashed #cbd5e1 !important;
             background: #f8fafc;
-            border-radius: 16px;
+            border-radius: 20px;
             overflow: hidden;
         }
         #qr-reader video {
-            border-radius: 16px !important;
+            border-radius: 20px !important;
         }
 
         /* ── Mobile Card List Premium Styles ─────────────── */
@@ -402,7 +402,7 @@
         }
         .pagination .page-item .page-link {
             border: none;
-            border-radius: 12px !important;
+            border-radius: 20px !important;
             min-width: 42px;
             height: 42px;
             display: flex;
@@ -609,7 +609,7 @@
         <div class="mb-4">
             <div class="row g-0 g-md-4">
                 <div class="col-md-6 col-xl-4 mb-2 mb-md-0">
-                    <div class="card shadow-lg border-0 rounded-0 rounded-md-4 h-100 overflow-hidden stats-card-gradient-1">
+                    <div class="card shadow-lg border-0 h-100 overflow-hidden stats-card-gradient-1" style="border-radius: 20px;">
                         <div class="card-body p-4 d-flex flex-column align-items-center justify-content-center text-center">
                             <div class="avatar avatar-lg bg-primary rounded-circle mb-3 shadow-sm d-flex align-items-center justify-content-center" style="width: 56px; height: 56px;">
                                 <i class="ti ti-gift text-white fs-2"></i>
@@ -622,7 +622,7 @@
                     </div>
                 </div>
                 <div class="col-md-6 col-xl-4 mb-2 mb-md-0">
-                    <div class="card shadow-lg border-0 rounded-0 rounded-md-4 h-100 overflow-hidden stats-card-gradient-2">
+                    <div class="card shadow-lg border-0 h-100 overflow-hidden stats-card-gradient-2" style="border-radius: 20px;">
                         <div class="card-body p-4 d-flex flex-column align-items-center justify-content-center text-center">
                             <div class="avatar avatar-lg bg-success rounded-circle mb-3 shadow-sm d-flex align-items-center justify-content-center" style="width: 56px; height: 56px;">
                                 <i class="ti ti-circle-check text-white fs-2"></i>
@@ -635,7 +635,7 @@
                     </div>
                 </div>
                 <div class="col-md-12 col-xl-4">
-                    <div class="card shadow-lg border-0 rounded-0 rounded-md-4 h-100 overflow-hidden stats-card-gradient-3">
+                    <div class="card shadow-lg border-0 h-100 overflow-hidden stats-card-gradient-3" style="border-radius: 20px;">
                         <div class="card-body p-4 d-flex flex-column align-items-center justify-content-center text-center">
                             <div class="avatar avatar-lg bg-info rounded-circle mb-3 shadow-sm d-flex align-items-center justify-content-center" style="width: 56px; height: 56px;">
                                 <i class="ti ti-wallet text-white fs-2"></i>
@@ -650,10 +650,9 @@
             </div>
         </div>
 
-        {{-- My Created Cards Section --}}
         <div class="mb-4">
-            <div class="card shadow-lg border-0 rounded-0 rounded-md-4 overflow-hidden">
-                <div class="card-header rounded-0 rounded-top-md-4 bg-white border-bottom pt-4 pb-3 px-4">
+            <div class="card shadow-lg border-0 overflow-hidden" style="border-radius: 20px;">
+                <div class="card-header bg-white border-bottom pt-4 pb-3 px-4">
                     <h5 class="fw-bold d-flex align-items-center gap-2 mb-0">
                         <i class="ti ti-gift text-primary"></i> Cards I've Generated
                     </h5>
@@ -712,10 +711,9 @@
                             </table>
                         </div>
 
-                        {{-- Mobile Card List --}}
                         <div class="d-md-none p-3 pt-4">
                             @foreach($createdCards as $card)
-                                <div class="card rounded-4 mb-3 mobile-card-item {{ $card->status === 'redeemed' ? 'status-redeemed' : '' }} shadow-none">
+                                <div class="card mb-3 mobile-card-item {{ $card->status === 'redeemed' ? 'status-redeemed' : '' }} shadow-none" style="border-radius: 20px;">
                                     <div class="card-body p-3">
                                         <div class="d-flex justify-content-between align-items-start mb-2">
                                             <div class="d-flex flex-column">
@@ -795,7 +793,7 @@
         {{-- Download/Preview Modal --}}
         <div class="modal fade" id="downloadCardModal" tabindex="-1" aria-labelledby="downloadCardModalLabel" aria-hidden="true">
             <div class="modal-dialog modal-xl modal-dialog-centered">
-                <div class="modal-content rounded-4 border-0 shadow-lg">
+                <div class="modal-content rounded-20px border-0 shadow-lg">
                     <div class="modal-header border-0">
                         <div>
                             <h5 class="modal-title fw-bold" id="downloadCardModalLabel">Gift Card Preview</h5>
@@ -880,10 +878,9 @@
             </div>
         </div>
 
-        {{-- My Redeemed Cards Section --}}
         <div class="mt-2 mt-md-0">
-            <div class="card shadow-lg border-0 rounded-0 rounded-md-4 overflow-hidden">
-                <div class="card-header rounded-0 rounded-top-md-4 bg-white border-bottom pt-4 pb-3 px-4">
+            <div class="card shadow-lg border-0 overflow-hidden" style="border-radius: 20px;">
+                <div class="card-header bg-white border-bottom pt-4 pb-3 px-4">
                     <h5 class="fw-bold d-flex align-items-center gap-2 mb-0">
                         <i class="ti ti-wallet text-success"></i> Cards I've Redeemed
                     </h5>
@@ -927,10 +924,9 @@
                             </table>
                         </div>
 
-                        {{-- Mobile Card List --}}
                         <div class="d-md-none p-3 pt-4">
                             @foreach($redeemedCards as $card)
-                                <div class="card rounded-4 mb-3 mobile-card-item status-redeemed shadow-none border-0">
+                                <div class="card mb-3 mobile-card-item status-redeemed shadow-none border-0" style="border-radius: 20px;">
                                     <div class="card-body p-3">
                                         <div class="d-flex justify-content-between align-items-start mb-2">
                                             <div class="d-flex flex-column text-start">

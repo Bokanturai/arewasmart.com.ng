@@ -51,6 +51,12 @@
         .animate-fade-in { animation: fadeIn 0.5s ease; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         .focus-within-shadow:focus-within { box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.1) !important; border-color: #0d6efd !important; }
+        
+        @media (min-width: 768px) {
+            .rounded-md-20px { border-radius: 20px !important; }
+            .rounded-top-md-20px { border-top-left-radius: 20px !important; border-top-right-radius: 20px !important; }
+            .rounded-bottom-md-20px { border-bottom-left-radius: 20px !important; border-bottom-right-radius: 20px !important; }
+        }
     </style>
     @endpush
 
@@ -58,8 +64,8 @@
         <div class="row g-0 g-md-4 justify-content-center">
             {{-- Left Column: Buy Data Form --}}
             <div class="col-12 col-xl-5 mb-4">
-                <div class="card custom-card shadow-lg border-0 rounded-0 rounded-md-4 d-flex flex-column">
-                    <div class="card-header justify-content-between bg-primary text-white rounded-0 rounded-top-md-4 flex-shrink-0">
+                <div class="card custom-card shadow-lg border-0 rounded-0 rounded-md-20px overflow-hidden d-flex flex-column">
+                    <div class="card-header justify-content-between bg-primary text-white rounded-0 rounded-top-md-20px flex-shrink-0">
                         <div class="card-title fw-semibold">
                             <i class="bi bi-credit-card me-2"></i> Buy Data
                         </div>
@@ -172,8 +178,8 @@
 
             {{-- Right Column: AI Smart Chatbot & History --}}
             <div class="col-12 col-xl-7 mt-2 mt-md-0">
-                <div class="card shadow-lg border-0 rounded-0 rounded-md-4 overflow-hidden d-flex flex-column shadow-hover transition-all" style="height: 750px;">
-                    <div class="card-header bg-white text-dark p-3 p-md-4 d-flex align-items-center justify-content-between rounded-0 rounded-top-md-4 flex-shrink-0">
+                <div class="card shadow-lg border-0 rounded-0 rounded-md-20px overflow-hidden d-flex flex-column shadow-hover transition-all" style="height: 750px;">
+                    <div class="card-header bg-white text-dark p-3 p-md-4 d-flex align-items-center justify-content-between rounded-0 rounded-top-md-20px flex-shrink-0">
                         <div class="d-flex align-items-center gap-3">
                             <div class="bg-success rounded-circle p-2 shadow-sm" style="width: 42px; height: 42px; display: flex; align-items: center; justify-content: center;">
                                 <i class="bi bi-robot fs-15 text-white"></i>
@@ -290,7 +296,7 @@
                         </div>
                     </div>
 
-                    <div class="card-footer bg-white border-top p-3 p-md-4 mt-auto rounded-0 rounded-bottom-md-4 shadow-sm">
+                    <div class="card-footer bg-white border-top p-3 p-md-4 mt-auto rounded-0 rounded-bottom-md-20px shadow-sm">
                         <div class="input-group bg-light rounded-pill p-1 border shadow-sm focus-within-shadow">
                             <input type="text" id="aiInput" class="form-control border-0 bg-transparent ps-3" placeholder="Ask about data plans...">
                             <button class="btn btn-success rounded-circle p-2 mx-1 shadow-sm d-flex align-items-center justify-content-center" id="sendAiBtn" style="width:38px;height:38px;">

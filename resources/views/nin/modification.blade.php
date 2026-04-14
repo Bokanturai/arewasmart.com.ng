@@ -19,9 +19,9 @@
 
                 {{-- MODIFICATION REQUEST FORM --}}
                 <div class="col-12 col-xl-5 mb-4">
-                    <div class="card shadow-lg border-0 rounded-0 rounded-md-4">
+                    <div class="card shadow-lg border-0" style="border-radius: 20px; overflow: hidden;">
                         <div
-                            class="card-header bg-primary text-white p-3 p-md-4 border-0 rounded-0 rounded-top-md-4 text-center text-sm-start">
+                            class="card-header bg-primary text-white p-3 p-md-4 border-0 text-center text-sm-start" style="border-top-left-radius: 20px; border-top-right-radius: 20px;">
                             <h5 class="mb-0 fw-bold fs-15"><i class="bi bi-gear-fill me-2"></i>New Modification Request
                             </h5>
                             <p class="mb-0 small text-white-50 mt-1">Fees are non-refundable. Please verify all details.
@@ -109,7 +109,7 @@
 
                                 <!-- DOB Modification Wizard -->
                                 <div class="col-12 d-none" id="dob-wizard">
-                                    <div class="card bg-white border shadow-sm rounded-4 overflow-hidden mt-2">
+                                    <div class="card bg-white border shadow-sm overflow-hidden mt-2" style="border-radius: 20px;">
                                         <div class="card-header bg-light border-bottom py-3 px-4">
                                             <h6 class="fw-bold text-primary mb-0"><i
                                                     class="bi bi-person-lines-fill me-2"></i>Attestation for DOB
@@ -419,9 +419,9 @@
 
                 <!-- SUBMISSION HISTORY -->
                 <div class="col-12 col-xl-7 mt-2 mt-md-0">
-                    <div class="card shadow-lg border-0 rounded-0 rounded-md-4">
+                    <div class="card shadow-lg border-0" style="border-radius: 20px; overflow: hidden;">
                         <div
-                            class="card-header bg-white p-3 p-md-4 border-bottom d-flex justify-content-center justify-content-sm-between align-items-center rounded-0 rounded-top-md-4">
+                            class="card-header bg-white p-3 p-md-4 border-bottom d-flex justify-content-center justify-content-sm-between align-items-center" style="border-top-left-radius: 20px; border-top-right-radius: 20px;">
                             <h5 class="mb-0 fw-bold text-dark fs-15"><i
                                     class="bi bi-clock-history text-primary me-2"></i>Submission History</h5>
                         </div>
@@ -573,7 +573,7 @@
             aria-hidden="true">
             <div class="modal-dialog modal-dialog-centered modal-lg">
                 <div class="modal-content shadow-lg border-0 rounded-4">
-                    <div class="modal-header bg-primary text-white py-3 rounded-top-4 border-0">
+                    <div class="modal-header bg-primary text-white py-3 border-0" style="border-top-left-radius: 20px; border-top-right-radius: 20px;">
                         <h4 class="modal-title fw-bold fs-18">
                             <i class="bi bi-info-square-fill me-2"></i> NIN Modification Guidelines
                         </h4>
@@ -593,7 +593,7 @@
 
                         <div class="row g-4">
                             <div class="col-md-6">
-                                <div class="card h-100 border-0 bg-light rounded-4 p-3 shadow-sm">
+                                <div class="card h-100 border-0 bg-light p-3 shadow-sm" style="border-radius: 20px;">
                                     <h6 class="fw-bold text-primary mb-3">
                                         <i class="bi bi-1-circle-fill me-2"></i> Initial Verification
                                     </h6>
@@ -612,7 +612,7 @@
                             </div>
 
                             <div class="col-md-6">
-                                <div class="card h-100 border-0 bg-light rounded-4 p-3 shadow-sm">
+                                <div class="card h-100 border-0 bg-light p-3 shadow-sm" style="border-radius: 20px;">
                                     <h6 class="fw-bold text-primary mb-3">
                                         <i class="bi bi-2-circle-fill me-2"></i> Documentation
                                     </h6>
@@ -631,7 +631,7 @@
                             </div>
                         </div>
 
-                        <div class="mt-4 p-3 bg-white border rounded-4 shadow-sm">
+                        <div class="mt-4 p-3 bg-white border shadow-sm" style="border-radius: 20px;">
                             <h6 class="fw-bold text-dark mb-3"><i class="bi bi-lightbulb-fill text-warning me-2"></i>
                                 Correct Submission Example:</h6>
                             <div class="table-responsive">
@@ -657,7 +657,7 @@
                         </div>
 
                         <div
-                            class="alert alert-warning border-0 rounded-4 mt-4 mb-0 d-flex align-items-center p-3 shadow-sm">
+                            class="alert alert-warning border-0 mt-4 mb-0 d-flex align-items-center p-3 shadow-sm" style="border-radius: 20px;">
                             <i class="bi bi-exclamation-triangle-fill fs-3 me-3 text-warning"></i>
                             <div class="small">
                                 <strong class="d-block mb-1">Important Notice:</strong>

@@ -222,6 +222,28 @@
             setTimeout(() => {
                 document.querySelectorAll('.alert.alert-dismissible').forEach(alert => new bootstrap.Alert(alert).close());
             }, 4000);
+
+            // Global Form Submission Loading State
+            const forms = document.querySelectorAll('form:not(.no-loader):not([target="_blank"])');
+            forms.forEach(form => {
+                form.addEventListener('submit', function(e) {
+                    if (e.defaultPrevented) return;
+                    
+                    // Don't show loader for specific trivial forms or search
+                    if (form.method.toLowerCase() === 'get') return;
+                    
+                    Swal.fire({
+                        title: 'Processing Request',
+                        text: 'Please wait while we secure your transaction...',
+                        allowOutsideClick: false,
+                        allowEscapeKey: false,
+                        showConfirmButton: false,
+                        didOpen: () => {
+                            Swal.showLoading();
+                        }
+                    });
+                });
+            });
         });
     </script>
 

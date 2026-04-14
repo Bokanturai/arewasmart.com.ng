@@ -118,7 +118,7 @@
             <!-- AI Assistant Banner -->
             <div class="row g-0 g-md-4 mb-4">
                 <div class="col-12">
-                    <div class="card bg-mesh-primary text-white shadow-lg border-0 rounded-0 rounded-md-4 overflow-hidden">
+                    <div class="card bg-mesh-primary text-white shadow-lg border-0 overflow-hidden" style="border-radius: 20px;">
                         <div
                             class="card-body d-flex flex-column flex-md-row align-items-center justify-content-between p-4"  style="position: relative; z-index: 1;">
                             <div class="d-flex align-items-center mb-3 mb-md-0">
@@ -152,9 +152,9 @@
             <!-- Tickets Table -->
             <div class="row g-0 g-md-4">
                 <div class="col-12">
-                    <div class="card shadow-lg border-0 rounded-0 rounded-md-4 overflow-hidden">
+                    <div class="card shadow-lg border-0 overflow-hidden" style="border-radius: 20px;">
                         <div
-                            class="card-header bg-white border-bottom py-3 d-flex align-items-center justify-content-between rounded-0 rounded-top-md-4">
+                            class="card-header bg-white border-bottom py-3 d-flex align-items-center justify-content-between text-center text-sm-start" style="border-top-left-radius: 20px; border-top-right-radius: 20px;">
                             <h5 class="mb-0 fw-bold text-dark"><i class="ti ti-list me-2 text-primary"></i>Your Support
                                 Tickets</h5>
                             <span class="badge badge-soft-primary px-3 py-2 rounded-pill">{{ $tickets->total() }}
@@ -240,7 +240,7 @@
                             </div>
                         </div>
                         @if($tickets->hasPages())
-                            <div class="card-footer bg-white border-top py-3 rounded-0 rounded-bottom-md-4">
+                            <div class="card-footer bg-white border-top py-3" style="border-bottom-left-radius: 20px; border-bottom-right-radius: 20px;">
                                 {{ $tickets->links() }}
                             </div>
                         @endif
@@ -254,8 +254,8 @@
     <div class="modal fade" id="createTicketModal" tabindex="-1" aria-labelledby="createTicketModalLabel"
         aria-hidden="true">
         <div class="modal-dialog modal-lg modal-dialog-centered">
-            <div class="modal-content border-0 shadow-lg rounded-4">
-                <div class="modal-header bg-primary text-white border-bottom-0 py-3">
+            <div class="modal-content border-0 shadow-lg" style="border-radius: 20px; overflow: hidden;">
+                <div class="modal-header bg-primary text-white border-bottom-0 py-3" style="border-top-left-radius: 20px; border-top-right-radius: 20px;">
                     <h5 class="modal-title fw-bold" id="createTicketModalLabel">
                         <i class="ti ti-message-dots me-2"></i>Open New Support Ticket
                     </h5>
@@ -285,7 +285,7 @@
                                     class="text-danger">*</span></label>
                             <textarea name="message" class="form-control focus-within-primary" rows="5"
                                 placeholder="Please describe your issue in detail..." required
-                                style="border-radius: 12px;"></textarea>
+                                style="border-radius: 20px;"></textarea>
                         </div>
 
                         <div class="mb-0">

@@ -15,8 +15,8 @@
         <div class="row mt-3 g-0 g-md-4">
             <!-- SEND VNIN TO NIBSS Request Form -->
             <div class="col-12 col-xl-6 mb-4">
-                <div class="card shadow-lg border-0 rounded-0 rounded-md-4">
-                    <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center rounded-0 rounded-top-md-4">
+                <div class="card shadow-lg border-0" style="border-radius: 20px; overflow: hidden;">
+                    <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center" style="border-top-left-radius: 20px; border-top-right-radius: 20px;">
                         <h5 class="mb-0 fw-bold">
                             <i class="bi bi-send-fill me-2"></i> SEND VNIN TO NIBSS Request
                         </h5>
@@ -151,8 +151,8 @@
 
             <!-- Submission History -->
             <div class="col-12 col-xl-6 mt-2 mt-md-0">
-                <div class="card shadow-lg border-0 rounded-0 rounded-md-4">
-                    <div class="card-header bg-primary d-flex justify-content-between align-items-center rounded-0 rounded-top-md-4">
+                <div class="card shadow-lg border-0" style="border-radius: 20px; overflow: hidden;">
+                    <div class="card-header bg-primary d-flex justify-content-between align-items-center" style="border-top-left-radius: 20px; border-top-right-radius: 20px;">
                         <h5 class="mb-0 fw-bold text-black">Submission History</h5>
                     </div>
                     <div class="card-body">

@@ -8,7 +8,7 @@
             --auth-primary: #d37102; 
             --auth-primary-rgb: 211, 113, 2;
             --auth-bg: #f8f9fa; 
-            --auth-card-radius: 12px; 
+            --auth-card-radius: 20px; 
             --auth-card-shadow: 0 4px 20px rgba(0, 0, 0, 0.08); 
             --transition: all 0.3s ease;
         }

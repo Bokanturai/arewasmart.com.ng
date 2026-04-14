@@ -11,7 +11,7 @@
 <div class="modal fade" id="pinModal" tabindex="-1" aria-hidden="true"
      data-bs-backdrop="static" data-bs-keyboard="false">
     <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
+        <div class="modal-content border-0 shadow-lg overflow-hidden" style="border-radius: 20px;">
 
             {{-- ── Header ───────────────────────────────────────────────── --}}
             <div class="modal-header bg-primary text-white border-0 px-4 py-3">

@@ -278,18 +278,24 @@
       color: var(--primary);
   }
   
-  .balance-text {
-      letter-spacing: -0.02em;
-  }
   
-  @media (max-width: 991.98px) {
-      .greeting-content h2 {
-          font-size: 1.5rem;
-      }
-      .avatar-wrapper img {
-          width: 65px !important;
-          height: 65px !important;
-      }
-  }
+   .balance-text {
+       letter-spacing: -0.02em;
+   }
+   
+   @media (max-width: 991.98px) {
+       .greeting-content h2 {
+           font-size: 1.5rem;
+       }
+       .avatar-wrapper img {
+           width: 65px !important;
+           height: 65px !important;
+       }
+   }
+   
+   /* Global Premium Rounding */
+   .rounded-20px {
+       border-radius: 20px !important;
+   }
 
 

@@ -1,7 +1,6 @@
 <!-- Quick Services Section -->
 <section class="py-1 py-md-2">
-    <div class="container-fluid px-0 px-md-3">
-        <div class="card border-0 shadow-sm overflow-hidden" style="border-radius: 12px;">
+        <div class="card border-0 shadow-lg overflow-hidden dashboard-card" style="border-radius: 30px !important;">
             <div class="card-body p-3 p-md-4">
                 <div class="d-flex align-items-center gap-2 mb-1">
                     <i class="fas fa-bolt text-warning"></i>
@@ -38,7 +37,7 @@
                     ];
                 @endphp
 
-                <div class="row row-cols-3 row-cols-md-4 row-cols-lg-6 g-2 g-md-3 text-center">
+                <div class="row row-cols-4 row-cols-md-4 row-cols-lg-6 g-2 g-md-3 text-center">
                     @foreach ($services as $sv)
                         <div class="col">
                             <a 
@@ -65,7 +64,6 @@
                 </div>
             </div>
         </div>
-    </div>
 </section>
 <!-- /Quick Services Section -->
 
@@ -404,13 +402,13 @@
 
 .service-content {
     transition: var(--transition-smooth);
-    border-radius: 16px;
+    border-radius: 20px;
 }
 
 .service-icon {
     width: var(--service-icon-size-sm);
     height: var(--service-icon-size-sm);
-    border-radius: 16px;
+    border-radius: 20px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -437,10 +435,17 @@
 }
 
 .service-name {
-    font-size: 12px;
+    font-size: 11px;
     font-weight: 500;
-    display: block;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
     line-height: 1.2;
+    min-height: 2.4em; /* Standardize height for 2 lines */
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 /* Modal Benefits Grid */
@@ -494,7 +499,7 @@
     .service-icon {
         width: 45px;
         height: 45px;
-        border-radius: 12px;
+        border-radius: 15px;
     }
     
     .service-icon i {
@@ -502,12 +507,13 @@
     }
     
     .service-name {
-        font-size: 10px;
+        font-size: 9px;
         letter-spacing: -0.2px;
+        min-height: 2.4em;
     }
     
     .service-content {
-        padding: 8px 4px !important;
+        padding: 6px 2px !important;
     }
     
     /* Modal mobile optimizations */

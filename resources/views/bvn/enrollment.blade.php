@@ -36,7 +36,7 @@
         </div>
 
         <!-- Search Card -->
-        <div class="card shadow-lg border-0 rounded-0 rounded-md-4 mb-4">
+        <div class="card shadow-lg border-0 mb-4" style="border-radius: 20px; overflow: hidden;">
             <div class="card-body p-4">
                 <form method="GET" action="{{ route('enrollments.index') }}" class="row g-3 justify-content-center">
                     <div class="col-12 col-md-8 col-lg-6">
@@ -63,7 +63,7 @@
 
         <!-- Agent Info -->
         @if ($agentCode && $agentInfo)
-            <div class="card shadow-lg border-0 rounded-0 rounded-md-4 mt-2 mt-md-0 mb-4">
+            <div class="card shadow-lg border-0 mt-2 mt-md-0 mb-4" style="border-radius: 20px; overflow: hidden;">
                 <div class="card-body bg-light-blue border-start border-4 border-primary p-4">
                     <div class="d-flex flex-wrap justify-content-between align-items-center">
                         <div>
@@ -84,8 +84,8 @@
             </div>
 
             <!-- Table Card -->
-            <div class="card shadow-lg border-0 rounded-0 rounded-md-4 mt-2 mt-md-0">
-                <div class="card-header bg-white border-0 p-4 pb-2 rounded-0 rounded-top-md-4">
+            <div class="card shadow-lg border-0 mt-2 mt-md-0" style="border-radius: 20px; overflow: hidden;">
+                <div class="card-header bg-white border-0 p-4 pb-2" style="border-top-left-radius: 20px; border-top-right-radius: 20px;">
                     <div class="d-flex flex-wrap justify-content-between align-items-center">
                         <div>
                             <h5 class="mb-1 text-primary fw-bold">

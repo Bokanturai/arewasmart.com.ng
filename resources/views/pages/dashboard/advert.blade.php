@@ -1,5 +1,4 @@
 @if(isset($adverts) && $adverts->count() > 0)
-<div class="mt-3 mb-4">
     <div id="serviceAdvertCarousel" class="carousel slide" data-bs-ride="carousel" data-bs-interval="5000">
         <div class="carousel-indicators">
             @foreach($adverts as $index => $advert)
@@ -17,15 +16,14 @@
             <span class="visually-hidden">Next</span>
         </button>
         
-        <div class="carousel-inner rounded-4 shadow-lg">
+        <div class="carousel-inner shadow-lg border-0" style="border-radius: 30px !important;">
             @foreach($adverts as $index => $advert)
                 <div class="carousel-item {{ $index === 0 ? 'active' : '' }}">
                     @if($advert->link)
                         <a href="{{ $advert->link }}" class="text-decoration-none">
                     @endif
-                    <div class="advert-card position-relative overflow-hidden rounded-4" 
-                         id="advert-card-{{ $index }}"
-                         style="height: 240px; background: {{ $advert->image ? 'url(' . asset($advert->image) . ')' : 'linear-gradient(135deg, #111827 0%, #F26522 100%)' }}; background-size: cover; background-position: center;">
+                    <div class="advert-card position-relative overflow-hidden border-0 shadow-sm" 
+                         style="border-radius: 30px !important; height: 240px; background: {{ $advert->image ? 'url(' . asset($advert->image) . ')' : 'linear-gradient(135deg, #111827 0%, #F26522 100%)' }}; background-size: cover; background-position: center;">
                         
                         {{-- Image Fallback Logic --}}
                         @if($advert->image)

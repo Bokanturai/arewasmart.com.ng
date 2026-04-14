@@ -32,8 +32,8 @@
             color: white;
             width: 18px;
             height: 18px;
-            border-radius: 50%;
-            font-size: 11px;
+            border-radius: 12px;
+            margin-bottom: 8px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -44,7 +44,7 @@
             width: 40px;
             height: 40px;
             object-fit: contain;
-            border-radius: 8px;
+            border-radius: 12px;
         }
 
         /* Typography & Utilities */
@@ -80,8 +80,8 @@
 
             {{-- Left Column: SME Data Form --}}
             <div class="col-12 col-xl-5 mb-4">
-                <div class="card custom-card shadow-lg border-0 rounded-0 rounded-md-4 d-flex flex-column">
-                    <div class="card-header justify-content-between bg-primary text-white rounded-0 rounded-top-md-4 flex-shrink-0">
+                <div class="card custom-card shadow-lg border-0 rounded-20px d-flex flex-column">
+                    <div class="card-header justify-content-between bg-primary text-white rounded-20px rounded-bottom-0 flex-shrink-0">
                         <div class="card-title fw-semibold">
                             <i class="bi bi-globe2 me-2"></i> SME Data Service
                         </div>
@@ -146,7 +146,7 @@
                                     @endphp
                                     @foreach($displayNetworks as $id => $net)
                                         <div class="col-3">
-                                            <div class="network-card p-2 border rounded-3 text-center" 
+                                            <div class="network-card p-2 border rounded-4 text-center" 
                                                  id="net-{{ strtolower($id) }}"
                                                  onclick="selectNetwork('{{ $net['val'] }}', 'net-{{ strtolower($id) }}')">
                                                 <img src="{{ asset('assets/img/apps/' . $net['img']) }}" alt="{{ $net['name'] }}" class="mb-1">
@@ -204,8 +204,8 @@
 
             {{-- Right Column: AI Guide & History --}}
             <div class="col-12 col-xl-7">
-                <div class="card shadow-lg border-0 rounded-0 rounded-md-4 overflow-hidden d-flex flex-column shadow-hover transition-all" style="height: 750px;">
-                    <div class="card-header bg-white text-dark p-3 p-md-4 d-flex align-items-center justify-content-between rounded-0 rounded-top-md-4 flex-shrink-0">
+                <div class="card shadow-lg border-0 rounded-20px overflow-hidden d-flex flex-column shadow-hover transition-all" style="height: 750px;">
+                    <div class="card-header bg-white text-dark p-3 p-md-4 d-flex align-items-center justify-content-between rounded-20px rounded-bottom-0 flex-shrink-0">
                         <div class="d-flex align-items-center gap-3">
                             <div class="bg-primary rounded-circle p-2 shadow-sm" style="width: 42px; height: 42px; display: flex; align-items: center; justify-content: center;">
                                 <i class="bi bi-robot fs-15 text-white"></i>
@@ -320,7 +320,7 @@
                         </div>
                     </div>
 
-                    <div class="card-footer bg-white border-top p-3 p-md-4 mt-auto rounded-0 rounded-bottom-md-4 shadow-sm">
+                    <div class="card-footer bg-white border-top p-3 p-md-4 mt-auto rounded-20px rounded-top-0 shadow-sm">
                         <div class="input-group bg-light rounded-pill p-1 border shadow-sm focus-within-shadow">
                             <input type="text" id="aiInput" class="form-control border-0 bg-transparent ps-3" placeholder="Ask about SME data...">
                             <button class="btn btn-primary rounded-circle p-2 mx-1 shadow-sm d-flex align-items-center justify-content-center" id="sendAiBtn" style="width:38px;height:38px;">

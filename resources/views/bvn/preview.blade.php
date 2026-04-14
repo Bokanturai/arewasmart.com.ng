@@ -12,7 +12,7 @@
         </div>
 
         <!-- Card Preview -->
-        <div class="card shadow-lg border-0 rounded-0 rounded-md-4 overflow-hidden">
+        <div class="card shadow-lg border-0" style="border-radius: 20px; overflow: hidden;">
             <div class="card-body p-4">
                 <div class="row g-0 g-md-4">
                     <!-- Left Column -->

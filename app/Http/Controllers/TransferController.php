@@ -39,7 +39,7 @@ class TransferController extends Controller
             ->values()
             ->take(15);
 
-        return view('transfer.index', compact('recentRecipients'));
+        return view('wallet.p2p', compact('recentRecipients'));
     }
 
     public function verifyUser(Request $request)

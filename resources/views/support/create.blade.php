@@ -34,8 +34,8 @@
         <div class="container-fluid px-0 px-md-3">
             <div class="row justify-content-center g-0 g-md-4">
                 <div class="col-12 col-lg-8">
-                    <div class="card shadow-lg border-0 rounded-0 rounded-md-4">
-                        <div class="card-header bg-primary text-white rounded-0 rounded-top-md-4">
+                    <div class="card shadow-lg border-0" style="border-radius: 20px; overflow: hidden;">
+                        <div class="card-header bg-primary text-white" style="border-top-left-radius: 20px; border-top-right-radius: 20px;">
                             <h5 class="mb-0">Ticket Information</h5>
                         </div>
                         <div class="card-body">
@@ -61,7 +61,7 @@
 
                                 <div class="mb-4">
                                     <label class="form-label fw-bold text-dark">Message <span class="text-danger">*</span></label>
-                                    <textarea name="message" class="form-control focus-within-primary" rows="6" placeholder="Detailed explanation of your issue..." required style="border-radius: 12px;">{{ old('message') }}</textarea>
+                                    <textarea name="message" class="form-control focus-within-primary" rows="6" placeholder="Detailed explanation of your issue..." required style="border-radius: 20px;">{{ old('message') }}</textarea>
                                 </div>
 
                                 <div class="mb-3">

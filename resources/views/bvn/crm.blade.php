@@ -16,8 +16,8 @@
 
             <!-- BVN CRM Form -->
             <div class="col-12 col-xl-6 mb-4">
-                <div class="card shadow-lg border-0 rounded-0 rounded-md-4">
-                    <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center rounded-0 rounded-top-md-4">
+                <div class="card shadow-lg border-0" style="border-radius: 20px; overflow: hidden;">
+                    <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center" style="border-top-left-radius: 20px; border-top-right-radius: 20px;">
                         <h5 class="mb-0 fw-bold"><i class="bi bi-gear me-2"></i>BVN CRM Request</h5>
                         <span class="badge bg-light text-primary fw-semibold">Arewa Smart</span>
                     </div>
@@ -143,9 +143,8 @@
 
     <!-- Submission History -->
 <div class="col-12 col-xl-6 mt-2 mt-md-0">
-    <div class="card shadow-lg border-0 rounded-0 rounded-md-4">
-
-        <div class="card-header bg-primary d-flex justify-content-between align-items-center rounded-0 rounded-top-md-4">
+    <div class="card shadow-lg border-0" style="border-radius: 20px; overflow: hidden;">
+        <div class="card-header bg-primary d-flex justify-content-between align-items-center" style="border-top-left-radius: 20px; border-top-right-radius: 20px;">
             <h5 class="fw-bold mb-0">
                 <i class="bi bi-clock-history me-2"></i> CRM Submission History
             </h5>

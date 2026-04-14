@@ -23,7 +23,7 @@
                         </ul>
                     </div>
                     <div class="service-image">
-                        <img src="{{ asset('assets/img/landing/00.png') }}" alt="Identity Management">
+                        <img src="{{ asset('assets/img/landing/004.png') }}" alt="Identity Management">
                         <div class="image-backdrop"></div>
                     </div>
                 </div>
@@ -41,7 +41,7 @@
                         </ul>
                     </div>
                     <div class="service-image">
-                        <img src="{{ asset('assets/img/landing/00.png') }}" alt="Utility Bill Payments">
+                        <img src="{{ asset('assets/img/landing/001.png') }}" alt="Utility Bill Payments">
                         <div class="image-backdrop"></div>
                     </div>
                 </div>
@@ -59,7 +59,7 @@
                         </ul>
                     </div>
                     <div class="service-image">
-                        <img src="{{ asset('assets/img/landing/00.png') }}" alt="Data and Airtime">
+                        <img src="{{ asset('assets/img/landing/001.png') }}" alt="Data and Airtime">
                         <div class="image-backdrop"></div>
                     </div>
                 </div>
@@ -77,7 +77,7 @@
                         </ul>
                     </div>
                     <div class="service-image">
-                        <img src="{{ asset('assets/img/landing/00.png') }}" alt="Spry Gift Cards">
+                        <img src="{{ asset('assets/img/landing/002.png') }}" alt="Spry Gift Cards">
                         <div class="image-backdrop"></div>
                     </div>
                 </div>
@@ -95,7 +95,7 @@
                         </ul>
                     </div>
                     <div class="service-image">
-                        <img src="{{ asset('assets/img/landing/00.png') }}" alt="BVN and NIN Modifications">
+                        <img src="{{ asset('assets/img/landing/003.png') }}" alt="BVN and NIN Modifications">
                         <div class="image-backdrop"></div>
                     </div>
                 </div>
@@ -113,7 +113,7 @@
                         </ul>
                     </div>
                     <div class="service-image">
-                        <img src="{{ asset('assets/img/landing/00.png') }}" alt="Educational Pins">
+                        <img src="{{ asset('assets/img/landing/005.png') }}" alt="Educational Pins">
                         <div class="image-backdrop"></div>
                     </div>
                 </div>
