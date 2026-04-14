@@ -81,7 +81,7 @@
                                     @if($virtualAccount)
                                         <small class="text-success fw-medium d-flex align-items-center gap-1">
                                             <i class="ti ti-building-bank"></i>
-                                            {{ $virtualAccount->accountNo }}
+                                            {{ $virtualAccount->accountNo }}-{{ $virtualAccount->bankName }}
                                         </small>
                                     @endif
                                 </div>
