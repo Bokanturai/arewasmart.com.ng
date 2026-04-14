@@ -12,8 +12,12 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('sme_datas', function (Blueprint $table) {
-            $table->integer('failure_count')->default(0)->after('status');
-            $table->timestamp('last_failure_at')->nullable()->after('failure_count');
+            if (!Schema::hasColumn('sme_datas', 'failure_count')) {
+                $table->integer('failure_count')->default(0)->after('status');
+            }
+            if (!Schema::hasColumn('sme_datas', 'last_failure_at')) {
+                $table->timestamp('last_failure_at')->nullable()->after('failure_count');
+            }
         });
     }
 
