@@ -87,7 +87,7 @@
                                 </div>
                             </div>
 
-                            <div class="d-flex align-items-center gap-2 bg-light px-3 py-2 rounded-pill shadow-sm">
+                            <div class="d-flex align-items-center justify-content-center gap-2 bg-light px-3 py-2 rounded-pill shadow-sm mx-auto mx-md-0">
                                 <h4 id="wallet-balance" class="mb-0 @if(($wallet->status ?? 'inactive') == 'active') text-success @else text-danger @endif fw-bold balance-text">
                                     ₦{{ number_format($wallet->balance ?? 0, 2) }}
                                 </h4>
