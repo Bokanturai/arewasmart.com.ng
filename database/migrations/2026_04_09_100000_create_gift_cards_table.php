@@ -17,6 +17,7 @@ return new class extends Migration
             $table->text('code_token_encrypted')->nullable(); // Encrypted raw code
             $table->decimal('amount', 15, 2);
             $table->string('title');
+            $table->string('title_color')->nullable();
             $table->text('message')->nullable();
             $table->string('style')->default('default'); // 'birthday', 'love', 'gaming', etc.
             $table->string('text_color')->default('#ffffff');
