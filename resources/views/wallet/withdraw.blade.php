@@ -121,7 +121,7 @@
                                 </div>
 
                                 {{-- Hidden native select for form submit & JS --}}
-                                <select name="bank_code" id="bank_code" class="d-none" required>
+                                <select name="bankCode" id="bank_code" class="d-none" required>
                                     <option value="">Choose a bank...</option>
                                     @foreach($banks as $bank)
                                         <option value="{{ $bank->bank_code }}"
@@ -173,7 +173,6 @@
                                                 </div>
                                             </div>
 
-                                            {{-- List --}}
                                             <ul class="list-unstyled mb-0" id="bankPickerList"
                                                 style="max-height:260px;overflow-y:auto;">
                                                 @foreach($banks as $bank)
@@ -184,7 +183,7 @@
                                                         data-url="{{ $bank->bank_url ?? '' }}"
                                                         data-bg="{{ $bank->bg_url ?? '' }}">
                                                         <div class="bg-light rounded-circle d-flex align-items-center justify-content-center flex-shrink-0"
-                                                             style="width:36px;height:36px;border:1px solid rgba(0,0,0,.08);">
+                                                              style="width:36px;height:36px;border:1px solid rgba(0,0,0,.08);">
                                                             @if($bank->bank_url)
                                                                 <img src="{{ $bank->bank_url }}" alt="{{ $bank->bank_name }}"
                                                                      style="width:23px;height:23px;object-fit:contain;"
@@ -197,6 +196,7 @@
                                                         <span class="small fw-semibold text-dark">{{ $bank->bank_name }}</span>
                                                     </li>
                                                 @endforeach
+
                                                 <li class="px-3 py-4 text-center text-muted small d-none" id="bankNoResults">
                                                     <i class="bi bi-search me-1"></i> No banks found
                                                 </li>
@@ -454,7 +454,7 @@
                 fetch("{{ route('withdraw.verifyAccount') }}", {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
-                    body: JSON.stringify({ bank_code: bankCode, account_no: acctNo })
+                    body: JSON.stringify({ bankCode: bankCode, account_no: acctNo })
                 })
                 .then(r => r.json())
                 .then(data => {
@@ -660,6 +660,28 @@
             loader.classList.remove('d-none');
             confirmText.textContent = 'Verifying...';
             pinError?.classList.add('d-none');
+
+            // Check if we already authorized via Biometrics in the modal
+            if (window.biometricAuthorized) {
+                const form = document.getElementById('withdrawForm');
+                
+                // Add biometric flag to form
+                const bioInput = document.createElement('input');
+                bioInput.type = 'hidden';
+                bioInput.name = 'biometric_auth';
+                bioInput.value = '1';
+                form.appendChild(bioInput);
+                
+                // Add dummy PIN to satisfy validation
+                const pinHiddenInput = document.createElement('input');
+                pinHiddenInput.type = 'hidden';
+                pinHiddenInput.name = 'pin';
+                pinHiddenInput.value = '00000';
+                form.appendChild(pinHiddenInput);
+
+                form.submit();
+                return;
+            }
 
             fetch("{{ route('verify.pin') }}", {
                 method: 'POST',

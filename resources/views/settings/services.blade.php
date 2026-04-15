@@ -12,6 +12,12 @@
             --card-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
             --accent-glow: 0 0 15px rgba(233, 60, 17, 0.3);
         }
+        
+        .settings-container {
+            max-width: 1000px;
+            margin: 0 auto;
+            width: 100%;
+        }
 
         /* Tabs Styling */
         .settings-nav {
@@ -220,7 +226,7 @@
     <!-- Cropper.css -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css" />
 
-    <div class="container-fluid px-0 px-md-3 py-4">
+    <div class="container settings-container py-4">
         
         <!-- Alerts -->
         @if (session('status'))
@@ -434,20 +440,46 @@
                         </div>
                     </div>
                     
-                    <div class="col-12 mt-4">
+                    <div class="col-12 mt-3">
                         <div class="card shadow-lg border-0" style="border-radius: 20px; overflow: hidden;">
-                            <div class="card-body p-4">
-                                <h5 class="fw-bold mb-3">Login Sessions & Security</h5>
-                                <div class="d-flex align-items-center gap-3 p-3 bg-light" style="border-radius: 20px;">
-                                    <div class="icon-circle bg-white shadow-sm rounded-circle">
-                                        <i class="ti ti-device-laptop text-primary"></i>
+                            <div class="card-body p-3">
+                                <h5 class="fw-bold mb-3 fs-14">Login Sessions & Security</h5>
+                                <div class="d-flex align-items-center flex-wrap flex-md-nowrap gap-3 p-3 bg-light" style="border-radius: 20px;">
+                                    <div class="icon-circle bg-white shadow-sm rounded-circle flex-shrink-0" style="width: 48px; height: 48px; display: flex; align-items: center; justify-content: center;">
+                                        <i class="ti ti-device-laptop text-primary fs-14"></i>
                                     </div>
-                                    <div class="flex-grow-1">
+                                    <div class="flex-grow-1 min-w-0">
                                         <div class="fw-bold text-primary">Current Session</div>
-                                        <div class="text-muted small">IP: {{ request()->ip() }} • {{ request()->userAgent() }}</div>
+                                        <div class="text-muted small text-break" style="line-height: 1.4;">
+                                            <span class="d-block d-md-inline mb-1 mb-md-0 me-md-2">IP: {{ request()->ip() }}</span>
+                                            <span class="opacity-75">{{ request()->userAgent() }}</span>
+                                        </div>
                                     </div>
-                                    <div class="status-badge verified small">Active</div>
+                                    <div class="status-badge verified small flex-shrink-0">Active</div>
                                 </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-12 mt-3">
+                        <!-- Biometric Devices Management -->
+                        <div class="card shadow-lg border-0" style="border-radius: 20px; overflow: hidden;">
+                            <div class="card-body p-3">
+                                <div class="d-flex align-items-center justify-content-between mb-4">
+                                    <h5 class="fw-bold mb-0">Biometric Devices (Passkeys)</h5>
+                                    <button class="btn btn-sm btn-primary rounded-pill px-3" data-bs-toggle="modal" data-bs-target="#biometricModal">
+                                        <i class="ti ti-plus me-1"></i> Add Device
+                                    </button>
+                                </div>
+                                <div id="biometric-devices-list">
+                                    <div class="text-center py-4">
+                                        <div class="spinner-border text-primary spinner-border-sm" role="status"></div>
+                                        <span class="ms-2 small text-muted">Loading devices...</span>
+                                    </div>
+                                </div>
+                                <p class="text-muted small mt-3 mb-0">
+                                    <i class="ti ti-info-circle me-1"></i> These devices allow you to sign in instantly without a password.
+                                </p>
                             </div>
                         </div>
                     </div>
@@ -628,21 +660,38 @@
         </div>
     </div>
 
+    <!-- Rename Biometric Modal -->
+    <div class="modal fade" id="renameBiometricModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered modal-sm">
+            <div class="modal-content modal-content-premium shadow-lg" style="border-radius: 20px; overflow: hidden;">
+                <div class="modal-header border-0 pb-0">
+                    <h5 class="modal-title fw-bold">Rename Device</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <input type="hidden" id="rename-device-id">
+                    <div class="mb-3">
+                        <label class="form-label fw-bold text-muted small">Device Name</label>
+                        <input type="text" id="rename-device-alias" class="form-control rounded-pill bg-light border-0 px-3 fw-bold" placeholder="e.g. My iPhone">
+                    </div>
+                    <button type="button" id="confirm-rename-btn" class="btn btn-primary w-100 rounded-pill py-2 fw-bold shadow-sm" style="background: var(--primary-gradient); border: none;">
+                        Update Name
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @include('auth.biometric-modal')
+
 </x-app-layout>
 
 <!-- Cropper.js Scripts -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
 <script>
-    document.addEventListener('DOMContentLoaded', function () {
-        let cropper;
-        const photoInput = document.getElementById('photoInput');
-        const cropperImage = document.getElementById('cropperImage');
-        const cropperContainer = document.getElementById('cropperContainer');
-        const uploadBtn = document.getElementById('cropAndUploadBtn');
-        const form = document.getElementById('photoUploadForm');
-        const uploadPlaceholder = document.getElementById('uploadPlaceholder');
-
-        // Copy to clipboard utility
+    // Integrated Settings Logic
+    document.addEventListener('DOMContentLoaded', function() {
+        // --- Copy to Clipboard Utility ---
         document.querySelectorAll('.btn-copy').forEach(btn => {
             btn.onclick = function() {
                 const text = this.getAttribute('data-text');
@@ -654,7 +703,15 @@
             }
         });
 
-        // Initialize Cropper when file is selected
+        // --- Profile Photo Cropper Logic ---
+        let cropper;
+        const photoInput = document.getElementById('photoInput');
+        const cropperImage = document.getElementById('cropperImage');
+        const cropperContainer = document.getElementById('cropperContainer');
+        const uploadBtn = document.getElementById('cropAndUploadBtn');
+        const photoForm = document.getElementById('photoUploadForm');
+        const uploadPlaceholder = document.getElementById('uploadPlaceholder');
+
         if(photoInput) {
             photoInput.addEventListener('change', function (e) {
                 const files = e.target.files;
@@ -667,9 +724,7 @@
                     if(uploadPlaceholder) uploadPlaceholder.classList.add('d-none');
                     uploadBtn.disabled = false;
 
-                    if (cropper) {
-                        cropper.destroy();
-                    }
+                    if (cropper) cropper.destroy();
 
                     cropper = new Cropper(cropperImage, {
                         aspectRatio: 1,
@@ -691,10 +746,10 @@
                 this.disabled = true;
 
                 cropper.getCroppedCanvas({ width: 400, height: 400 }).toBlob((blob) => {
-                    const formData = new FormData(form);
+                    const formData = new FormData(photoForm);
                     formData.set('photo', blob, 'profile.jpg');
 
-                    fetch(form.action, {
+                    fetch(photoForm.action, {
                         method: 'POST',
                         body: formData,
                         headers: { 'X-Requested-With': 'XMLHttpRequest' }
@@ -714,6 +769,165 @@
                 uploadBtn.disabled = true;
                 if(uploadPlaceholder) uploadPlaceholder.classList.remove('d-none');
             });
+        }
+
+        // --- Biometric Device Management (Passkeys) ---
+        const devicesList = document.getElementById('biometric-devices-list');
+        const renameModal = new bootstrap.Modal(document.getElementById('renameBiometricModal'));
+        
+        // Initial fetch
+        fetchDevices();
+
+        async function fetchDevices() {
+            if (!devicesList) return;
+            
+            try {
+                const response = await fetch('{{ route("webauthn.devices.index") }}');
+                const devices = await response.json();
+                
+                if (devices.length === 0) {
+                    devicesList.innerHTML = `
+                        <div class="text-center py-4 bg-light rounded-4">
+                            <i class="ti ti-fingerprint-off fs-1 text-muted opacity-25"></i>
+                            <p class="text-muted small mt-2">No biometric devices registered yet.</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                devicesList.innerHTML = devices.map(device => `
+                    <div class="d-flex align-items-center gap-3 p-3 mb-2 border rounded-4 transition-all hover-shadow bg-white">
+                        <div class="icon-circle bg-primary-subtle rounded-circle" style="width: 45px; height: 45px; display: flex; align-items: center; justify-content: center;">
+                            <i class="ti ${device.aaguid ? 'ti-device-mobile' : 'ti-device-laptop'} text-primary fs-5"></i>
+                        </div>
+                        <div class="flex-grow-1">
+                            <div class="fw-bold text-dark d-flex align-items-center gap-2">
+                                ${device.alias || 'Unnamed Device'}
+                                <span class="badge bg-light text-muted fw-normal" style="font-size: 10px; border: 1px solid #eee;">
+                                    ${device.attestation_format}
+                                </span>
+                            </div>
+                            <div class="text-muted small" style="font-size: 11px;">
+                                <i class="ti ti-clock-hour-4 me-1"></i>Registered: ${new Date(device.created_at).toLocaleDateString()}
+                            </div>
+                        </div>
+                        <div class="d-flex gap-1">
+                            <button class="btn btn-sm btn-icon btn-light rounded-circle shadow-sm edit-device" 
+                                    data-id="${device.id}" data-alias="${device.alias || ''}" title="Rename">
+                                <i class="ti ti-edit"></i>
+                            </button>
+                            <button class="btn btn-sm btn-icon btn-light rounded-circle shadow-sm text-danger delete-device" 
+                                    data-id="${device.id}" title="Revoke">
+                                <i class="ti ti-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                `).join('');
+
+                attachDeviceListeners();
+            } catch (error) {
+                devicesList.innerHTML = '<div class="alert alert-danger py-2 small">Failed to load biometric devices.</div>';
+            }
+        }
+
+        function attachDeviceListeners() {
+            // Rename Action
+            document.querySelectorAll('.edit-device').forEach(btn => {
+                btn.onclick = () => {
+                    document.getElementById('rename-device-id').value = btn.dataset.id;
+                    document.getElementById('rename-device-alias').value = btn.dataset.alias;
+                    renameModal.show();
+                };
+            });
+
+            // Delete Action
+            document.querySelectorAll('.delete-device').forEach(btn => {
+                btn.onclick = async () => {
+                    const result = await Swal.fire({
+                        title: 'Revoke Access?',
+                        text: "This biometric device will no longer be able to log in. You can re-register it at any time.",
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonColor: '#e93c11',
+                        cancelButtonColor: '#6c757d',
+                        confirmButtonText: 'Yes, Revoke',
+                        cancelButtonText: 'Cancel',
+                        borderRadius: '20px',
+                        background: '#fff',
+                        customClass: {
+                            confirmButton: 'rounded-pill px-4',
+                            cancelButton: 'rounded-pill px-4'
+                        }
+                    });
+
+                    if (result.isConfirmed) {
+                        try {
+                            const response = await fetch(`{{ url('webauthn/devices') }}/${btn.dataset.id}`, {
+                                method: 'DELETE',
+                                headers: {
+                                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                                    'Accept': 'application/json'
+                                }
+                            });
+                            
+                            if (response.ok) {
+                                Swal.fire({ 
+                                    icon: 'success', 
+                                    title: 'Access Revoked', 
+                                    text: 'Device removed successfully.',
+                                    toast: true, 
+                                    position: 'top-end', 
+                                    showConfirmButton: false, 
+                                    timer: 3000 
+                                });
+                                fetchDevices();
+                            }
+                        } catch (error) {
+                            Swal.fire({ icon: 'error', title: 'Action Failed', text: 'Encountered an error while revoking access.' });
+                        }
+                    }
+                };
+            });
+        }
+
+        // Confirm Rename Modal Submit
+        const confirmRenameBtn = document.getElementById('confirm-rename-btn');
+        if (confirmRenameBtn) {
+            confirmRenameBtn.onclick = async function() {
+                const id = document.getElementById('rename-device-id').value;
+                const alias = document.getElementById('rename-device-alias').value;
+                
+                if (!alias) {
+                    alert('Please provide a name');
+                    return;
+                }
+
+                this.disabled = true;
+                this.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Updating...';
+
+                try {
+                    const response = await fetch(`{{ url('webauthn/devices') }}/${id}`, {
+                        method: 'PATCH',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                            'Accept': 'application/json'
+                        },
+                        body: JSON.stringify({ alias })
+                    });
+
+                    if (response.ok) {
+                        renameModal.hide();
+                        Swal.fire({ icon: 'success', title: 'Renamed', toast: true, position: 'top-end', showConfirmButton: false, timer: 2000 });
+                        fetchDevices();
+                    }
+                } catch (error) {
+                    Swal.fire({ icon: 'error', title: 'Update Failed' });
+                } finally {
+                    this.disabled = false;
+                    this.innerHTML = 'Update Name';
+                }
+            };
         }
     });
 </script>

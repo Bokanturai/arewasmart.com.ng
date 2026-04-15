@@ -10,6 +10,7 @@
             border: 2px solid transparent;
             border-radius: 10px;
             transition: all 0.2s ease-in-out;
+            position: relative;
         }
         .network-option:hover {
             background-color: #f8f9fa;
@@ -17,9 +18,6 @@
         .network-option.active {
             border-color: #df6808ff;
             background-color: #e7f1ff;
-        }
-        .network-option {
-            position: relative;
         }
         .network-option .check-mark {
             display: none;
@@ -110,121 +108,95 @@
                             @endif
                         </div>
 
-                                <div class="text-center mb-3 mb-md-4">
-                                    <div class="avatar-wrapper bg-primary bg-opacity-10 text-primary rounded-circle mb-3 mx-auto d-flex align-items-center justify-content-center" 
-                                         style="width: 50px; height: 50px;">
-                                        <i class="bi bi-broadcast fs-15"></i>
-                                    </div>
-                                    <h6 class="fw-bold small">Instant Airtime Top-up</h6>
-                                    <p class="text-muted small px-3">Top up any network instantly with zero hidden fees.</p>
+                        <div class="text-center mb-3 mb-md-4">
+                            <div class="avatar-wrapper bg-primary bg-opacity-10 text-primary rounded-circle mb-3 mx-auto d-flex align-items-center justify-content-center" style="width: 50px; height: 50px;">
+                                <i class="bi bi-broadcast fs-15"></i>
+                            </div>
+                            <h6 class="fw-bold small">Instant Airtime Top-up</h6>
+                            <p class="text-muted small px-3">Top up any network instantly with zero hidden fees.</p>
+                        </div>
+
+                        {{-- Airtime Form --}}
+                        <form id="buyAirtimeForm" method="POST" action="{{ route('buyairtime') }}">
+                            @csrf
+                            <input type="hidden" id="selectedNetwork" name="network" value="{{ old('network') }}">
+
+                            {{-- Phone Number --}}
+                            <div class="mb-3 mb-md-4">
+                                <label for="mobileno" class="form-label text-dark small mb-1">Recipient phone number</label>
+                                <div class="input-group shadow-sm">
+                                    <span class="input-group-text bg-light border-end-0">
+                                        <i class="bi bi-telephone text-muted"></i>
+                                    </span>
+                                    <input type="tel" id="mobileno" name="mobileno" value="{{ old('mobileno') }}" class="form-control border-start-0 ps-0 text-center text-dark" maxlength="11" pattern="\d{11}" placeholder="080 0000 0000" required>
+                                </div>
+                                <div id="networkResult" class="mt-2 small-note text-center fw-bold text-primary" style="min-height: 1.2em;"></div>
+                            </div>
+
+                            {{-- Network Selection --}}
+                            <div class="network-selection mb-3 mb-md-4">
+                                <label class="form-label fw-semibold text-dark small mb-2 text-center d-block w-100">Select network operator</label>
+                                <div class="row text-center g-2 g-sm-3 justify-content-center">
+                                    @php
+                                        $networks = [
+                                            'mtn'      => ['name' => 'MTN',    'img' => 'mtn.jpg'],
+                                            'airtel'   => ['name' => 'Airtel', 'img' => 'Airtel.png'],
+                                            'glo'      => ['name' => 'Glo',    'img' => 'glo.jpg'],
+                                            'etisalat' => ['name' => '9Mobile','img' => '9Mobile.jpg'],
+                                        ];
+                                    @endphp
+
+                                    @foreach ($networks as $key => $network)
+                                        <div class="col-3">
+                                            <div class="network-option d-flex flex-column align-items-center p-2 rounded-4 border border-light shadow-sm" data-network="{{ $key }}" style="cursor: pointer; transition: all 0.2s;">
+                                                <i class="bi bi-check-circle-fill text-primary check-mark"></i>
+                                                <img src="{{ asset('assets/img/apps/' . $network['img']) }}" alt="{{ $network['name'] }}" class="rounded-circle mb-1 shadow-sm" style="width: 38px; height: 38px; object-fit: contain;" onerror="this.src='{{ asset('assets/img/apps/default.png') }}'">
+                                                <div class="small fw-bold text-dark" style="font-size: 10px;">
+                                                    {{ $network['name'] }}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    @endforeach
+                                </div>
+                            </div>
+
+                            {{-- Amount --}}
+                            <div class="mb-3 mb-md-4">
+                                <label for="amount" class="form-label d-flex justify-content-between align-items-center fw-semibold text-dark small mb-2">
+                                    <span>Amount</span>
+                                    <small class="text-muted fw-normal d-flex align-items-center">
+                                        <span>Bal: </span>
+                                        <strong id="walletBalance" class="text-success ms-1 d-none">₦{{ number_format($wallet->balance ?? 0, 2) }}</strong>
+                                        <strong id="hiddenBalance" class="text-success ms-1">₦ * * * *</strong>
+                                        <i id="toggleBalance" class="bi bi-eye ms-2 text-primary" style="cursor: pointer; font-size: 0.9rem;"></i>
+                                    </small>
+                                </label>
+                                <div class="input-group shadow-sm">
+                                    <span class="input-group-text bg-light border-end-0 fw-bold text-secondary">₦</span>
+                                    <input type="number" id="amount" name="amount" value="{{ old('amount') }}" class="form-control border-start-0 ps-0 text-center fw-bold text-dark fs-15" min="50" max="50000" placeholder="0.00" required>
                                 </div>
 
-                                {{-- Airtime Form --}}
-                                <form id="buyAirtimeForm" method="POST" action="{{ route('buyairtime') }}">
-                                    @csrf
-                                    <input type="hidden" id="selectedNetwork" name="network" value="{{ old('network') }}">
-
-                                    {{-- Phone Number --}}
-                                    <div class="mb-3 mb-md-4">
-                                        <label for="mobileno" class="form-label text-dark small mb-1">Recipient phone number</label>
-                                        <div class="input-group shadow-sm">
-                                            <span class="input-group-text bg-light border-end-0">
-                                                <i class="bi bi-telephone text-muted"></i>
-                                            </span>
-                                            <input type="tel"
-                                                   id="mobileno"
-                                                   name="mobileno"
-                                                   value="{{ old('mobileno') }}"
-                                                   class="form-control border-start-0 ps-0 text-center text-dark"
-                                                   maxlength="11"
-                                                   pattern="\d{11}"
-                                                   placeholder="080 0000 0000"
-                                                   required>
+                                {{-- Quick Amount Suggestions --}}
+                                <div class="row g-2 mt-2">
+                                    @php $amounts = [100, 200, 500, 1000, 2000]; @endphp
+                                    @foreach ($amounts as $amt)
+                                        <div class="col px-1">
+                                            <button type="button" class="btn btn-light w-100 amount-btn btn-sm fw-bold border-0 shadow-sm text-muted rounded-pill py-1" style="font-size: 10px;" data-amount="{{ $amt }}">
+                                                ₦{{ number_format($amt) }}
+                                            </button>
                                         </div>
-                                        <div id="networkResult" class="mt-2 small-note text-center fw-bold text-primary" style="min-height: 1.2em;"></div>
-                                    </div>
-
-                                    {{-- Network Selection --}}
-                                    <div class="network-selection mb-3 mb-md-4">
-                                        <label class="form-label fw-semibold text-dark small mb-2 text-center d-block w-100">Select network operator</label>
-                                        <div class="row text-center g-2 g-sm-3 justify-content-center">
-                                            @php
-                                                $networks = [
-                                                    'mtn'      => ['name' => 'MTN',    'img' => 'mtn.jpg'],
-                                                    'airtel'   => ['name' => 'Airtel', 'img' => 'Airtel.png'],
-                                                    'glo'      => ['name' => 'Glo',    'img' => 'glo.jpg'],
-                                                    'etisalat' => ['name' => '9Mobile','img' => '9Mobile.jpg'],
-                                                ];
-                                            @endphp
-
-                                            @foreach ($networks as $key => $network)
-                                                <div class="col-3">
-                                                    <div class="network-option d-flex flex-column align-items-center p-2 rounded-4 border border-light shadow-sm"
-                                                         data-network="{{ $key }}"
-                                                         style="cursor: pointer; transition: all 0.2s;">
-                                                        <i class="bi bi-check-circle-fill text-primary check-mark"></i>
-                                                        <img src="{{ asset('assets/img/apps/' . $network['img']) }}"
-                                                             alt="{{ $network['name'] }}"
-                                                             class="rounded-circle mb-1 shadow-sm"
-                                                             style="width: 38px; height: 38px; object-fit: contain;"
-                                                             onerror="this.src='{{ asset('assets/img/apps/default.png') }}'">
-                                                        <div class="small fw-bold text-dark" style="font-size: 10px;">
-                                                            {{ $network['name'] }}
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            @endforeach
-                                        </div>
-                                    </div>
-
-                                    {{-- Amount --}}
-                                    <div class="mb-3 mb-md-4">
-                                        <label for="amount" class="form-label d-flex justify-content-between align-items-center fw-semibold text-dark small mb-2">
-                                            <span>Amount</span>
-                                            <small class="text-muted fw-normal d-flex align-items-center">
-                                                <span>Bal: </span>
-                                                <strong id="walletBalance" class="text-success ms-1 d-none">₦{{ number_format($wallet->balance ?? 0, 2) }}</strong>
-                                                <strong id="hiddenBalance" class="text-success ms-1">₦ * * * *</strong>
-                                                <i id="toggleBalance" class="bi bi-eye ms-2 text-primary" style="cursor: pointer; font-size: 0.9rem;"></i>
-                                            </small>
-                                        </label>
-                                        <div class="input-group shadow-sm">
-                                            <span class="input-group-text bg-light border-end-0 fw-bold text-secondary">₦</span>
-                                            <input type="number"
-                                                   id="amount"
-                                                   name="amount"
-                                                   value="{{ old('amount') }}"
-                                                   class="form-control border-start-0 ps-0 text-center fw-bold text-dark fs-15"
-                                                   min="50"
-                                                   max="50000"
-                                                   placeholder="0.00"
-                                                   required>
-                                        </div>
-
-                                        {{-- Quick Amount Suggestions --}}
-                                        <div class="row g-2 mt-2">
-                                            @php $amounts = [100, 200, 500, 1000, 2000]; @endphp
-                                            @foreach ($amounts as $amt)
-                                                <div class="col px-1">
-                                                    <button type="button"
-                                                            class="btn btn-light w-100 amount-btn btn-sm fw-bold border-0 shadow-sm text-muted rounded-pill py-1"
-                                                            style="font-size: 10px;"
-                                                            data-amount="{{ $amt }}">
-                                                        ₦{{ number_format($amt) }}
-                                                    </button>
-                                                </div>
-                                            @endforeach
-                                        </div>
-                                    </div>
-
-                                    {{-- Submit Button --}}
-                                    <div class="d-grid mt-4">
-                                        <button type="button" id="buy-airtime" class="btn btn-primary btn-lg fw-bold rounded-pill shadow-lg py-2 py-md-3">
-                                            <i class="bi bi-lightning-charge-fill me-2"></i> Purchase Now
-                                        </button>
-                                    </div>
-                                </form>
+                                    @endforeach
+                                </div>
                             </div>
+
+                            {{-- Submit Button --}}
+                            <div class="d-grid mt-4">
+                                <button type="button" id="buy-airtime" class="btn btn-primary btn-lg fw-bold rounded-pill shadow-lg py-2 py-md-3">
+                                    <i class="bi bi-lightning-charge-fill me-2"></i> Purchase Now
+                                </button>
+                            </div>
+                        </form>
+                    </div>
 
                     <div class="card-footer bg-white border-top text-center py-3 rounded-20px rounded-top-0">
                         <small class="text-muted d-flex align-items-center justify-content-center gap-2">
@@ -299,11 +271,6 @@
                             </div>
                         </div>
                     </div>
-
-                </div>{{-- /row-inner --}}
-            </div>{{-- /col-inner --}}
-        </div>{{-- /row-outer --}}
-    </div>{{-- /container --}}
 
     {{-- PIN Modal --}}
     @include('pages.pin')

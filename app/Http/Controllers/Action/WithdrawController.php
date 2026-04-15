@@ -70,11 +70,11 @@ class WithdrawController extends Controller
             ->map(function ($report) use ($banks) {
                 $bank = $banks->firstWhere('bank_code', $report->bank_code);
                 return [
-                    'bank_code' => $report->bank_code,
+                    'bankCode' => $report->bank_code,
                     'account_no' => $report->account_number,
                     'account_name' => $report->account_name,
-                    'bank_name' => $report->bank_name ?? 'Bank',
-                    'bank_url' => $bank->bank_url ?? null
+                    'bankName' => $report->bank_name ?? 'Bank',
+                    'bankUrl' => $bank->bank_url ?? null
                 ];
             })
             ->filter(fn($item) => !empty($item['bank_code']) && !empty($item['account_no']))
@@ -123,11 +123,11 @@ class WithdrawController extends Controller
     public function verifyAccount(Request $request)
     {
         $request->validate([
-            'bank_code' => 'required|string',
+            'bankCode' => 'required|string',
             'account_no' => 'required|string|digits:10',
         ]);
 
-        $response = $this->palmPay->queryBankAccount($request->bank_code, $request->account_no);
+        $response = $this->palmPay->queryBankAccount($request->bankCode, $request->account_no);
 
         if (isset($response['respCode']) && $response['respCode'] === '00000000') {
             if ($response['data']['Status'] === 'Success') {
@@ -154,7 +154,7 @@ class WithdrawController extends Controller
     public function processWithdrawal(Request $request)
     {
         $request->validate([
-            'bank_code' => 'required|exists:banks,bank_code',
+            'bankCode' => 'required|exists:banks,bank_code',
             'account_no' => 'required|digits:10',
             'account_name' => 'required|string',
             'amount' => 'required|numeric|min:100', // Minimum 100 NGN
@@ -192,7 +192,7 @@ class WithdrawController extends Controller
                 ->first();
 
             if ($recentDuplicate) {
-                $bankName = Bank::where('bank_code', $request->bank_code)->value('bank_name') ?? 'Bank';
+                $bankName = Bank::where('bank_code', $request->bankCode)->value('bank_name') ?? 'Bank';
                 return view('thankyou2', [
                     'transaction' => $recentDuplicate,
                     'sender' => $user,
@@ -203,20 +203,29 @@ class WithdrawController extends Controller
                 ]);
             }
 
-            // 4. PIN Verification & Rate Limiting (Max 5 attempts / 15 mins)
-            $pinLimiterKey = 'withdraw_pin_' . $user->id;
+            // 4. PIN Verification & Biometric Support
+            $isBiometricValid = $request->biometric_auth && 
+                               session('biometric_verified_at') && 
+                               (now()->timestamp - session('biometric_verified_at')) < 60;
 
-            if (\Illuminate\Support\Facades\RateLimiter::tooManyAttempts($pinLimiterKey, 5)) {
-                $seconds = \Illuminate\Support\Facades\RateLimiter::availableIn($pinLimiterKey);
-                return back()->with('error', "Too many incorrect PIN attempts. Please try again in {$seconds} seconds.");
+            if ($isBiometricValid) {
+                \Illuminate\Support\Facades\RateLimiter::clear('withdraw_pin_' . $user->id);
+                session()->forget('biometric_verified_at');
+            } else {
+                $pinLimiterKey = 'withdraw_pin_' . $user->id;
+
+                if (\Illuminate\Support\Facades\RateLimiter::tooManyAttempts($pinLimiterKey, 5)) {
+                    $seconds = \Illuminate\Support\Facades\RateLimiter::availableIn($pinLimiterKey);
+                    return back()->with('error', "Too many incorrect PIN attempts. Please try again in {$seconds} seconds.");
+                }
+
+                if (!Hash::check($request->pin, $user->pin)) {
+                    \Illuminate\Support\Facades\RateLimiter::hit($pinLimiterKey, 900); // 15 mins
+                    return back()->with('error', 'Incorrect transaction PIN.');
+                }
+
+                \Illuminate\Support\Facades\RateLimiter::clear($pinLimiterKey);
             }
-
-            if (!Hash::check($request->pin, $user->pin)) {
-                \Illuminate\Support\Facades\RateLimiter::hit($pinLimiterKey, 900); // 15 mins
-                return back()->with('error', 'Incorrect transaction PIN.');
-            }
-
-            \Illuminate\Support\Facades\RateLimiter::clear($pinLimiterKey);
 
             // 5. Service Check / Auto-creation
             $service = Service::firstOrCreate(
@@ -297,7 +306,7 @@ class WithdrawController extends Controller
                     'performed_by' => $performedBy,
                     'metadata' => [
                         'service' => 'withdrawal',
-                        'bank_code' => $request->bank_code,
+                        'bankCode' => $request->bankCode,
                         'account_no' => $request->account_no,
                         'account_name' => $request->account_name,
                         'user_role' => $user->role,
@@ -310,14 +319,14 @@ class WithdrawController extends Controller
                 ]);
 
                 // 7. Create Report Record (Pending)
-                $bankName = Bank::where('bank_code', $request->bank_code)->value('bank_name') ?? 'Bank';
+                $bankName = Bank::where('bankCode', $request->bankCode)->value('bankName') ?? 'Bank';
 
                 $report = \App\Models\Report::create([
                     'user_id' => $user->id,
                     'phone_number' => $request->account_no,
                     'account_number' => $request->account_no,
                     'account_name' => $request->account_name,
-                    'bank_code' => $request->bank_code,
+                    'bank_code' => $request->bankCode,
                     'bank_name' => $bankName,
                     'network' => 'Withdrawal',
                     'ref' => $transactionRef,
@@ -347,7 +356,7 @@ class WithdrawController extends Controller
                 $payoutResponse = $this->palmPay->transfer([
                     'orderId' => $transactionRef,
                     'payeeName' => $request->account_name,
-                    'payeeBankCode' => $request->bank_code,
+                    'payeeBankCode' => $request->bankCode,
                     'payeeBankAccNo' => $request->account_no,
                     'payeePhoneNo' => $user->phone_number ?? '0000000000',
                     'amount' => (int) ($request->amount * 100), // Convert to unit (e.g., kobo for NGN)

@@ -114,6 +114,22 @@
                         </div>
                     </div>
 
+                    {{-- Biometric Option --}}
+                    <div id="biometricAuthSection" class="d-none text-center mb-4">
+                        <div class="divider d-flex align-items-center mb-3">
+                            <hr class="flex-grow-1 border-gray-300">
+                            <span class="px-2 text-muted small">OR</span>
+                            <hr class="flex-grow-1 border-gray-300">
+                        </div>
+                        
+                        <button type="button" 
+                                id="btnBiometricAuth" 
+                                class="btn btn-outline-primary rounded-pill w-100 py-2 fw-bold d-flex align-items-center justify-content-center gap-2">
+                            <i class="ti ti-fingerprint fs-5"></i> 
+                            Confirm with Biometrics
+                        </button>
+                    </div>
+
                     <div class="text-center">
                         <a href="{{ route('profile.edit') }}#security" class="small text-muted">
                             <i class="bi bi-question-circle me-1"></i>Forgot your PIN? Reset it here
@@ -152,6 +168,103 @@
 <script>
 (function () {
     document.addEventListener('DOMContentLoaded', function () {
+        // --- WebAuthn / Biometric Step-up Support ---
+        const biometricBtn = document.getElementById('btnBiometricAuth');
+        const biometricSection = document.getElementById('biometricAuthSection');
+        const pinInputEl = document.getElementById('pinInput');
+
+        // Show/Hide Biometric Option based on availability
+        if (biometricSection && localStorage.getItem('arewa_smart_biometrics_enabled') === 'true') {
+            biometricSection.classList.remove('d-none');
+        }
+
+        if (biometricBtn) {
+            biometricBtn.addEventListener('click', async function() {
+                const originalContent = biometricBtn.innerHTML;
+                biometricBtn.disabled = true;
+                biometricBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span> Initializing...';
+                
+                try {
+                    // 1. Fetch Options
+                    const optionsResponse = await fetch('{{ route("webauthn.confirm.options") }}', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                            'Accept': 'application/json'
+                        }
+                    });
+
+                    if (!optionsResponse.ok) throw new Error('Biometrics not available for this session.');
+                    const options = await optionsResponse.json();
+
+                    // 2. Decode Options
+                    const decodeBase64 = (s) => Uint8Array.from(atob(s.replace(/-/g, '+').replace(/_/g, '/')), c => c.charCodeAt(0));
+                    const publicKeyOptions = options.publicKey || options;
+                    publicKeyOptions.challenge = decodeBase64(publicKeyOptions.challenge);
+                    if (publicKeyOptions.allowCredentials) {
+                        publicKeyOptions.allowCredentials.forEach(cred => cred.id = decodeBase64(cred.id));
+                    }
+
+                    // 3. Get Assertion
+                    biometricBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span> Verify your biometric...';
+                    const assertion = await navigator.credentials.get({ publicKey: publicKeyOptions });
+
+                    // 4. Encode Response
+                    const bufferToBase64url = (buffer) => btoa(String.fromCharCode(...new Uint8Array(buffer))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
+                    const assertionResponse = {
+                        id: assertion.id,
+                        rawId: bufferToBase64url(assertion.rawId),
+                        type: assertion.type,
+                        response: {
+                            authenticatorData: bufferToBase64url(assertion.response.authenticatorData),
+                            clientDataJSON: bufferToBase64url(assertion.response.clientDataJSON),
+                            signature: bufferToBase64url(assertion.response.signature),
+                            userHandle: assertion.response.userHandle ? bufferToBase64url(assertion.response.userHandle) : null,
+                        },
+                    };
+
+                    // 5. Verify on Server
+                    biometricBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span> Finalizing...';
+                    const verifyResponse = await fetch('{{ route("webauthn.confirm") }}', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                            'Accept': 'application/json'
+                        },
+                        body: JSON.stringify(assertionResponse)
+                    });
+
+                    if (verifyResponse.ok) {
+                        // Success! Trigger the PIN confirmation button in "biometric mode"
+                        const confirmPinBtn = document.getElementById('confirmPinBtn');
+                        
+                        // Set a global flag that the success logic on the page can read
+                        window.biometricAuthorized = true;
+                        
+                        // Also fill visual indicator
+                        if (pinInputEl) {
+                            pinInputEl.value = '*****'; 
+                            pinInputEl.disabled = true;
+                        }
+
+                        // Trigger the parent page's handler
+                        confirmPinBtn.click();
+                    } else {
+                        throw new Error('Biometric verification failed.');
+                    }
+
+                } catch (error) {
+                    console.error('Biometric Step-up Error:', error);
+                    alert(error.message || 'Verification failed.');
+                } finally {
+                    biometricBtn.disabled = false;
+                    biometricBtn.innerHTML = originalContent;
+                }
+            });
+        }
+
 
         const pinInput       = document.getElementById('pinInput');
         const toggleBtn      = document.getElementById('togglePinVisibility');

@@ -159,9 +159,6 @@
                         </div>
                         @endif
                         <div class="col-12">
-                            <a href="{{ url()->previous() }}" class="btn btn-primary w-100 rounded-3 py-2 fw-bold extra-small shadow-sm d-flex align-items-center justify-content-center text-nowrap">
-                                <i class="bi bi-arrow-repeat me-2"></i>Buy Again
-                            </a>
                         </div>
                     </div>
                     <p class="text-muted text-center extra-small mb-0 px-2" style="line-height: 1.4; font-size: 0.7rem;">

@@ -1,77 +1,71 @@
 @if(isset($adverts) && $adverts->count() > 0)
-    <div id="serviceAdvertCarousel" class="carousel slide" data-bs-ride="carousel" data-bs-interval="5000">
-        <div class="carousel-indicators">
+    <div id="serviceAdvertCarousel" class="carousel slide carousel-fade" data-bs-ride="carousel" data-bs-interval="5000" data-bs-pause="hover">
+        <div class="carousel-indicators custom-indicators">
             @foreach($adverts as $index => $advert)
                 <button type="button" data-bs-target="#serviceAdvertCarousel" data-bs-slide-to="{{ $index }}" class="{{ $index === 0 ? 'active' : '' }}" aria-current="{{ $index === 0 ? 'true' : 'false' }}" aria-label="Slide {{ $index + 1 }}"></button>
             @endforeach
         </div>
         
-        {{-- Optional: Add prev/next buttons for better UX --}}
-        <button class="carousel-control-prev d-none d-md-flex" type="button" data-bs-target="#serviceAdvertCarousel" data-bs-slide="prev">
-            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-            <span class="visually-hidden">Previous</span>
+        <button class="carousel-control-prev custom-nav d-none d-md-flex" type="button" data-bs-target="#serviceAdvertCarousel" data-bs-slide="prev">
+            <i class="ti ti-chevron-left"></i>
         </button>
-        <button class="carousel-control-next d-none d-md-flex" type="button" data-bs-target="#serviceAdvertCarousel" data-bs-slide="next">
-            <span class="carousel-control-next-icon" aria-hidden="true"></span>
-            <span class="visually-hidden">Next</span>
+        <button class="carousel-control-next custom-nav d-none d-md-flex" type="button" data-bs-target="#serviceAdvertCarousel" data-bs-slide="next">
+            <i class="ti ti-chevron-right"></i>
         </button>
         
-        <div class="carousel-inner shadow-lg border-0" style="border-radius: 30px !important;">
+        <div class="carousel-inner premium-carousel-inner shadow-lg border-0" style="border-radius: 30px !important;">
             @foreach($adverts as $index => $advert)
                 <div class="carousel-item {{ $index === 0 ? 'active' : '' }}">
                     @if($advert->link)
-                        <a href="{{ $advert->link }}" class="text-decoration-none">
+                        <a href="{{ $advert->link }}" class="text-decoration-none h-100 w-100">
                     @endif
-                    <div class="advert-card position-relative overflow-hidden border-0 shadow-sm" 
-                         style="border-radius: 30px !important; height: 240px; background: {{ $advert->image ? 'url(' . asset($advert->image) . ')' : 'linear-gradient(135deg, #111827 0%, #F26522 100%)' }}; background-size: cover; background-position: center;">
+                    <div class="advert-card position-relative overflow-hidden" 
+                         style="background: {{ $advert->image ? 'url(' . asset($advert->image) . ')' : 'linear-gradient(135deg, #0f172a 0%, #334155 100%)' }}; background-size: cover; background-position: center;">
                         
-                        {{-- Image Fallback Logic --}}
                         @if($advert->image)
                             <img src="{{ asset($advert->image) }}" class="d-none" 
-                                 onerror="this.parentElement.style.backgroundImage = 'linear-gradient(135deg, #111827 0%, #F26522 100%)';">
+                                 onerror="this.parentElement.style.backgroundImage = 'linear-gradient(135deg, #0f172a 0%, #334155 100%)';">
                         @endif
 
-                        <!-- Premium Overlay with Gradient Animation -->
-                        <div class="advert-overlay position-absolute top-0 start-0 w-100 h-100 d-flex flex-column justify-content-center px-4 px-md-5" 
-                             style="background: linear-gradient(105deg, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.4) 50%, rgba(0,0,0,0.1) 100%);">
-                            
-                            <!-- Floating Elements for Depth -->
-                            <div class="floating-elements">
-                                <div class="circle-blur position-absolute rounded-circle bg-white" style="width: 200px; height: 200px; top: -50px; left: -50px; opacity: 0.03;"></div>
-                                <div class="circle-blur position-absolute rounded-circle bg-primary" style="width: 250px; height: 250px; bottom: -80px; right: -50px; opacity: 0.08;"></div>
-                            </div>
-                            
-                            <!-- Service Badge with Icon -->
-                            @if($advert->service_name)
-                                <div class="service-badge mb-3 animate__animated animate__fadeInDown">
-                                    <span class="badge bg-warning bg-gradient text-dark px-3 py-2 rounded-pill fw-bold text-uppercase shadow-sm" style="font-size: 0.7rem; letter-spacing: 1.5px; background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);">
-                                        <i class="ti ti-crown me-1"></i> {{ $advert->service_name }}
-                                    </span>
-                                </div>
-                            @endif
-                            
-                            <!-- Main Message with Text Shadow -->
-                            <h3 class="text-white fw-bold mb-2 animate__animated animate__fadeInLeft" style="font-size: 1.5rem; text-shadow: 2px 2px 4px rgba(0,0,0,0.3); max-width: 80%;">
-                                {{ $advert->message }}
-                            </h3>
-                            
-                            <!-- Discount Banner with Enhanced Design -->
-                            @if($advert->discount)
-                                <div class="discount-banner mb-3 animate__animated animate__fadeInLeft animate__delay-1s">
-                                    <div class="d-inline-flex align-items-center bg-white bg-opacity-15 border border-white border-opacity-25 rounded-pill px-3 py-1.5 backdrop-blur">
-                                        <span class="badge bg-danger me-2 px-2 py-1 rounded-pill" style="font-size: 0.7rem;">
-                                            <i class="ti ti-discount-2 me-1"></i> {{ $advert->discount }}% OFF
+                        <!-- Ambient Background Objects -->
+                        <div class="glass-ambient-overlay">
+                            <div class="ambient-circle ambient-1"></div>
+                            <div class="ambient-circle ambient-2"></div>
+                        </div>
+
+                        <!-- Main Content Overlay -->
+                        <div class="advert-content-wrapper d-flex flex-column justify-content-center h-100 px-4 px-md-5">
+                            <div class="content-glass-panel p-3 p-md-4">
+                                <!-- Service Badge -->
+                                @if($advert->service_name)
+                                    <div class="service-tag-wrapper mb-2 animate__animated animate__fadeInDown">
+                                        <span class="glass-badge-service">
+                                            <i class="ti ti-sparkles me-1 text-warning"></i> {{ $advert->service_name }}
                                         </span>
-                                        <span class="text-white small fw-semibold">Limited Time Offer</span>
                                     </div>
-                                    <p class="text-white-50 small mt-1 mb-0" style="font-size: 0.75rem;">
-                                        <i class="ti ti-clock me-1"></i> Hurry! Offer ends soon
-                                    </p>
+                                @endif
+                                
+                                <!-- Message -->
+                                <h3 class="advert-title text-white fw-bold mb-2 animate__animated animate__fadeInLeft">
+                                    {{ $advert->message }}
+                                </h3>
+                                
+                                <!-- CTA Area -->
+                                <div class="d-flex align-items-center gap-3 mt-auto">
+                                    @if($advert->discount)
+                                        <div class="glass-discount-pill">
+                                            <span class="discount-value">{{ $advert->discount }}</span>
+                                            <span class="discount-text ms-1">OFF</span>
+                                        </div>
+                                    @endif
+                                    
+                                    <div class="cta-indicator">
+                                        <span class="small text-white-50 fw-medium">Tap to explore</span>
+                                        <i class="ti ti-arrow-right ms-1 text-white animate-arrow-side"></i>
+                                    </div>
                                 </div>
-                            @endif
                             </div>
                         </div>
-                    </div>
                     @if($advert->link)
                         </a>
                     @endif
@@ -80,205 +74,193 @@
         </div>
     </div>
 
-    <style>
-   
-
-    /* Backdrop Blur */
-    .backdrop-blur {
-        backdrop-filter: blur(8px);
-        -webkit-backdrop-filter: blur(8px);
-    }
-    
-    .bg-opacity-15 {
-        --bs-bg-opacity: 0.15;
-        background-color: rgba(255, 255, 255, var(--bs-bg-opacity)) !important;
-    }
-    
-    .py-1\.5 {
-        padding-top: 0.375rem !important;
-        padding-bottom: 0.375rem !important;
+<style>
+    :root {
+        --advert-height-desktop: 240px;
+        --advert-height-mobile: 180px;
+        --glass-border: rgba(255, 255, 255, 0.15);
     }
 
-    /* Carousel Indicators */
-    #serviceAdvertCarousel .carousel-indicators {
-        bottom: 15px;
-        justify-content: flex-start;
-        margin-left: 2rem;
-        margin-right: 0;
-        gap: 4px;
-    }
-    
-    #serviceAdvertCarousel .carousel-indicators [data-bs-target] {
-        width: 12px;
-        height: 4px;
-        border-radius: 4px;
-        margin: 0;
-        background-color: rgba(255, 255, 255, 0.5);
-        border: none;
-        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-    }
-    
-    #serviceAdvertCarousel .carousel-indicators [data-bs-target]:hover {
-        background-color: rgba(255, 255, 255, 0.8);
-        transform: scaleY(1.2);
-    }
-    
-    #serviceAdvertCarousel .carousel-indicators .active {
-        background: var(--primary-gradient);
-        width: 35px;
-        opacity: 1;
+    /* Aggressive Spacing Fixes */
+    #serviceAdvertCarousel {
+        border-radius: 30px;
+        overflow: hidden;
+        margin-bottom: -15px !important;
+        height: var(--advert-height-desktop);
     }
 
-    /* Card Styles */
+    /* Mobile Height Correction */
+    @media (max-width: 768px) {
+        #serviceAdvertCarousel {
+            height: var(--advert-height-mobile);
+        }
+    }
+
+    .premium-carousel-inner {
+        border-radius: 30px !important;
+        height: 100%;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+
     .advert-card {
-        transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+        height: 100%;
+        width: 100%;
+        display: flex;
+        border-radius: 30px !important;
+        background-color: #0f172a;
+        z-index: 1;
+        margin: 0 !important;
+    }
+
+    /* Glass Effect Panel */
+    .content-glass-panel {
+        background: rgba(0, 0, 0, 0.45);
+        backdrop-filter: blur(15px);
+        -webkit-backdrop-filter: blur(15px);
+        border: 1px solid var(--glass-border);
+        border-radius: 20px;
+        max-width: 85%;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.2);
         position: relative;
+        z-index: 5;
     }
-    
-   
-    /* Hot Badge Animation */
-    .hot-badge {
-        background: linear-gradient(135deg, #dc3545 0%, #ff6b81 100%) !important;
-        position: relative;
-        overflow: hidden;
+
+    /* Discount Pill */
+    .glass-discount-pill {
+        background: linear-gradient(135deg, #f26522, #ea580c);
+        padding: 4px 12px;
+        border-radius: 100px;
+        color: #fff;
+        font-weight: 800;
+        display: flex;
+        align-items: center;
+        box-shadow: 0 4px 15px rgba(242, 101, 34, 0.4);
+        border: 1px solid rgba(255,255,255,0.2);
     }
-    
-    .hot-badge::before {
-        content: '';
-        position: absolute;
-        top: -50%;
-        left: -50%;
-        width: 200%;
-        height: 200%;
-        background: rgba(255,255,255,0.1);
-        transform: rotate(45deg);
-        animation: shimmer 3s infinite;
+
+    .discount-value { font-size: 1rem; }
+    .discount-text { font-size: 0.65rem; opacity: 0.9; }
+
+    /* Indicators - Inside and Absolute */
+    .custom-indicators {
+        position: absolute !important;
+        bottom: 10px !important; 
+        left: 50% !important;
+        transform: translateX(-50%) !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        gap: 6px;
+        z-index: 15;
+        width: fit-content !important;
     }
-    
-    .pulse-dot {
-        width: 8px;
-        height: 8px;
-        background-color: #fff;
+
+    .custom-indicators [data-bs-target] {
+        width: 6px;
+        height: 6px;
         border-radius: 50%;
-        margin-right: 6px;
-        animation: pulse-dot 2s infinite;
-    }
-    
-    @keyframes pulse-dot {
-        0% { transform: scale(1); opacity: 1; }
-        50% { transform: scale(1.5); opacity: 0.5; }
-        100% { transform: scale(1); opacity: 1; }
-    }
-    
-    @keyframes shimmer {
-        0% { transform: rotate(45deg) translateX(-100%); }
-        100% { transform: rotate(45deg) translateX(100%); }
+        background-color: rgba(255, 255, 255, 0.4);
+        border: none;
+        margin: 0 !important;
     }
 
-    /* CTA Button Hover Effect */
-    .btn-cta {
-        position: relative;
+    .custom-indicators .active {
+        width: 16px;
+        border-radius: 8px;
+        background-color: #fff;
+    }
+
+    /* Ambient Background Objects */
+    .glass-ambient-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
         overflow: hidden;
-        transition: all 0.3s ease;
-    }
-    
-    .btn-cta:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 10px 20px rgba(242, 101, 34, 0.3) !important;
-    }
-    
-    .btn-cta:hover i {
-        animation: arrow-move 0.6s ease infinite;
-    }
-    
-    @keyframes arrow-move {
-        0% { transform: translateX(0); }
-        50% { transform: translateX(5px); }
-        100% { transform: translateX(0); }
+        z-index: 2;
     }
 
-    /* Carousel Transition Enhancement */
-    #serviceAdvertCarousel .carousel-item {
-        transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+    .ambient-circle {
+        position: absolute;
+        border-radius: 50%;
+        filter: blur(50px);
+        opacity: 0.12;
+        animation: float-ambient 12s infinite ease-in-out;
     }
-    
-    /* Floating Circles Animation */
-    .circle-blur {
-        animation: float 8s infinite ease-in-out;
+
+    .ambient-1 {
+        width: 200px; height: 200px;
+        background: #f26522; top: -50px; right: -20px;
     }
-    
-    .circle-blur:nth-child(2) {
-        animation-delay: -4s;
+
+    .ambient-2 {
+        width: 180px; height: 180px;
+        background: #0ea5e9; bottom: -40px; left: 5%;
+        animation-delay: -6s;
     }
-    
-    @keyframes float {
+
+    /* Text Style */
+    .advert-title {
+        font-size: 1.5rem;
+        line-height: 1.2;
+        text-shadow: 0 2px 10px rgba(0,0,0,0.3);
+        margin-bottom: 0.5rem;
+    }
+
+    .glass-badge-service {
+        background: rgba(255, 255, 255, 0.1);
+        padding: 3px 10px;
+        border-radius: 100px;
+        font-size: 0.7rem;
+        font-weight: 700;
+        color: #fff;
+        text-transform: uppercase;
+        border: 1px solid rgba(255,255,255,0.1);
+    }
+
+    /* Navigation */
+    .custom-nav {
+        width: 36px;
+        height: 36px;
+        background: rgba(255, 255, 255, 0.1) !important;
+        backdrop-filter: blur(8px);
+        border-radius: 50%;
+        top: 50%;
+        transform: translateY(-50%);
+        margin: 0 10px;
+        border: 1px solid rgba(255, 255, 255, 0.2) !important;
+        opacity: 0.4;
+        transition: all 0.3s ease;
+        color: white;
+        z-index: 10;
+    }
+
+    .custom-nav:hover { opacity: 1; background: #f26522 !important; }
+
+    @media (max-width: 768px) {
+        .content-glass-panel {
+            max-width: 90%;
+            padding: 0.85rem !important;
+        }
+        .advert-title {
+            font-size: 1rem;
+            margin-bottom: 0.3rem;
+        }
+    }
+
+    @keyframes float-ambient {
         0%, 100% { transform: translate(0, 0); }
         50% { transform: translate(10px, -10px); }
     }
-
-    /* Responsive Design */
-    @media (max-width: 768px) {
-        .advert-card {
-            height: 200px !important;
-        }
-        
-        #serviceAdvertCarousel .carousel-indicators {
-            justify-content: center;
-            margin-left: 0;
-        }
-        
-        #serviceAdvertCarousel .carousel-indicators [data-bs-target] {
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-        }
-        
-        #serviceAdvertCarousel .carousel-indicators .active {
-            width: 24px;
-            border-radius: 12px;
-        }
-        
-        h3 {
-            font-size: 1.1rem !important;
-            max-width: 100% !important;
-        }
-    }
-
-    /* Loading Animation (optional) */
-    .carousel-item {
-        opacity: 0;
-        transition: opacity 0.5s ease-in-out;
+    
+    .animate-swipe {
+        animation: swipe-hint 2s infinite ease-in-out;
     }
     
-    .carousel-item.active {
-        opacity: 1;
+    @keyframes swipe-hint {
+        0%, 100% { transform: translateX(0); opacity: 0.5; }
+        50% { transform: translateX(-8px); opacity: 1; }
     }
-
-    /* Optional: Add these animation classes if you include Animate.css or create your own */
-    .animate__animated {
-        animation-duration: 0.8s;
-        animation-fill-mode: both;
-    }
-    
-    @keyframes fadeInDown {
-        from { opacity: 0; transform: translateY(-20px); }
-        to { opacity: 1; transform: translateY(0); }
-    }
-    
-    @keyframes fadeInLeft {
-        from { opacity: 0; transform: translateX(-20px); }
-        to { opacity: 1; transform: translateX(0); }
-    }
-    
-    @keyframes fadeInUp {
-        from { opacity: 0; transform: translateY(20px); }
-        to { opacity: 1; transform: translateY(0); }
-    }
-    
-    .animate__fadeInDown { animation-name: fadeInDown; }
-    .animate__fadeInLeft { animation-name: fadeInLeft; }
-    .animate__fadeInUp { animation-name: fadeInUp; }
-    .animate__delay-1s { animation-delay: 0.2s; }
-    .animate__delay-2s { animation-delay: 0.4s; }
 </style>
 @endif

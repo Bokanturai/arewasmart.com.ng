@@ -89,7 +89,9 @@
                     });
 
                     if (registerResponse.ok) {
-                        // Success!
+                        // Success! - Save that biometrics are enabled for this browser
+                        localStorage.setItem('arewa_smart_biometrics_enabled', 'true');
+
                         Swal.fire({
                             icon: 'success',
                             title: 'Biometrics Enabled!',
@@ -128,8 +130,13 @@
     /**
      * WebAuthn Login Logic (Optional helper)
      */
-    async function webAuthnLogin(email = null) {
+    async function webAuthnLogin(email = null, mediation = 'optional') {
         try {
+            // Ensure empty email strings are treated as null for the server
+            const payload = { 
+                email: (email && email.trim() !== '') ? email : null 
+            };
+
             const optionsResponse = await fetch('{{ route("webauthn.login.options") }}', {
                 method: 'POST',
                 headers: {
@@ -137,7 +144,7 @@
                     'X-CSRF-TOKEN': '{{ csrf_token() }}',
                     'Accept': 'application/json'
                 },
-                body: JSON.stringify({ email })
+                body: JSON.stringify(payload)
             });
 
             if (!optionsResponse.ok) throw new Error('Failed to initialize biometric login');
@@ -155,8 +162,12 @@
             }
 
             const assertion = await navigator.credentials.get({
-                publicKey: publicKeyOptions
+                publicKey: publicKeyOptions,
+                mediation: mediation
             });
+
+            // If assertion is null (e.g. user cancelled), just return
+            if (!assertion) return;
 
             const bufferToBase64url = (buffer) => {
                 return btoa(String.fromCharCode(...new Uint8Array(buffer)))
@@ -188,13 +199,44 @@
             });
 
             if (loginResponse.ok) {
+                // Save that biometrics are enabled for this browser
+                localStorage.setItem('arewa_smart_biometrics_enabled', 'true');
                 window.location.href = '{{ route("dashboard") }}';
             } else {
                 throw new Error('Biometric verification failed');
             }
         } catch (error) {
+            // Don't alert if it's a silent conditional check or user cancellation
+            if (mediation === 'conditional' || error.name === 'NotAllowedError' || error.name === 'AbortError') {
+                console.log('Biometric login cancelled or background check complete.');
+                return;
+            }
+
             console.error('WebAuthn Login Error:', error);
+            
+            // Show user feedback on login failure
+            Swal.fire({
+                icon: 'error',
+                title: 'Login Failed',
+                text: error.message || 'Could not verify your biometrics. Please try again or use your password.',
+                confirmButtonColor: '#d33'
+            });
+
             throw error;
         }
     }
+
+    /**
+     * Initialize Passkey Conditional UI (Autofill)
+     */
+    document.addEventListener('DOMContentLoaded', async () => {
+        if (window.PublicKeyCredential && 
+            PublicKeyCredential.isConditionalMediationAvailable && 
+            await PublicKeyCredential.isConditionalMediationAvailable()) {
+            
+            // Trigger conditional login in the background.
+            // This will show the biometric prompt when the user clicks the email field.
+            webAuthnLogin(null, 'conditional');
+        }
+    });
 </script>

@@ -109,10 +109,17 @@ class TransferController extends Controller
         $senderWallet = $user->wallet;
         $amount = $request->amount;
         
-        // Verify PIN
-        if (!Hash::check($request->pin, $user->pin)) {
+        // Verify PIN or Biometric
+        $isBiometricValid = $request->biometric_auth && 
+                           session('biometric_verified_at') && 
+                           (now()->timestamp - session('biometric_verified_at')) < 60; // 60 seconds window
+
+        if (!$isBiometricValid && !Hash::check($request->pin, $user->pin)) {
              return back()->with('error', 'Incorrect Transaction PIN.');
         }
+
+        // Clear biometric flag after use for security
+        if ($isBiometricValid) session()->forget('biometric_verified_at');
 
         // Get Receiver
         $receiverWallet = Wallet::where('wallet_number', $request->wallet_id)->first();

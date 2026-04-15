@@ -66,4 +66,12 @@ Route::middleware('auth')->group(function () {
         ->name('webauthn.register.options');
     Route::post('webauthn/register', [WebAuthnRegisterController::class, 'register'])
         ->name('webauthn.register');
+
+    // WebAuthn Device Management
+    Route::get('webauthn/devices', [\App\Http\Controllers\WebAuthn\WebAuthnDeviceController::class, 'index'])
+        ->name('webauthn.devices.index');
+    Route::patch('webauthn/devices/{id}', [\App\Http\Controllers\WebAuthn\WebAuthnDeviceController::class, 'update'])
+        ->name('webauthn.devices.update');
+    Route::delete('webauthn/devices/{id}', [\App\Http\Controllers\WebAuthn\WebAuthnDeviceController::class, 'destroy'])
+        ->name('webauthn.devices.destroy');
 });

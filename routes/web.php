@@ -147,6 +147,10 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/transfer/verify', [App\Http\Controllers\TransferController::class, 'verifyUser'])->name('transfer.verify');
     Route::post('/transfer/process', [App\Http\Controllers\TransferController::class, 'processTransfer'])->name('transfer.process');
 
+    // Biometric Step-up / Confirmation Routes
+    Route::post('/webauthn/confirm/options', [App\Http\Controllers\WebAuthnConfirmController::class, 'options'])->name('webauthn.confirm.options');
+    Route::post('/webauthn/confirm', [App\Http\Controllers\WebAuthnConfirmController::class, 'verify'])->name('webauthn.confirm');
+
     Route::view('/thankyou', 'thankyou')->name('thankyou');
 
 

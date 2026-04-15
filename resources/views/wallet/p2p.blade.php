@@ -353,6 +353,29 @@
             const pinErrorText = document.getElementById('pinErrorText');
             const pin = document.getElementById('pinInput').value.trim();
 
+            // Check if we already authorized via Biometrics in the modal
+            if (window.biometricAuthorized) {
+                const form = document.getElementById('transferForm');
+                
+                // Add biometric flag to form
+                const bioInput = document.createElement('input');
+                bioInput.type = 'hidden';
+                bioInput.name = 'biometric_auth';
+                bioInput.value = '1';
+                form.appendChild(bioInput);
+                
+                // Still add a dummy PIN to pass validation if needed, 
+                // or we update the controller to make PIN optional when biometric_auth is present.
+                const pinHiddenInput = document.createElement('input');
+                pinHiddenInput.type = 'hidden';
+                pinHiddenInput.name = 'pin';
+                pinHiddenInput.value = '00000'; // Dummy PIN
+                form.appendChild(pinHiddenInput);
+
+                form.submit();
+                return;
+            }
+
             if (!pin || pin.length !== 5) {
                 pinErrorText.textContent = 'Please enter a valid 5-digit PIN.';
                 pinError.classList.remove('d-none');
