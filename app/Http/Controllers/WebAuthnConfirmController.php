@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Laragear\WebAuthn\Http\Requests\AssertedRequest;
+use Laragear\WebAuthn\Http\Requests\AssertionRequest;
 use Laragear\WebAuthn\WebAuthn;
 use Illuminate\Support\Facades\Auth;
 
@@ -12,9 +13,9 @@ class WebAuthnConfirmController extends Controller
     /**
      * Generate WebAuthn options for an existing user (Step-up).
      */
-    public function options()
+    public function options(AssertionRequest $request)
     {
-        return Auth::user()->generateLoginOptions();
+        return $request->toVerify(Auth::user());
     }
 
     /**

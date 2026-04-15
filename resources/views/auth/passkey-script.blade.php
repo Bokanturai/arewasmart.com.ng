@@ -130,7 +130,15 @@
     /**
      * WebAuthn Login Logic (Optional helper)
      */
+    let webAuthnAbortController = null;
+
     async function webAuthnLogin(email = null, mediation = 'optional') {
+        // Abort any existing pending WebAuthn request to prevent conflicts
+        if (webAuthnAbortController) {
+            webAuthnAbortController.abort('New request started');
+        }
+        webAuthnAbortController = new AbortController();
+
         try {
             // Ensure empty email strings are treated as null for the server
             const payload = { 
@@ -144,7 +152,8 @@
                     'X-CSRF-TOKEN': '{{ csrf_token() }}',
                     'Accept': 'application/json'
                 },
-                body: JSON.stringify(payload)
+                body: JSON.stringify(payload),
+                signal: webAuthnAbortController.signal
             });
 
             if (!optionsResponse.ok) throw new Error('Failed to initialize biometric login');
@@ -163,7 +172,8 @@
 
             const assertion = await navigator.credentials.get({
                 publicKey: publicKeyOptions,
-                mediation: mediation
+                mediation: mediation,
+                signal: webAuthnAbortController.signal
             });
 
             // If assertion is null (e.g. user cancelled), just return
@@ -195,7 +205,8 @@
                     'X-CSRF-TOKEN': '{{ csrf_token() }}',
                     'Accept': 'application/json'
                 },
-                body: JSON.stringify(assertionResponse)
+                body: JSON.stringify(assertionResponse),
+                signal: webAuthnAbortController.signal
             });
 
             if (loginResponse.ok) {
@@ -206,9 +217,12 @@
                 throw new Error('Biometric verification failed');
             }
         } catch (error) {
-            // Don't alert if it's a silent conditional check or user cancellation
-            if (mediation === 'conditional' || error.name === 'NotAllowedError' || error.name === 'AbortError') {
-                console.log('Biometric login cancelled or background check complete.');
+            // Don't alert if it's a silent conditional check, an abort, or user cancellation
+            if (mediation === 'conditional' || 
+                error.name === 'NotAllowedError' || 
+                error.name === 'AbortError' || 
+                error === 'New request started') {
+                console.log('Biometric login cancelled, aborted, or background check complete.');
                 return;
             }
 
@@ -223,6 +237,9 @@
             });
 
             throw error;
+        } finally {
+            // We only clear the controller if it's the one we created
+            // if (webAuthnAbortController?.signal === signal) webAuthnAbortController = null;
         }
     }
 

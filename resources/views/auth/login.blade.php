@@ -121,29 +121,6 @@
                     }
                 });
             }
-            // Auto-trigger biometrics if enabled previously
-            if (localStorage.getItem('arewa_smart_biometrics_enabled') === 'true') {
-                setTimeout(async () => {
-                    // Only auto-trigger if email is empty (usernameless flow)
-                    // or if email is pre-filled (remember me)
-                    const emailInput = document.getElementById('email');
-                    const email = emailInput ? emailInput.value : null;
-
-                    try {
-                        // Disable button and show loading while auto-prompt is active
-                        const originalContent = bioLoginBtn.innerHTML;
-                        bioLoginBtn.disabled = true;
-                        bioLoginBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span> Auto-signing in...';
-                        
-                        await webAuthnLogin(email);
-                    } catch (error) {
-                        // If auto-login fails (e.g. user canceled), just reset UI
-                        bioLoginBtn.disabled = false;
-                        bioLoginBtn.innerHTML = '<i class="ti ti-fingerprint me-2 fs-20"></i> Sign in with Biometrics';
-                        console.log('Auto-biometrics cancelled or blocked.');
-                    }
-                }, 1000); // Small delay to ensure browser readiness
-            }
         });
     </script>
 </x-guest-layout>

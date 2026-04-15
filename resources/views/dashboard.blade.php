@@ -194,14 +194,7 @@
             </div>
         </div>
 
-        <!-- 4. Advertisement Section -->
-        <div class="row g-0 mt-n2">
-            <div class="col-12 px-0 px-md-3">
-                @include('pages.dashboard.advert')
-            </div>
-        </div>
-
-        <!-- 5. Transactions & Statistics Section -->
+        <!-- 4. Transactions & Statistics Section -->
         <div class="row g-0 mt-n5 d-none d-lg-flex">
             <div class="col-12 px-0 px-md-3">
                 @include('pages.dashboard.trans')
