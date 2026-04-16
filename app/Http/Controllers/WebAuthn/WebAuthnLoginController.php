@@ -28,9 +28,9 @@ class WebAuthnLoginController
 
         if ($user) {
             \Illuminate\Support\Facades\Auth::login($user, true);
-            return response()->noContent(204);
+            return response()->json(['status' => 'success', 'message' => 'Logged in successfully']);
         }
 
-        return response()->noContent(422);
+        return response()->json(['status' => 'error', 'message' => 'Biometric verification failed'], 422);
     }
 }

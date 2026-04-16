@@ -30,6 +30,6 @@ class WebAuthnRegisterController
     {
         $request->save();
 
-        return response()->noContent();
+        return response()->json(['status' => 'success', 'message' => 'Biometrics registered successfully']);
     }
 }

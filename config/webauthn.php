@@ -15,7 +15,13 @@ return [
 
     'relying_party' => [
         'name' => env('WEBAUTHN_NAME', config('app.name')),
-        'id' => env('WEBAUTHN_ID', parse_url(env('APP_URL', 'localhost'), PHP_URL_HOST)),
+        'id' => env('WEBAUTHN_ID', function () {
+            $url = env('APP_URL', 'localhost');
+            if (!str_contains($url, '://')) {
+                $url = 'https://' . $url;
+            }
+            return parse_url($url, PHP_URL_HOST);
+        }()),
     ],
 
     /*

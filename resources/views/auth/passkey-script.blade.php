@@ -15,6 +15,19 @@
         return Uint8Array.from(atob(padded.replace(/-/g, '+').replace(/_/g, '/')), c => c.charCodeAt(0));
     };
 
+    const safeJsonParse = async (response) => {
+        const contentType = response.headers.get('content-type');
+        if (contentType && contentType.includes('application/json')) {
+            try {
+                return await response.json();
+            } catch (e) {
+                console.error('JSON Parse Error:', e);
+                return {};
+            }
+        }
+        return {};
+    };
+
     /**
      * WebAuthn / Passkey Registration Logic
      */
@@ -39,7 +52,7 @@
 
                     if (!optionsResponse.ok) throw new Error('Failed to fetch biometric options.');
 
-                    const options = await optionsResponse.json();
+                    const options = await safeJsonParse(optionsResponse);
                     const publicKeyOptions = options.publicKey || options;
                     
                     // Decode necessary Base64URL strings to Uint8Array
@@ -86,7 +99,7 @@
                             confirmButtonColor: '#F26522'
                         }).then(() => location.reload());
                     } else {
-                        const errorData = await registerResponse.json();
+                        const errorData = await safeJsonParse(registerResponse);
                         throw new Error(errorData.message || 'Verification failed.');
                     }
 
@@ -137,7 +150,7 @@
 
             if (!optionsResponse.ok) throw new Error('Failed to initialize biometric login');
 
-            const options = await optionsResponse.json();
+            const options = await safeJsonParse(optionsResponse);
             const publicKeyOptions = options.publicKey || options;
             
             publicKeyOptions.challenge = decodeBase64url(publicKeyOptions.challenge);
@@ -182,7 +195,7 @@
                 localStorage.setItem('arewa_smart_biometrics_enabled', 'true');
                 window.location.href = '{{ route("dashboard") }}';
             } else {
-                const errorData = await loginResponse.json();
+                const errorData = await safeJsonParse(loginResponse);
                 throw new Error(errorData.message || 'Biometric verification failed');
             }
         } catch (error) {
