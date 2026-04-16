@@ -24,6 +24,13 @@ class WebAuthnLoginController
      */
     public function login(AssertedRequest $request): Response
     {
-        return response()->noContent($request->login() ? 204 : 422);
+        $user = $request->user();
+
+        if ($user) {
+            \Illuminate\Support\Facades\Auth::login($user, true);
+            return response()->noContent(204);
+        }
+
+        return response()->noContent(422);
     }
 }
