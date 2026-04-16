@@ -8,9 +8,13 @@ use Illuminate\Support\Facades\Log;
 use App\Models\AgentService;
 use App\Models\Transaction;
 use App\Models\AiChat;
+use App\Models\Report;
+use App\Models\VirtualAccount;
+use App\Traits\HttpResponses;
 
 class AiCommentController extends Controller
 {
+    use HttpResponses;
     /**
      * Summarize an administrative comment using AI.
      */
@@ -24,26 +28,24 @@ class AiCommentController extends Controller
         $comment = $request->input('comment');
         $reference = $request->input('reference');
 
-        $context = $this->fetchContext($reference);
-        $financialContext = $this->fetchUserFinancialContext();
-        $recentActivity = $this->fetchRecentUserActivity();
-        $fullContext = $context . "\n\n" . $financialContext . "\n\nRecent User Activity (Last 5 Days):\n" . $recentActivity;
+        $fullContext = $this->fetchFullUserContext($reference);
 
         $user = auth()->user();
         $userName = $user ? $user->first_name . ' ' . $user->last_name : 'Valued User';
         $systemPrompt = $this->getSystemPrompt('summarize', $fullContext, $userName);
 
-        $response = $this->callDeepseek($systemPrompt, "Please provide a professional transaction summary and analysis for matches in the last 5 days if visible, otherwise focus on the specific context: \"$comment\"");
+        $response = $this->callDeepseek($systemPrompt, "Provide a friendly, very brief greeting and offer assistance. Do NOT provide a summary yet. Just say you are ready to help with any questions about this transaction: \"$comment\"");
 
         if ($response['success']) {
-            // Save the summary as the first assistant message if not already present
+            // Save the intro as the first assistant message if not already present
             AiChat::updateOrCreate(
                 ['user_id' => auth()->id(), 'reference' => $reference, 'role' => 'assistant', 'type' => 'comment'],
                 ['content' => $response['answer']]
             );
+            return $this->success($response);
         }
 
-        return response()->json($response);
+        return $this->error($response['message'] ?? 'AI Service Error', 500);
     }
 
     /**
@@ -71,10 +73,7 @@ class AiCommentController extends Controller
             'content' => $question
         ]);
 
-        $recordContext = $this->fetchContext($reference);
-        $financialContext = $this->fetchUserFinancialContext();
-        $recentActivity = $this->fetchRecentUserActivity();
-        $fullContext = "Context: \"$comment\"\n\n" . $recordContext . "\n\n" . $financialContext . "\n\nRecent User Activity (Last 5 Days):\n" . $recentActivity;
+        $fullContext = $this->fetchFullUserContext($reference);
 
         $user = auth()->user();
         $userName = $user ? $user->first_name . ' ' . $user->last_name : 'Valued User';
@@ -107,9 +106,10 @@ class AiCommentController extends Controller
                 'type' => 'comment',
                 'content' => $response['answer']
             ]);
+            return $this->success($response);
         }
 
-        return response()->json($response);
+        return $this->error($response['message'] ?? 'AI Service Error', 500);
     }
 
     /**
@@ -126,7 +126,7 @@ class AiCommentController extends Controller
             ->oldest()
             ->get(['role', 'content']);
 
-        return response()->json([
+        return $this->success([
             'success' => true,
             'history' => $chats
         ]);
@@ -138,6 +138,7 @@ class AiCommentController extends Controller
     private function getSystemPrompt($action, $context = '', $userName = 'Valued User')
     {
         $today = now()->format('l, d F Y');
+        $userId = auth()->id();
         $termsAndConditions = <<<TEXT
 AREWA SMART CORE RULES (TERMS & CONDITIONS):
 1. Nature: Digital service platform & intermediary (NOT a bank).
@@ -147,30 +148,32 @@ AREWA SMART CORE RULES (TERMS & CONDITIONS):
 5. Charges: Apply once a request is successfully processed.
 6. Etiquette: Extremely professional, Nigerian business style, highly respectful.
 7. Security: You are a VIEW-ONLY assistant. You cannot delete, update, or post new transactions.
-8. MANUAL SUPPORT: If the user explicitly asks for human/manual support or if you cannot resolve their complex issue, politely direct them to contact Arewa Smart human support via WhatsApp at 08064333983 (WhatsApp only).
 TEXT;
 
         $basePrompt = <<<TEXT
-You are 'Arewa Smart AI Guide', a premium, highly professional virtual assistant for Arewa Smart Idea Ltd. 
+You are 'Arewa Smart AI Guide', a premium, highly professional virtual assistant for Arewa Smart Idea Ltd.
 
-Your Mission & Response Strategy (95/5 Rule):
-1. 95% FOCUS: Dedicate the vast majority of your response to addressing the user's specific question, concern, or complaint. Be direct, empathetic, and provide technical clarity based on the provided context.
-2. 5% FOCUS: Only at the very END of your response, you may include a single, brief sentence encouraging the user to explore more services or reach out again.
-3. If the user is COMPLAINING (e.g., failed transaction, pending status), your entire response should be empathetic and explanatory. Do NOT market to them if they are frustrated.
-4. Tone: Expert, warm, premium. Use Nigerian business etiquette. Highly respectful of the user's time.
+Your Mission & Response Strategy (Strictly Reactive):
+1. REACTIVE ONLY: Do NOT provide summaries, detailed analysis, or financial reports proactively. Wait for the user to ask a specific question.
+2. 95% FOCUS: When asked, dedicate the vast majority of your response to the user's specific question. Be direct, empathetic, and provide technical clarity.
+3. 5% FOCUS: Only at the very END of your response, you may include a single, brief sentence encouraging the user to explore more services or reach out again.
+4. TONE: Expert, warm, premium. Use Nigerian business etiquette. Highly respectful of the user's time.
+5. WHATSAPP RULE: NEVER provide the WhatsApp support number unless the user explicitly asks for 'human support', 'manual support', or a person to talk to.
+6. DATA PRIVACY & AUTHORIZATION: You are officially authorized with VIEW-ONLY access to all database systems for the authenticated user. You may reference any information provided in the context (Transactions, Services, Reports, Wallet, Profile) to assist the user. 
+7. SECURITY BOUNDARY: You MUST NOT attempt to access or reveal data that does not belong to User ID: $userId. Stay strictly within the provided user context.
 
 Strict Formatting Rules:
 - Start your response with: "Dear User $userName,"
-- Use standard Markdown for professional formatting (e.g., **bold** for emphasis, bullet points for lists).
+- Use standard Markdown for professional formatting.
 - Use double newlines between paragraphs for clear visual separation.
 - Date Context: Today is $today.
 TEXT;
 
         if ($action === 'summarize') {
-            return $basePrompt . "\n\nTask: Provide a detailed professional summary of the user's recent activity. Focus 95% on the data analysis and 5% on a subtle closing encouragement.";
+            return $basePrompt . "\n\nTask: Provide a very brief, friendly greeting (2 sentences max). Mention that you have access to the records and are ready to answer any specific questions the user has about this transaction/service. DO NOT show any details yet.";
         }
 
-        return $basePrompt . "\n\nTask: Answer the user's specific question or complaint. Dedicate 95% of your energy to solving their concern or providing clarification. 5% focus on a polite sign-off.";
+        return $basePrompt . "\n\nTask: Answer the user's specific question. Only provide information that was directly requested.";
     }
 
     /**
@@ -202,6 +205,55 @@ TEXT;
         }
 
         return "Reference provided ($reference) but no matching record found for your account.";
+    }
+
+    /**
+     * Systematically fetch all relevant database context for the user.
+     * SCOPED to user_id for security.
+     */
+    private function fetchFullUserContext($reference = null)
+    {
+        $userId = auth()->id();
+        if (!$userId) return "No authenticated user session found.";
+
+        // 1. Specific Record Context (if ref provided)
+        $recordContext = $this->fetchContext($reference);
+
+        // 2. Financial & Profile Context
+        $financialContext = $this->fetchUserFinancialContext();
+
+        // 3. Virtual Accounts Context
+        $virtualAccounts = VirtualAccount::where('user_id', $userId)->get();
+        $vaContext = "VIRTUAL ACCOUNTS:\n";
+        if ($virtualAccounts->isEmpty()) {
+            $vaContext .= "- No virtual accounts assigned yet.\n";
+        } else {
+            foreach ($virtualAccounts as $va) {
+                $vaContext .= "- {$va->bankName}: {$va->accountNo} ({$va->accountName}) [{$va->status}]\n";
+            }
+        }
+
+        // 4. Reports & Complaints Context (Last 10)
+        $reports = Report::where('user_id', $userId)->latest()->take(10)->get();
+        $reportContext = "USER REPORTS & COMPLAINTS (Last 10):\n";
+        if ($reports->isEmpty()) {
+            $reportContext .= "- No reports found.\n";
+        } else {
+            foreach ($reports as $r) {
+                $reportContext .= "- [{$r->created_at->format('Y-m-d')}] {$r->type} - {$r->description} [{$r->status}]\n";
+            }
+        }
+
+        // 5. Recent Activity (Transactions & Services)
+        $recentActivity = $this->fetchRecentUserActivity();
+
+        return "--- USER AUTHENTICATED CONTEXT (USER ID: $userId) ---\n\n" . 
+               "CURRENT FOCUS RECORD:\n$recordContext\n\n" .
+               "$financialContext\n\n" .
+               "$vaContext\n\n" .
+               "$reportContext\n\n" .
+               "RECENT ACTIVITY LOGS:\n$recentActivity\n\n" .
+               "--- END OF AUTHORIZED CONTEXT ---";
     }
 
     /**
