@@ -468,7 +468,7 @@
                                 <div class="d-flex align-items-center justify-content-between mb-4">
                                     <h5 class="fw-bold mb-0">Biometric Devices (Passkeys)</h5>
                                     <button class="btn btn-sm btn-primary rounded-pill px-3" data-bs-toggle="modal" data-bs-target="#biometricModal">
-                                        <i class="ti ti-plus me-1"></i> Add Device
+                                        <i class="ti ti-plus me-1 fs-15"></i> Add Device
                                     </button>
                                 </div>
                                 <div id="biometric-devices-list">

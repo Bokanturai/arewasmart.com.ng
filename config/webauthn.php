@@ -50,4 +50,20 @@ return [
         'timeout' => 60,
         'key' => '_webauthn',
     ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Database
+    |--------------------------------------------------------------------------
+    |
+    | Here you can configure the database connection and the model to use to
+    | store and retrieve WebAuthn credentials. You can also specify the
+    | table name if you are using a different one than the default.
+    |
+    */
+
+    'database' => [
+        'model' => \Laragear\WebAuthn\Models\WebAuthnCredential::class,
+        'table' => 'webauthn_credentials',
+    ],
 ];
