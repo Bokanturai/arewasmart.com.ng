@@ -22,7 +22,7 @@ class WebAuthnLoginController
     /**
      * Log the user in.
      */
-    public function login(AssertedRequest $request): Response
+    public function login(AssertedRequest $request): \Symfony\Component\HttpFoundation\Response
     {
         $user = $request->user();
 

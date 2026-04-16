@@ -26,7 +26,7 @@ class WebAuthnRegisterController
     /**
      * Registers a device for further WebAuthn authentication.
      */
-    public function register(AttestedRequest $request): Response
+    public function register(AttestedRequest $request): \Symfony\Component\HttpFoundation\Response
     {
         $request->save();
 
