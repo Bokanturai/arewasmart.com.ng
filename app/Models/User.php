@@ -7,12 +7,9 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
-use Laragear\WebAuthn\Contracts\WebAuthnAuthenticatable;
-use Laragear\WebAuthn\WebAuthnAuthentication;
-
-class User extends Authenticatable implements MustVerifyEmail, WebAuthnAuthenticatable
+class User extends Authenticatable implements MustVerifyEmail
 {
-    use HasFactory, Notifiable, WebAuthnAuthentication;
+    use HasFactory, Notifiable;
 
     /**
      * The attributes that are mass assignable.
@@ -77,19 +74,9 @@ class User extends Authenticatable implements MustVerifyEmail, WebAuthnAuthentic
     }
 
 
-    /**
-     * Relationship: A user has one wallet
-     */
     public function wallet()
     {
         return $this->hasOne(Wallet::class);
     }
-
-    /**
-     * Returns displayable data to be used to create WebAuthn Credentials.
-     */
-    public function webAuthnData(): \Laragear\WebAuthn\WebAuthnData
-    {
-        return \Laragear\WebAuthn\WebAuthnData::make($this->email, trim($this->first_name . ' ' . $this->last_name));
-    }
 }
+

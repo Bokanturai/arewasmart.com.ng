@@ -176,14 +176,14 @@
                                     </thead>
                                     <tbody>
                                         @forelse($tickets as $ticket)
-                                                                                <tr onclick="window.location='{{ route('support.show', $ticket->ticket_reference) }}'" class="position-relative">
+                                                                                <tr onclick="window.location='{{ route('support.show', $ticket->reference) }}'" class="position-relative">
                                                                                     <td class="ps-4 text-muted fw-bold d-mobile-none" data-label="S/N">
                                                                                         {{ $tickets->firstItem() + $loop->index }}
                                                                                     </td>
                                                                                     <td data-label="Ticket ID">
                                                                                         <span
                                                                                             class="badge bg-light text-dark border fw-bold text-uppercase px-2 py-1">
-                                                                                            {{ $ticket->ticket_reference }}
+                                                                                            {{ $ticket->reference }}
                                                                                         </span>
                                                                                     </td>
                                                                                     <td data-label="Subject">
@@ -206,7 +206,7 @@
                                                                                             class="ti ti-clock me-1"></i>{{ $ticket->updated_at->diffForHumans() }}
                                                                                     </td>
                                                                                     <td class="text-end pe-4" data-label="Action">
-                                                                                        <a href="{{ route('support.show', $ticket->ticket_reference) }}"
+                                                                                        <a href="{{ route('support.show', $ticket->reference) }}"
                                                                                             class="btn btn-sm btn-outline-primary rounded-pill px-3 stretched-link">
                                                                                             View <i class="ti ti-arrow-right ms-1"></i>
                                                                                         </a>
@@ -263,7 +263,7 @@
                         aria-label="Close"></button>
                 </div>
                 <form id="createTicketForm" action="{{ route('support.store') }}" method="POST"
-                    enctype="multipart/form-data">
+                    enctype="multipart/form-data" class="no-loader">
                     @csrf
                     <div style="display: none;">
                         <input type="text" name="honeypot_field" autocomplete="off">

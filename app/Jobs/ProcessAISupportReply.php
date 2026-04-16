@@ -2,8 +2,7 @@
 
 namespace App\Jobs;
 
-use App\Models\SupportTicket;
-use App\Models\SupportMessage;
+use App\Models\AiChat;
 use App\Services\DeepSeekService;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -16,47 +15,55 @@ class ProcessAISupportReply implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
-    public $ticket;
+    public $chat;
 
     /**
      * Create a new job instance.
      *
      * @return void
      */
-    public function __construct(SupportTicket $ticket)
+    public function __construct(AiChat $chat)
     {
-        $this->ticket = $ticket;
+        $this->chat = $chat;
     }
 
     /**
      * Execute the job.
-     *
-     * @return void
      */
     public function handle(DeepSeekService $deepSeekService)
     {
+        $reference = $this->chat->reference;
+        
         // Indicate to the frontend that AI is typing
-        Cache::put('admin_typing_' . $this->ticket->id, true, now()->addMinutes(5));
+        Cache::put('admin_typing_' . $reference, true, now()->addMinutes(5));
 
         try {
-            $reply = $deepSeekService->generateReply($this->ticket);
+            $reply = $deepSeekService->generateReply($this->chat);
 
-            SupportMessage::create([
-                'support_ticket_id' => $this->ticket->id,
-                'user_id' => null, // AI system acts as admin
-                'message' => $reply,
-                'is_admin_reply' => true,
+            AiChat::create([
+                'user_id' => $this->chat->user_id,
+                'reference' => $reference,
+                'type' => 'support',
+                'role' => 'assistant',
+                'content' => $reply,
             ]);
             
-            // Mark the ticket as answered by the admin
-            $this->ticket->update([
-                'status' => 'answered',
-                'updated_at' => now(),
-            ]);
+            // Mark the ticket as answered (update the head record)
+            $ticketHead = AiChat::support()
+                ->where('reference', $reference)
+                ->whereNotNull('subject')
+                ->first();
+                
+            if ($ticketHead) {
+                $ticketHead->update([
+                    'status' => 'answered',
+                    'updated_at' => now(),
+                ]);
+            }
 
         } finally {
             // Unset typing indicator
-            Cache::forget('admin_typing_' . $this->ticket->id);
+            Cache::forget('admin_typing_' . $reference);
         }
     }
 }

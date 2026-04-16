@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use App\Models\AgentService;
 use App\Models\Transaction;
+use App\Models\AiChat;
 
 class AiCommentController extends Controller
 {
@@ -34,6 +35,14 @@ class AiCommentController extends Controller
 
         $response = $this->callDeepseek($systemPrompt, "Please provide a professional transaction summary and analysis for matches in the last 5 days if visible, otherwise focus on the specific context: \"$comment\"");
 
+        if ($response['success']) {
+            // Save the summary as the first assistant message if not already present
+            AiChat::updateOrCreate(
+                ['user_id' => auth()->id(), 'reference' => $reference, 'role' => 'assistant', 'type' => 'comment'],
+                ['content' => $response['answer']]
+            );
+        }
+
         return response()->json($response);
     }
 
@@ -45,14 +54,22 @@ class AiCommentController extends Controller
         $request->validate([
             'comment' => 'required|string',
             'question' => 'required|string',
-            'history' => 'nullable|array',
             'reference' => 'nullable|string',
         ]);
 
         $comment = $request->input('comment');
         $question = $request->input('question');
-        $history = $request->input('history', []);
         $reference = $request->input('reference');
+        $userId = auth()->id();
+
+        // Save User Message
+        AiChat::create([
+            'user_id' => $userId,
+            'reference' => $reference,
+            'role' => 'user',
+            'type' => 'comment',
+            'content' => $question
+        ]);
 
         $recordContext = $this->fetchContext($reference);
         $financialContext = $this->fetchUserFinancialContext();
@@ -64,9 +81,55 @@ class AiCommentController extends Controller
 
         $systemPrompt = $this->getSystemPrompt('ask', $fullContext, $userName);
 
+        // Fetch last 20 messages for history context
+        $dbHistory = AiChat::comment()
+            ->where('user_id', $userId)
+            ->where('reference', $reference)
+            ->latest()
+            ->take(20)
+            ->get(['role', 'content'])
+            ->reverse()
+            ->toArray();
+
+        // Rename 'content' to 'content' for Deepseek compatibility (which it already is)
+        $history = array_map(function($msg) {
+            return ['role' => $msg['role'], 'content' => $msg['content']];
+        }, $dbHistory);
+
         $response = $this->callDeepseek($systemPrompt, $question, $history);
 
+        if ($response['success']) {
+            // Save Assistant Message
+            AiChat::create([
+                'user_id' => $userId,
+                'reference' => $reference,
+                'role' => 'assistant',
+                'type' => 'comment',
+                'content' => $response['answer']
+            ]);
+        }
+
         return response()->json($response);
+    }
+
+    /**
+     * Fetch chat history for a specific reference.
+     */
+    public function fetchHistory(Request $request)
+    {
+        $reference = $request->query('reference');
+        $userId = auth()->id();
+
+        $chats = AiChat::comment()
+            ->where('user_id', $userId)
+            ->where('reference', $reference)
+            ->oldest()
+            ->get(['role', 'content']);
+
+        return response()->json([
+            'success' => true,
+            'history' => $chats
+        ]);
     }
 
     /**
@@ -76,44 +139,38 @@ class AiCommentController extends Controller
     {
         $today = now()->format('l, d F Y');
         $termsAndConditions = <<<TEXT
-        AREWA SMART CORE RULES (TERMS & CONDITIONS):
-        1. Nature: Digital service platform & intermediary (NOT a bank).
-        2. Refunds: Only for system errors caused by Arewa Smart. NOT for user error or 3rd party failures.
-        3. Transactions: Final and Irreversible once processed.
-        4. Services: NIN (Validation, Modification, IPE), BVN (Search, Reports), Agency Banking, Airtime/Data.
-        5. Charges: Apply once a request is successfully processed.
-        6. Etiquette: Extremely professional, Nigerian business style, highly respectful.
-        7. Security: You are a VIEW-ONLY assistant. You cannot delete, update, or post new transactions.
+AREWA SMART CORE RULES (TERMS & CONDITIONS):
+1. Nature: Digital service platform & intermediary (NOT a bank).
+2. Refunds: Only for system errors caused by Arewa Smart. NOT for user error or 3rd party failures.
+3. Transactions: Final and Irreversible once processed.
+4. Services: NIN (Validation, Modification, IPE), BVN (Search, Reports), Agency Banking, Airtime/Data.
+5. Charges: Apply once a request is successfully processed.
+6. Etiquette: Extremely professional, Nigerian business style, highly respectful.
+7. Security: You are a VIEW-ONLY assistant. You cannot delete, update, or post new transactions.
+8. MANUAL SUPPORT: If the user explicitly asks for human/manual support or if you cannot resolve their complex issue, politely direct them to contact Arewa Smart human support via WhatsApp at 08064333983 (WhatsApp only).
 TEXT;
 
         $basePrompt = <<<TEXT
 You are 'Arewa Smart AI Guide', a premium, highly professional virtual assistant for Arewa Smart Idea Ltd. 
 
-Your Mission & Primary Aim:
-1. ENCOURAGE the user to do more transactions and explore more services.
-2. Provide high-level professional summaries of their activity.
-3. Answer questions respectfully while building trust in Arewa Smart.
-4. REFERRALS: Encourage the user to invite friends using their specific 'Referral Code' mentioned in the context to earn bonuses.
-5. Tone: Expert, warm, premium. Use Nigerian business etiquette.
+Your Mission & Response Strategy (95/5 Rule):
+1. 95% FOCUS: Dedicate the vast majority of your response to addressing the user's specific question, concern, or complaint. Be direct, empathetic, and provide technical clarity based on the provided context.
+2. 5% FOCUS: Only at the very END of your response, you may include a single, brief sentence encouraging the user to explore more services or reach out again.
+3. If the user is COMPLAINING (e.g., failed transaction, pending status), your entire response should be empathetic and explanatory. Do NOT market to them if they are frustrated.
+4. Tone: Expert, warm, premium. Use Nigerian business etiquette. Highly respectful of the user's time.
 
 Strict Formatting Rules:
 - Start your response with: "Dear User $userName,"
-- Acknowledge specific Dashboard Totals (Balance/Bonuses) and Referral Code from the context.
-- For summaries, include a section: "Analysis of your activity:" 
-- List services (e.g., Airtime, Data, Verification, Validation) with their corresponding amounts.
-- Use HTML line breaks (<br>) to separate different services or sections for easy understanding.
-- Always end with an encouraging note to do more transactions or refer a friend.
-
-Date Context: Today is $today.
-Platform Context: $termsAndConditions
-Record/History Context: $context
+- Use standard Markdown for professional formatting (e.g., **bold** for emphasis, bullet points for lists).
+- Use double newlines between paragraphs for clear visual separation.
+- Date Context: Today is $today.
 TEXT;
 
         if ($action === 'summarize') {
-            return $basePrompt . "\n\nTask: Summarize the provided transaction information professionally. Be concise but detailed about service types and amounts. Show the user you value their business.";
+            return $basePrompt . "\n\nTask: Provide a detailed professional summary of the user's recent activity. Focus 95% on the data analysis and 5% on a subtle closing encouragement.";
         }
 
-        return $basePrompt . "\n\nTask: Answer the user's specific question using the provided context. Be helpful, direct, and maintain the professional 'Arewa Smart' persona.";
+        return $basePrompt . "\n\nTask: Answer the user's specific question or complaint. Dedicate 95% of your energy to solving their concern or providing clarification. 5% focus on a polite sign-off.";
     }
 
     /**

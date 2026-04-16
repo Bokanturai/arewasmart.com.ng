@@ -1,4 +1,46 @@
 <!-- AREWA SMART: Comment Response Modal -->
+<style>
+    .message-bubble {
+        padding: 12px 16px;
+        margin-bottom: 12px;
+        border-radius: 18px;
+        font-size: 0.95rem;
+        line-height: 1.5;
+        max-width: 90%;
+        position: relative;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        animation: fadeIn 0.3s ease-out;
+    }
+  
+    .message-user {
+        background: linear-gradient(135deg, #F26522 0%, #ff8c52 100%);
+        color: white;
+        border-bottom-right-radius: 4px;
+        align-self: flex-end;
+        margin-left: auto;
+    }
+   
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    .loader-dots span {
+        width: 8px;
+        height: 8px;
+        margin: 0 2px;
+        background-color: #F26522;
+        border-radius: 50%;
+        display: inline-block;
+        animation: bounce 0.6s infinite alternate;
+    }
+    .loader-dots span:nth-child(2) { animation-delay: 0.2s; }
+    .loader-dots span:nth-child(3) { animation-delay: 0.4s; }
+    @keyframes bounce {
+        from { transform: translateY(0); }
+        to { transform: translateY(-8px); }
+    }
+</style>
+
 <div class="modal fade" id="commentModal" tabindex="-1" aria-labelledby="commentModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-lg">
         <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden position-relative">
@@ -33,7 +75,7 @@
                         </div>
 
                         <!-- AI Analysis & Chat injected here -->
-                        <div id="aiUnifiedSection"></div>
+                        <div id="aiUnifiedSection" class="chat-container mt-4"></div>
                     </div>
 
                     <!-- AI Input Wrapper (Initially hidden) -->
@@ -84,7 +126,6 @@
             "Serving Northern Excellence with Smart Tech."
         ];
 
-        let chatHistory = [];
         let currentComment = '';
         let currentReferenceId = '';
 
@@ -106,7 +147,7 @@
         ui.aiSend.addEventListener("click", submitUserQuery);
         ui.aiInput.addEventListener("keydown", (e) => { if (e.key === 'Enter') submitUserQuery(); });
 
-        function handleOpen(event) {
+        async function handleOpen(event) {
             const btn = event.relatedTarget;
             currentComment = btn.getAttribute('data-comment');
             currentReferenceId = btn.getAttribute('data-reference') || btn.getAttribute('data-ref') || '';
@@ -115,10 +156,9 @@
 
             ui.modalBody.innerHTML = `<div>${currentComment || 'No feedback provided yet.'}</div> ${approvedBy ? `<div class="mt-3 text-muted small border-top pt-2 opacity-75"><i class="bi bi-patch-check-fill text-primary"></i> Verified by ${approvedBy}</div>` : ''}`;
 
-            ui.summarizeBtn.classList.remove('d-none');
+            ui.aiSection.innerHTML = '<div class="text-center py-2"><span class="spinner-border spinner-border-sm text-primary opacity-50"></span></div>';
+            ui.summarizeBtn.classList.add('d-none');
             ui.aiInputWrapper.classList.add('d-none');
-            ui.aiSection.innerHTML = '';
-            chatHistory = [];
 
             if (fileUrl && fileUrl !== 'null' && fileUrl.trim()) {
                 ui.downloadBtn.href = fileUrl;
@@ -128,28 +168,40 @@
             }
 
             ui.encouragement.innerText = ENCOURAGEMENT_MESSAGES[Math.floor(Math.random() * ENCOURAGEMENT_MESSAGES.length)];
+
+            // Fetch History
+            try {
+                const res = await fetch(`{{ route('ai.history') }}?reference=${currentReferenceId}`);
+                const data = await res.json();
+                ui.aiSection.innerHTML = '';
+                
+                if (data.success && data.history.length > 0) {
+                    data.history.forEach(chat => {
+                        addBubble(chat.role === 'assistant' ? 'ai' : 'user', chat.content);
+                    });
+                    ui.aiInputWrapper.classList.remove('d-none');
+                } else {
+                    ui.summarizeBtn.classList.remove('d-none');
+                }
+            } catch (err) {
+                ui.aiSection.innerHTML = '';
+                ui.summarizeBtn.classList.remove('d-none');
+            }
         }
 
         function handleReset() {
             ui.aiSection.innerHTML = '';
             ui.aiInput.value = '';
             ui.aiInputWrapper.classList.add('d-none');
-            chatHistory = [];
         }
 
         async function performSummarization() {
             if (!currentComment) return;
 
             ui.summarizeBtn.classList.add('disabled');
-            ui.summarizeBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>...';
+            ui.summarizeBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span> Analyzing...';
 
-            if (chatHistory.length === 0) {
-                const divider = document.createElement('hr');
-                divider.className = 'my-4 opacity-10';
-                ui.aiSection.appendChild(divider);
-            }
-
-            addBubble('ai', '✨ *Our AI Guide is analyzing this feedback...*');
+            addBubble('ai', '<div class="loader-dots"><span></span><span></span><span></span></div>');
 
             try {
                 const res = await fetch("{{ route('ai.summarize') }}", {
@@ -163,7 +215,6 @@
 
                 if (data.success) {
                     addBubble('ai', data.answer);
-                    chatHistory.push({ role: 'assistant', content: data.answer });
                     ui.summarizeBtn.classList.add('d-none');
                     ui.aiInputWrapper.classList.remove('d-none');
                 } else {
@@ -190,7 +241,7 @@
                 const res = await fetch("{{ route('ai.ask') }}", {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
-                    body: JSON.stringify({ comment: currentComment, question: q, history: chatHistory, reference: currentReferenceId })
+                    body: JSON.stringify({ comment: currentComment, question: q, reference: currentReferenceId })
                 });
 
                 const data = await res.json();
@@ -198,7 +249,6 @@
 
                 if (data.success) {
                     addBubble('ai', data.answer);
-                    chatHistory.push({ role: 'user', content: q }, { role: 'assistant', content: data.answer });
                 } else {
                     addBubble('ai', 'Please try again in a few seconds.');
                 }
@@ -211,14 +261,9 @@
         function addBubble(type, text) {
             const b = document.createElement('div');
             b.className = `message-bubble message-${type}`;
-
-            if (type === 'ai' && chatHistory.length === 0) {
-                b.innerHTML = `<div class="small text-muted mb-2 fw-bold text-uppercase"><i class="bi bi-stars text-primary"></i> Smart Analysis</div>` + text.replace(/\n/g, '<br>');
-            } else {
-                b.innerHTML = text.replace(/\n/g, '<br>');
-            }
-
+            b.innerHTML = text.replace(/\n/g, '<br>');
             ui.aiSection.appendChild(b);
+            
             const modalBody = document.querySelector('.modal-body');
             modalBody.scrollTo({ top: modalBody.scrollHeight, behavior: 'smooth' });
         }

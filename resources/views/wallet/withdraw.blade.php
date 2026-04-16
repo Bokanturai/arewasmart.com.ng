@@ -661,27 +661,6 @@
             confirmText.textContent = 'Verifying...';
             pinError?.classList.add('d-none');
 
-            // Check if we already authorized via Biometrics in the modal
-            if (window.biometricAuthorized) {
-                const form = document.getElementById('withdrawForm');
-                
-                // Add biometric flag to form
-                const bioInput = document.createElement('input');
-                bioInput.type = 'hidden';
-                bioInput.name = 'biometric_auth';
-                bioInput.value = '1';
-                form.appendChild(bioInput);
-                
-                // Add dummy PIN to satisfy validation
-                const pinHiddenInput = document.createElement('input');
-                pinHiddenInput.type = 'hidden';
-                pinHiddenInput.name = 'pin';
-                pinHiddenInput.value = '00000';
-                form.appendChild(pinHiddenInput);
-
-                form.submit();
-                return;
-            }
 
             fetch("{{ route('verify.pin') }}", {
                 method: 'POST',

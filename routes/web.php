@@ -147,10 +147,6 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/transfer/verify', [App\Http\Controllers\TransferController::class, 'verifyUser'])->name('transfer.verify');
     Route::post('/transfer/process', [App\Http\Controllers\TransferController::class, 'processTransfer'])->name('transfer.process');
 
-    // Biometric Step-up / Confirmation Routes
-    Route::post('/webauthn/confirm/options', [App\Http\Controllers\WebAuthnConfirmController::class, 'options'])->name('webauthn.confirm.options');
-    Route::post('/webauthn/confirm', [App\Http\Controllers\WebAuthnConfirmController::class, 'verify'])->name('webauthn.confirm');
-
     Route::view('/thankyou', 'thankyou')->name('thankyou');
 
 
@@ -321,6 +317,7 @@ Route::middleware(['auth'])->group(function () {
     Route::prefix('ai')->middleware('throttle:10,1')->group(function () {
         Route::post('/summarize', [AiCommentController::class, 'summarize'])->name('ai.summarize');
         Route::post('/ask', [AiCommentController::class, 'ask'])->name('ai.ask');
+        Route::get('/history', [AiCommentController::class, 'fetchHistory'])->name('ai.history');
     });
 
     // Gift Card Routes

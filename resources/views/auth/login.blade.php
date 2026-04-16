@@ -30,7 +30,7 @@
                         required 
                         autofocus 
                         placeholder="Enter your email"
-                        autocomplete="username webauthn"
+                        autocomplete="username"
                         class="form-control border-end-0 @error('email') is-invalid @enderror">
                     <span class="input-group-text border-start-0">
                         <i class="ti ti-mail"></i>
@@ -56,7 +56,7 @@
                         name="password" 
                         required 
                         placeholder="••••••••"
-                        autocomplete="current-password webauthn"
+                        autocomplete="current-password"
                         class="form-control @error('password') is-invalid @enderror">
                     <span class="ti toggle-password ti-eye-off position-absolute end-0 top-50 translate-middle-y me-3 cursor-pointer text-muted fs-18"></span>
                     @error('password')
@@ -76,10 +76,6 @@
             {{-- Submit Button --}}
             <button type="submit" class="btn btn-primary w-100 mb-3 py-2">Sign In</button>
 
-            {{-- Biometric Login Button --}}
-            <button type="button" id="biometric-login-btn" class="btn btn-outline-primary w-100 mb-4 py-2 d-flex align-items-center justify-content-center">
-                <i class="ti ti-fingerprint me-2 fs-20"></i> Sign in with Biometrics
-            </button>
 
             {{-- Register Link --}}
             <div class="text-center">
@@ -94,33 +90,26 @@
     {{-- Footer Text --}}
     <p class="auth-footer-text">&copy; {{ date('Y') }} Arewa Smart. All rights reserved.</p>
 
-    <!-- SweetAlert2 & Biometric Script -->
-    <script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    @include('auth.passkey-script')
-
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            const bioLoginBtn = document.getElementById('biometric-login-btn');
-            if (bioLoginBtn) {
-                bioLoginBtn.addEventListener('click', async function() {
-                    const emailInput = document.getElementById('email');
-                    const email = emailInput ? emailInput.value : null;
-
-                    // Disable button and show loading
-                    const originalContent = bioLoginBtn.innerHTML;
-                    bioLoginBtn.disabled = true;
-                    bioLoginBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span> Initializing...';
-
-                    try {
-                        await webAuthnLogin(email);
-                    } catch (error) {
-                        // webAuthnLogin already handles logging the error, 
-                        // but we need to reset the button state here.
-                        bioLoginBtn.disabled = false;
-                        bioLoginBtn.innerHTML = originalContent;
-                    }
-                });
-            }
+            const passGroups = document.querySelectorAll('.pass-group');
+            passGroups.forEach(group => {
+                const input = group.querySelector('input');
+                const toggle = group.querySelector('.toggle-password');
+                if (toggle) {
+                    toggle.addEventListener('click', function() {
+                        if (input.type === 'password') {
+                            input.type = 'text';
+                            toggle.classList.remove('ti-eye-off');
+                            toggle.classList.add('ti-eye');
+                        } else {
+                            input.type = 'password';
+                            toggle.classList.remove('ti-eye');
+                            toggle.classList.add('ti-eye-off');
+                        }
+                    });
+                }
+            });
         });
     </script>
 </x-guest-layout>
