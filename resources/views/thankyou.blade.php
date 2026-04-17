@@ -27,22 +27,7 @@
     @endpush
 
     @php
-        $token = $token ?? session('token');
-        $amount = $amount ?? session('amount') ?? 0;
-        $paid = $paid ?? session('paid') ?? $amount;
         $discount = $amount - $paid;
-        $network = $network ?? session('network') ?? 'N/A';
-        $mobile = $mobile ?? session('mobile') ?? 'N/A';
-        $ref = $ref ?? session('ref') ?? 'N/A';
-
-        $serviceName = 'Service Purchase';
-        if($token) {
-            $serviceName = 'Educational Pin';
-        } elseif ($network && str_contains(strtolower($network), 'data')) {
-            $serviceName = 'Data Purchase';
-        } elseif ($network && $network !== 'N/A') {
-            $serviceName = 'Airtime Purchase';
-        }
     @endphp
 
     <div class="container-fluid px-0 px-md-3 py-3 py-sm-5 d-flex flex-column align-items-center bg-light min-vh-100">
@@ -84,7 +69,7 @@
                 <div class="list-group list-group-flush border-top border-bottom py-3 mb-4">
                     <div class="list-group-item d-flex justify-content-between border-0 px-0 py-2">
                         <span class="text-secondary small fw-medium">Date & Time</span>
-                        <span class="text-dark small fw-bold">{{ now()->format('d M Y, h:i A') }}</span>
+                        <span class="text-dark small fw-bold">{{ \Carbon\Carbon::parse($date)->format('d M Y, h:i A') }}</span>
                     </div>
                     <div class="list-group-item d-flex justify-content-between border-0 px-0 py-2">
                         <span class="text-secondary small fw-medium">Customer</span>
@@ -94,12 +79,18 @@
                         <span class="text-secondary small fw-medium">Service Type</span>
                         <span class="text-dark small fw-bold">{{ $serviceName }}</span>
                     </div>
+                    @if($receiverName)
                     <div class="list-group-item d-flex justify-content-between border-0 px-0 py-2">
-                        <span class="text-secondary small fw-medium">Network/Provider</span>
+                        <span class="text-secondary small fw-medium">Beneficiary</span>
+                        <span class="text-dark small fw-bold text-end">{{ $receiverName }}</span>
+                    </div>
+                    @endif
+                    <div class="list-group-item d-flex justify-content-between border-0 px-0 py-2">
+                        <span class="text-secondary small fw-medium">{{ str_contains(strtolower($serviceName), 'withdrawal') ? 'Recipient Bank' : 'Network/Provider' }}</span>
                         <span class="badge bg-primary-subtle text-primary border-0 rounded-pill px-3">{{ strtoupper($network) }}</span>
                     </div>
                     <div class="list-group-item d-flex justify-content-between border-0 px-0 py-2">
-                        <span class="text-secondary small fw-medium">Phone/Account</span>
+                        <span class="text-secondary small fw-medium">{{ str_contains(strtolower($serviceName), 'withdrawal') ? 'Account Number' : 'Phone/Account' }}</span>
                         <span class="text-dark small fw-bold">{{ $mobile }}</span>
                     </div>
                 </div>

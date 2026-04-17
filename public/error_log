@@ -1,0 +1,58 @@
+[14-Apr-2026 15:47:04 UTC] PHP Warning:  require(/home/biyanowc/test.arewasmart.com.ng/public/../vendor/autoload.php): Failed to open stream: No such file or directory in /home/biyanowc/test.arewasmart.com.ng/public/index.php on line 14
+[14-Apr-2026 15:47:04 UTC] PHP Warning:  require(/home/biyanowc/test.arewasmart.com.ng/public/../vendor/autoload.php): Failed to open stream: No such file or directory in /home/biyanowc/test.arewasmart.com.ng/public/index.php on line 14
+[14-Apr-2026 15:47:04 UTC] PHP Fatal error:  Uncaught Error: Failed opening required '/home/biyanowc/test.arewasmart.com.ng/public/../vendor/autoload.php' (include_path='.:/opt/alt/php82/usr/share/pear:/opt/alt/php82/usr/share/php:/usr/share/pear:/usr/share/php') in /home/biyanowc/test.arewasmart.com.ng/public/index.php:14
+Stack trace:
+#0 {main}
+  thrown in /home/biyanowc/test.arewasmart.com.ng/public/index.php on line 14
+[14-Apr-2026 15:47:36 UTC] PHP Warning:  require(/home/biyanowc/test.arewasmart.com.ng/public/../vendor/autoload.php): Failed to open stream: No such file or directory in /home/biyanowc/test.arewasmart.com.ng/public/index.php on line 14
+[14-Apr-2026 15:47:36 UTC] PHP Warning:  require(/home/biyanowc/test.arewasmart.com.ng/public/../vendor/autoload.php): Failed to open stream: No such file or directory in /home/biyanowc/test.arewasmart.com.ng/public/index.php on line 14
+[14-Apr-2026 15:47:36 UTC] PHP Fatal error:  Uncaught Error: Failed opening required '/home/biyanowc/test.arewasmart.com.ng/public/../vendor/autoload.php' (include_path='.:/opt/alt/php82/usr/share/pear:/opt/alt/php82/usr/share/php:/usr/share/pear:/usr/share/php') in /home/biyanowc/test.arewasmart.com.ng/public/index.php:14
+Stack trace:
+#0 {main}
+  thrown in /home/biyanowc/test.arewasmart.com.ng/public/index.php on line 14
+[14-Apr-2026 15:47:37 UTC] PHP Warning:  require(/home/biyanowc/test.arewasmart.com.ng/public/../vendor/autoload.php): Failed to open stream: No such file or directory in /home/biyanowc/test.arewasmart.com.ng/public/index.php on line 14
+[14-Apr-2026 15:47:37 UTC] PHP Warning:  require(/home/biyanowc/test.arewasmart.com.ng/public/../vendor/autoload.php): Failed to open stream: No such file or directory in /home/biyanowc/test.arewasmart.com.ng/public/index.php on line 14
+[14-Apr-2026 15:47:37 UTC] PHP Fatal error:  Uncaught Error: Failed opening required '/home/biyanowc/test.arewasmart.com.ng/public/../vendor/autoload.php' (include_path='.:/opt/alt/php82/usr/share/pear:/opt/alt/php82/usr/share/php:/usr/share/pear:/usr/share/php') in /home/biyanowc/test.arewasmart.com.ng/public/index.php:14
+Stack trace:
+#0 {main}
+  thrown in /home/biyanowc/test.arewasmart.com.ng/public/index.php on line 14
+[14-Apr-2026 15:47:37 UTC] PHP Warning:  require(/home/biyanowc/test.arewasmart.com.ng/public/../vendor/autoload.php): Failed to open stream: No such file or directory in /home/biyanowc/test.arewasmart.com.ng/public/index.php on line 14
+[14-Apr-2026 15:47:37 UTC] PHP Warning:  require(/home/biyanowc/test.arewasmart.com.ng/public/../vendor/autoload.php): Failed to open stream: No such file or directory in /home/biyanowc/test.arewasmart.com.ng/public/index.php on line 14
+[14-Apr-2026 15:47:37 UTC] PHP Fatal error:  Uncaught Error: Failed opening required '/home/biyanowc/test.arewasmart.com.ng/public/../vendor/autoload.php' (include_path='.:/opt/alt/php82/usr/share/pear:/opt/alt/php82/usr/share/php:/usr/share/pear:/usr/share/php') in /home/biyanowc/test.arewasmart.com.ng/public/index.php:14
+Stack trace:
+#0 {main}
+  thrown in /home/biyanowc/test.arewasmart.com.ng/public/index.php on line 14
+[14-Apr-2026 15:47:38 UTC] PHP Warning:  require(/home/biyanowc/test.arewasmart.com.ng/public/../vendor/autoload.php): Failed to open stream: No such file or directory in /home/biyanowc/test.arewasmart.com.ng/public/index.php on line 14
+[14-Apr-2026 15:47:38 UTC] PHP Warning:  require(/home/biyanowc/test.arewasmart.com.ng/public/../vendor/autoload.php): Failed to open stream: No such file or directory in /home/biyanowc/test.arewasmart.com.ng/public/index.php on line 14
+[14-Apr-2026 15:47:38 UTC] PHP Fatal error:  Uncaught Error: Failed opening required '/home/biyanowc/test.arewasmart.com.ng/public/../vendor/autoload.php' (include_path='.:/opt/alt/php82/usr/share/pear:/opt/alt/php82/usr/share/php:/usr/share/pear:/usr/share/php') in /home/biyanowc/test.arewasmart.com.ng/public/index.php:14
+Stack trace:
+#0 {main}
+  thrown in /home/biyanowc/test.arewasmart.com.ng/public/index.php on line 14
+[16-Apr-2026 10:54:14 UTC] PHP Fatal error:  Uncaught RuntimeException: A facade root has not been set. in /home/biyanowc/test.arewasmart.com.ng/vendor/laravel/framework/src/Illuminate/Support/Facades/Facade.php:360
+Stack trace:
+#0 /home/biyanowc/test.arewasmart.com.ng/vendor/laravel/framework/src/Illuminate/Foundation/Exceptions/RegisterErrorViewPaths.php(17): Illuminate\Support\Facades\Facade::__callStatic()
+#1 /home/biyanowc/test.arewasmart.com.ng/vendor/laravel/framework/src/Illuminate/Foundation/Exceptions/Handler.php(947): Illuminate\Foundation\Exceptions\RegisterErrorViewPaths->__invoke()
+#2 /home/biyanowc/test.arewasmart.com.ng/vendor/laravel/framework/src/Illuminate/Foundation/Exceptions/Handler.php(922): Illuminate\Foundation\Exceptions\Handler->registerErrorViewPaths()
+#3 /home/biyanowc/test.arewasmart.com.ng/vendor/laravel/framework/src/Illuminate/Foundation/Exceptions/Handler.php(847): Illuminate\Foundation\Exceptions\Handler->renderHttpException()
+#4 /home/biyanowc/test.arewasmart.com.ng/vendor/laravel/framework/src/Illuminate/Foundation/Exceptions/Handler.php(738): Illuminate\Foundation\Exceptions\Handler->prepareResponse()
+#5 /home/biyanowc/test.arewasmart.com.ng/vendor/laravel/framework/src/Illuminate/Foundation/Exceptions/Handler.php(626): Illuminate\Foundation\Exceptions\Handler->renderExceptionResponse()
+#6 /home/biyanowc/test.arewasmart.com.ng/vendor/laravel/framework/src/Illuminate/Foundation/Http/Kernel.php(574): Illuminate\Foundation\Exceptions\Handler->render()
+#7 /home/biyanowc/test.arewasmart.com.ng/vendor/laravel/framework/src/Illuminate/Foundation/Http/Kernel.php(148): Illuminate\Foundation\Http\Kernel->renderException()
+#8 /home/biyanowc/test.arewasmart.com.ng/vendor/laravel/framework/src/Illuminate/Foundation/Application.php(1220): Illuminate\Foundation\Http\Kernel->handle()
+#9 /home/biyanowc/test.arewasmart.com.ng/public/index.php(20): Illuminate\Foundation\Application->handleRequest()
+#10 {main}
+  thrown in /home/biyanowc/test.arewasmart.com.ng/vendor/laravel/framework/src/Illuminate/Support/Facades/Facade.php on line 360
+[16-Apr-2026 10:54:16 UTC] PHP Fatal error:  Uncaught RuntimeException: A facade root has not been set. in /home/biyanowc/test.arewasmart.com.ng/vendor/laravel/framework/src/Illuminate/Support/Facades/Facade.php:360
+Stack trace:
+#0 /home/biyanowc/test.arewasmart.com.ng/vendor/laravel/framework/src/Illuminate/Foundation/Exceptions/RegisterErrorViewPaths.php(17): Illuminate\Support\Facades\Facade::__callStatic()
+#1 /home/biyanowc/test.arewasmart.com.ng/vendor/laravel/framework/src/Illuminate/Foundation/Exceptions/Handler.php(947): Illuminate\Foundation\Exceptions\RegisterErrorViewPaths->__invoke()
+#2 /home/biyanowc/test.arewasmart.com.ng/vendor/laravel/framework/src/Illuminate/Foundation/Exceptions/Handler.php(922): Illuminate\Foundation\Exceptions\Handler->registerErrorViewPaths()
+#3 /home/biyanowc/test.arewasmart.com.ng/vendor/laravel/framework/src/Illuminate/Foundation/Exceptions/Handler.php(847): Illuminate\Foundation\Exceptions\Handler->renderHttpException()
+#4 /home/biyanowc/test.arewasmart.com.ng/vendor/laravel/framework/src/Illuminate/Foundation/Exceptions/Handler.php(738): Illuminate\Foundation\Exceptions\Handler->prepareResponse()
+#5 /home/biyanowc/test.arewasmart.com.ng/vendor/laravel/framework/src/Illuminate/Foundation/Exceptions/Handler.php(626): Illuminate\Foundation\Exceptions\Handler->renderExceptionResponse()
+#6 /home/biyanowc/test.arewasmart.com.ng/vendor/laravel/framework/src/Illuminate/Foundation/Http/Kernel.php(574): Illuminate\Foundation\Exceptions\Handler->render()
+#7 /home/biyanowc/test.arewasmart.com.ng/vendor/laravel/framework/src/Illuminate/Foundation/Http/Kernel.php(148): Illuminate\Foundation\Http\Kernel->renderException()
+#8 /home/biyanowc/test.arewasmart.com.ng/vendor/laravel/framework/src/Illuminate/Foundation/Application.php(1220): Illuminate\Foundation\Http\Kernel->handle()
+#9 /home/biyanowc/test.arewasmart.com.ng/public/index.php(20): Illuminate\Foundation\Application->handleRequest()
+#10 {main}
+  thrown in /home/biyanowc/test.arewasmart.com.ng/vendor/laravel/framework/src/Illuminate/Support/Facades/Facade.php on line 360

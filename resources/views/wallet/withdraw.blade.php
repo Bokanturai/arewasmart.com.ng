@@ -386,6 +386,7 @@
     document.addEventListener('DOMContentLoaded', function () {
 
         /* ── References ───────────────────────────────── */
+        const withdrawalFee     = {{ $withdrawalFee ?? 0 }};
         const accountNoInput    = document.getElementById('account_no');
         const bankCodeSelect    = document.getElementById('bank_code');
         const accountNameDisp   = document.getElementById('accountNameDisplay');
@@ -611,10 +612,12 @@
                 return;
             }
 
+            const totalAmount = parseFloat(amount) + withdrawalFee;
+
             document.getElementById('confirmAccountName').textContent = accountName;
             document.getElementById('confirmBankName').textContent    = bankName;
             document.getElementById('confirmAccountNo').textContent   = accountNo;
-            document.getElementById('confirmAmount').textContent      = '₦' + parseFloat(amount).toLocaleString(undefined, { minimumFractionDigits: 2 });
+            document.getElementById('confirmAmount').textContent      = '₦' + totalAmount.toLocaleString(undefined, { minimumFractionDigits: 2 });
 
             confirmationStep.classList.remove('d-none');
             pinStep.classList.add('d-none');

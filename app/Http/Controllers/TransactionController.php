@@ -58,4 +58,60 @@ class TransactionController extends Controller
 
         return view('transactions', compact('transactions'));
     }
+    /**
+     * Display a specific transaction receipt.
+     * Supports both dynamic DB lookup and session-based fallback for backward compatibility.
+     */
+    public function receipt(Request $request)
+    {
+        $ref = $request->query('ref') ?? session('ref');
+        
+        // Initial defaults from session or empty
+        $data = [
+            'ref' => $ref ?? 'N/A',
+            'token' => session('token'),
+            'amount' => session('amount') ?? 0,
+            'paid' => session('paid') ?? session('amount') ?? 0,
+            'network' => session('network') ?? 'N/A',
+            'mobile' => session('mobile') ?? 'N/A',
+            'date' => session('date') ?? now(),
+            'receiverName' => null,
+            'serviceName' => 'Service Purchase',
+        ];
+
+        // Attempt to fetch robust data from DB if ref exists
+        if ($ref && $ref !== 'N/A') {
+            $tx = Transaction::where('transaction_ref', $ref)->first();
+            if ($tx) {
+                $data['amount'] = $tx->amount;
+                $data['paid'] = $tx->net_amount;
+                $data['date'] = $tx->created_at;
+                $data['ref'] = $tx->transaction_ref;
+                
+                $meta = is_array($tx->metadata) ? $tx->metadata : json_decode($tx->metadata ?? '[]', true);
+                
+                if (isset($meta['service']) && $meta['service'] === 'withdrawal' || str_starts_with($data['ref'], 'WDL')) {
+                    $data['serviceName'] = 'Wallet Withdrawal';
+                    $data['network'] = $meta['bankName'] ?? 'Bank Transfer';
+                    $data['mobile'] = $meta['account_no'] ?? 'N/A';
+                    $data['receiverName'] = $meta['account_name'] ?? null;
+                } else {
+                    $data['network'] = $meta['network'] ?? $data['network'];
+                    $data['mobile'] = $meta['phone_number'] ?? $meta['account_number'] ?? $data['mobile'];
+                    $data['token'] = $meta['token'] ?? $data['token'];
+
+                    // Dynamic Service Name identification
+                    if ($data['token']) {
+                        $data['serviceName'] = 'Educational Pin';
+                    } elseif (str_contains(strtolower($data['network']), 'data')) {
+                        $data['serviceName'] = 'Data Purchase';
+                    } elseif ($data['network'] !== 'N/A') {
+                        $data['serviceName'] = 'Airtime Purchase';
+                    }
+                }
+            }
+        }
+
+        return view('thankyou', $data);
+    }
 }

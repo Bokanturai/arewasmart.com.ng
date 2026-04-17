@@ -206,7 +206,10 @@
             try {
                 const res = await fetch("{{ route('ai.summarize') }}", {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
+                    headers: { 
+                        'Content-Type': 'application/json', 
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                    },
                     body: JSON.stringify({ comment: currentComment, reference: currentReferenceId })
                 });
 
@@ -240,7 +243,10 @@
             try {
                 const res = await fetch("{{ route('ai.ask') }}", {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
+                    headers: { 
+                        'Content-Type': 'application/json', 
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                    },
                     body: JSON.stringify({ comment: currentComment, question: q, reference: currentReferenceId })
                 });
 
@@ -261,7 +267,12 @@
         function addBubble(type, text) {
             const b = document.createElement('div');
             b.className = `message-bubble message-${type}`;
-            b.innerHTML = text.replace(/\n/g, '<br>');
+            
+            // Premium Markdown Rendering (Bold & Newlines)
+            let formatted = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+            formatted = formatted.replace(/\n/g, '<br>');
+            
+            b.innerHTML = formatted;
             ui.aiSection.appendChild(b);
             
             const modalBody = document.querySelector('.modal-body');

@@ -339,5 +339,6 @@
             });
         });
     </script>
+    @include('layouts.partials.ai_widget')
 </body>
 </html>

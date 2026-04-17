@@ -70,11 +70,11 @@ class WithdrawController extends Controller
             ->map(function ($report) use ($banks) {
                 $bank = $banks->firstWhere('bank_code', $report->bank_code);
                 return [
-                    'bankCode' => $report->bank_code,
+                    'bank_code' => $report->bank_code,
                     'account_no' => $report->account_number,
                     'account_name' => $report->account_name,
-                    'bankName' => $report->bank_name ?? 'Bank',
-                    'bankUrl' => $bank->bank_url ?? null
+                    'bank_name' => $report->bank_name ?? 'Bank',
+                    'bank_url' => $bank->bank_url ?? null
                 ];
             })
             ->filter(fn($item) => !empty($item['bank_code']) && !empty($item['account_no']))
@@ -82,7 +82,10 @@ class WithdrawController extends Controller
             ->values()
             ->take(15);
 
-        return view('wallet.withdraw', compact('banks', 'totalVolume', 'user', 'recentRecipients', 'eligibilityAmount'));
+        $feeField = ServiceField::where('field_name', 'withdrawal fee')->first();
+        $withdrawalFee = $feeField ? $feeField->getPriceForUserType($user->role) : 0;
+
+        return view('wallet.withdraw', compact('banks', 'totalVolume', 'user', 'recentRecipients', 'eligibilityAmount', 'withdrawalFee'));
     }
 
     /**
@@ -182,25 +185,17 @@ class WithdrawController extends Controller
         }
 
         try {
-            // 3. Prevent Duplicate: Return old result for identical recent request (within 2 mins)
+            // 3. Prevent Duplicate: Redirect to old result for identical recent request (within 2 mins)
             $recentDuplicate = Transaction::where('user_id', $user->id)
                 ->where('type', 'debit')
-                ->where('status', 'completed')
+                ->whereIn('status', ['completed', 'pending'])
                 ->where('amount', $request->amount)
                 ->where('metadata->account_no', $request->account_no)
                 ->where('created_at', '>=', now()->subMinutes(2))
                 ->first();
 
             if ($recentDuplicate) {
-                $bankName = Bank::where('bank_code', $request->bankCode)->value('bank_name') ?? 'Bank';
-                return view('thankyou2', [
-                    'transaction' => $recentDuplicate,
-                    'sender' => $user,
-                    'receiver_name' => $request->account_name . ' (' . $bankName . ')',
-                    'service_name' => 'Wallet Withdrawal',
-                    'amount' => $request->amount,
-                    'date' => $recentDuplicate->created_at
-                ]);
+                return redirect()->route('thankyou', ['ref' => $recentDuplicate->transaction_ref]);
             }
 
             // 4. PIN Verification & Biometric Support
@@ -292,7 +287,9 @@ class WithdrawController extends Controller
 
                 // 6. Create Transaction Record (Pending)
                 $transactionRef = 'WDL' . strtoupper(Str::random(12));
+                $bankName = Bank::where('bank_code', $request->bankCode)->value('bank_name') ?? 'Bank';
                 $performedBy = trim($user->first_name . ' ' . ($user->middle_name ?? '') . ' ' . $user->last_name);
+                $detailedDescription = "Withdrawal from {$performedBy} to {$bankName}: {$request->account_no} ({$request->account_name})";
 
                 $transaction = Transaction::create([
                     'transaction_ref' => $transactionRef,
@@ -300,13 +297,14 @@ class WithdrawController extends Controller
                     'amount' => $request->amount,
                     'fee' => $fee,
                     'net_amount' => $totalCharge,
-                    'description' => "Withdrawal to {$request->account_name} ({$request->account_no})",
+                    'description' => $detailedDescription,
                     'type' => 'debit',
                     'status' => 'pending',
                     'performed_by' => $performedBy,
                     'metadata' => [
                         'service' => 'withdrawal',
                         'bankCode' => $request->bankCode,
+                        'bankName' => $bankName,
                         'account_no' => $request->account_no,
                         'account_name' => $request->account_name,
                         'user_role' => $user->role,
@@ -319,8 +317,6 @@ class WithdrawController extends Controller
                 ]);
 
                 // 7. Create Report Record (Pending)
-                $bankName = Bank::where('bankCode', $request->bankCode)->value('bankName') ?? 'Bank';
-
                 $report = \App\Models\Report::create([
                     'user_id' => $user->id,
                     'phone_number' => $request->account_no,
@@ -333,7 +329,7 @@ class WithdrawController extends Controller
                     'amount' => $totalCharge,
                     'status' => 'pending',
                     'type' => 'withdrawal',
-                    'description' => "Withdrawal to {$request->account_name} ({$request->account_no})",
+                    'description' => $detailedDescription,
                     'old_balance' => $oldBalance,
                     'new_balance' => $newBalance,
                     'service_id' => $service->id,
@@ -362,7 +358,7 @@ class WithdrawController extends Controller
                     'amount' => (int) ($request->amount * 100), // Convert to unit (e.g., kobo for NGN)
                     'currency' => 'NGN',
                     'notifyUrl' => url('/api/palmpay/webhook'),
-                    'remark' => 'Withdrawal from ' . config('app.name'),
+                    'remark' => $detailedDescription,
                 ]);
 
                 // 10. Finalize Logic
@@ -378,14 +374,7 @@ class WithdrawController extends Controller
                     $report->status = 'completed';
                     $report->save();
 
-                    return view('thankyou2', [
-                        'transaction' => $transaction,
-                        'sender' => $user,
-                        'receiver_name' => $request->account_name . ' (' . $bankName . ')',
-                        'service_name' => 'Wallet Withdrawal',
-                        'amount' => $request->amount,
-                        'date' => now()
-                    ]);
+                    return redirect()->route('thankyou', ['ref' => $transaction->transaction_ref]);
                 } else {
                     // EXPLICIT API REJECTION - We must refund the user!
                     $transaction->status = 'failed';

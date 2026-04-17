@@ -147,7 +147,7 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/transfer/verify', [App\Http\Controllers\TransferController::class, 'verifyUser'])->name('transfer.verify');
     Route::post('/transfer/process', [App\Http\Controllers\TransferController::class, 'processTransfer'])->name('transfer.process');
 
-    Route::view('/thankyou', 'thankyou')->name('thankyou');
+    Route::get('/thankyou', [App\Http\Controllers\TransactionController::class, 'receipt'])->name('thankyou');
 
 
     /*
@@ -317,6 +317,7 @@ Route::middleware(['auth'])->group(function () {
     Route::prefix('ai')->middleware('throttle:10,1')->group(function () {
         Route::post('/summarize', [AiCommentController::class, 'summarize'])->name('ai.summarize');
         Route::post('/ask', [AiCommentController::class, 'ask'])->name('ai.ask');
+        Route::post('/chat', [AiCommentController::class, 'chat'])->name('ai.chat');
         Route::get('/history', [AiCommentController::class, 'fetchHistory'])->name('ai.history');
     });
 
