@@ -100,7 +100,7 @@ class NinValidationController extends Controller
             }
 
             // 8. Create transaction (completed - non-refundable)
-            $transactionRef = 'bokap' . strtoupper(Str::random(10));
+            $transactionRef = 'N' . strtoupper(Str::random(10));
             $performedBy = $user->first_name . ' ' . $user->last_name;
 
             $transaction = Transaction::create([
