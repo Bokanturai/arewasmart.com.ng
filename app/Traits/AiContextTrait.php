@@ -66,7 +66,7 @@ trait AiContextTrait
     private function fetchFinancialContext($user)
     {
         $wallet = $user->wallet;
-        $balance = $wallet ? $wallet->available_balance : 0;
+        $balance = $wallet ? $wallet->balance : 0;
         $bonus = $wallet ? $wallet->bonus : 0;
         
         return "FINANCIAL SUMMARY:\n" .
