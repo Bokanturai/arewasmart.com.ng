@@ -40,7 +40,7 @@ class AiCommentController extends Controller
             // Save the summary as the first assistant message if not already present
             AiChat::updateOrCreate(
                 ['user_id' => auth()->id(), 'reference' => $reference, 'role' => 'assistant', 'type' => 'comment'],
-                ['content' => $response['answer']]
+                ['content' => $response['answer'], 'status' => 'replied']
             );
             return response()->json($response);
         }
@@ -70,7 +70,8 @@ class AiCommentController extends Controller
             'reference' => $reference,
             'role' => 'user',
             'type' => 'comment',
-            'content' => $question
+            'content' => $question,
+            'status' => 'open'
         ]);
 
         $fullContext = $this->fetchFullUserContext($reference);
@@ -104,8 +105,13 @@ class AiCommentController extends Controller
                 'reference' => $reference,
                 'role' => 'assistant',
                 'type' => 'comment',
-                'content' => $response['answer']
+                'content' => $response['answer'],
+                'status' => 'replied'
             ]);
+
+            // Update linked report status if exists
+            Report::where('ref', $reference)->where('user_id', $userId)->update(['status' => 'replied']);
+
             return response()->json($response);
         }
 

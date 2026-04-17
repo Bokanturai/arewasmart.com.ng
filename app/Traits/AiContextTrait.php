@@ -60,6 +60,11 @@ trait AiContextTrait
             return "Type: Transaction\nDescription: {$transaction->description}\nStatus: {$transaction->status}\nAmount: ₦" . number_format($transaction->amount, 2) . "\nPayer: {$transaction->payer_name}\nRef: {$transaction->transaction_ref}";
         }
 
+        $report = Report::where('ref', $reference)->where('user_id', $userId)->first();
+        if ($report) {
+            return "Type: User Report/Complaint ({$report->type})\nDescription: {$report->description}\nStatus: {$report->status}\nRef: {$report->ref}\nAmount: ₦" . number_format($report->amount, 2) . "\nDate: " . $report->created_at->toDayDateTimeString();
+        }
+
         return "Reference $reference not found in your records.";
     }
 
