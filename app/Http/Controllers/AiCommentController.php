@@ -163,7 +163,8 @@ class AiCommentController extends Controller
             'user_id' => $userId,
             'role' => 'user',
             'type' => 'global',
-            'content' => $message
+            'content' => $message,
+            'status' => 'AI instant'
         ]);
 
         $fullContext = $this->fetchFullUserContext();
@@ -176,7 +177,8 @@ class AiCommentController extends Controller
                 'user_id' => $userId,
                 'role' => 'assistant',
                 'type' => 'global',
-                'content' => $response['answer']
+                'content' => $response['answer'],
+                'status' => 'AI instant'
             ]);
             return response()->json($response);
         }
