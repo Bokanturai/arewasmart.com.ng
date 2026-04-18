@@ -42,7 +42,7 @@ class NinValidationController extends Controller
         $wallet = Wallet::where('user_id', Auth::id())->first();
 
         $query = AgentService::where('user_id', Auth::id())
-            ->where('service_type', 'NIN_VALIDATION');
+            ->where('service_type', 'nin_validation');
 
         if ($request->has('search') && $request->search != '') {
             $searchTerm = $request->search;
@@ -213,13 +213,13 @@ class NinValidationController extends Controller
             }
 
             // Non-Refundable: Even if submission fails at this stage, we keep the charge
-            $errorMessage = $data['message'] ?? 'API Submission Failed';
+            $cleanResponse = $this->cleanApiResponse($data);
             $agentService->update([
                 'status' => 'failed',
-                'comment' => $errorMessage
+                'comment' => $cleanResponse
             ]);
 
-            return back()->with('error', 'API Submission Failed: ' . $errorMessage . '. (Service is non-refundable)');
+            return back()->with('error', 'API Submission Failed: ' . $cleanResponse . '. (Service is non-refundable)');
 
         } catch (\Exception $e) {
             if (DB::transactionLevel() > 0) {
@@ -253,7 +253,8 @@ class NinValidationController extends Controller
             }
 
             $apiKey = env('IDENFY_API_KEY');
-            $url = 'https://www.idenfy.ng/api/nin-validation-status';
+            $apiBaseUrl = env('IDENFY_API_BASE', 'https://www.idenfy.ng');
+            $url = $apiBaseUrl . '/api/nin-validation-status';
             $payload = [
                 'nin' => $agentService->nin,
             ];
@@ -295,9 +296,28 @@ class NinValidationController extends Controller
     {
         if (is_array($response)) {
             $message = $response['message'] ?? '';
-            $reply = $response['data']['reply'] ?? $response['reply'] ?? '';
+            $data = $response['data'] ?? [];
+            
+            // Safe extraction from nested 'data' or top-level
+            $nin = '';
+            $reply = '';
+            
+            if (is_array($data)) {
+                $nin = $data['nin'] ?? '';
+                $reply = $data['reply'] ?? '';
+            }
+            
+            // Fallbacks for top-level if not in data
+            if (!$nin) $nin = $response['nin'] ?? '';
+            if (!$reply) $reply = $response['reply'] ?? '';
 
-            $combined = trim($message . ($message && $reply ? ': ' : '') . $reply);
+            $parts = array_filter([
+                $message,
+                $nin ? "NIN: $nin" : null,
+                $reply ? "Reply: $reply" : null
+            ]);
+
+            $combined = implode(' - ', $parts);
 
             if ($combined) {
                 return strip_tags($combined);
@@ -310,13 +330,15 @@ class NinValidationController extends Controller
 
         $cleanResponse = str_replace(['{', '}', '"', "'"], '', $jsonString);
         $cleanResponse = preg_replace('/\s+/', ' ', $cleanResponse);
-        $cleanResponse = trim(strip_tags($cleanResponse));
-
-        return $cleanResponse;
+        return trim(strip_tags($cleanResponse));
     }
 
     private function normalizeStatus($status): string
     {
+        if (is_bool($status)) {
+            return $status ? 'successful' : 'failed';
+        }
+
         $s = strtolower(trim((string) $status));
 
         return match ($s) {

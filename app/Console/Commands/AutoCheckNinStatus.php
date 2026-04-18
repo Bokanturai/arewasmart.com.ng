@@ -152,12 +152,41 @@ class AutoCheckNinStatus extends Command
     private function cleanApiResponse($response): string
     {
         if (is_array($response)) {
+            $message = $response['message'] ?? '';
+            $data = $response['data'] ?? [];
+
+            // Safe extraction from nested 'data' or top-level
+            $nin = '';
+            $reply = '';
+
+            if (is_array($data)) {
+                $nin = $data['nin'] ?? '';
+                $reply = $data['reply'] ?? '';
+            }
+
+            // Fallbacks for top-level if not in data
+            if (!$nin) $nin = $response['nin'] ?? '';
+            if (!$reply) $reply = $response['reply'] ?? '';
+
+            $parts = array_filter([
+                $message,
+                $nin ? "NIN: $nin" : null,
+                $reply ? "Reply: $reply" : null
+            ]);
+
+            $combined = implode(' - ', $parts);
+
+            if ($combined) {
+                return strip_tags($combined);
+            }
+
             $jsonString = json_encode($response, JSON_PRETTY_PRINT);
         } else {
             $jsonString = (string) $response;
         }
+
         $cleanResponse = str_replace(['{', '}', '"', "'"], '', $jsonString);
         $cleanResponse = preg_replace('/\s+/', ' ', $cleanResponse);
-        return trim($cleanResponse);
+        return trim(strip_tags($cleanResponse));
     }
 }
