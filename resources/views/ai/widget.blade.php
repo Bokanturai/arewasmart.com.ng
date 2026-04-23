@@ -22,7 +22,7 @@
         font-size: 24px;
         cursor: pointer;
         box-shadow: var(--ai-shadow);
-        z-index: 9999;
+        z-index: 1040;
         transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     }
 
@@ -42,7 +42,7 @@
         border: 1px solid rgba(255, 255, 255, 0.3);
         border-radius: 24px;
         box-shadow: var(--ai-shadow);
-        z-index: 9998;
+        z-index: 1039;
         display: none;
         flex-direction: column;
         overflow: hidden;
