@@ -308,10 +308,10 @@ class SmeDataController extends Controller
     {
         $networkMap = [
             'MTN'      => 1,
-            'AIRTEL'   => 2,
-            'GLO'      => 3,
-            '9MOBILE'  => 4,
-            'ETISALAT' => 4,
+            'GLO'      => 2,
+            '9MOBILE'  => 3,
+            'AIRTEL'   => 4,
+            'ETISALAT' => 3,
         ];
 
         $networkId = $networkMap[strtoupper($plan->network)] ?? 1;

@@ -1,0 +1,320 @@
+/* Dark Mode Styles for Arewa Smart */
+
+[data-theme="dark"] {
+    --dark-bg: #0d1117;
+    --dark-card: #161b22;
+    --dark-border: #30363d;
+    --dark-text: #e6edf3;
+    --dark-text-muted: #8b949e;
+    --dark-header: #161b22;
+    --dark-sidebar: #0d1117;
+}
+
+[data-theme="dark"] body {
+    background-color: var(--dark-bg);
+    color: var(--dark-text);
+}
+
+[data-theme="dark"] #global-loader {
+    background-color: var(--dark-bg) !important;
+}
+
+[data-theme="dark"] .bg-light {
+    background-color: var(--dark-bg) !important;
+}
+
+[data-theme="dark"] .bg-light-subtle {
+    background-color: #161b22 !important;
+    border-color: var(--dark-border) !important;
+    color: var(--dark-text-muted) !important;
+}
+
+[data-theme="dark"] .bg-white {
+    background-color: var(--dark-card) !important;
+}
+
+/* Header & Sidebar */
+[data-theme="dark"] .header,
+[data-theme="dark"] .main-header {
+    background-color: var(--dark-header) !important;
+    border-bottom: 1px solid var(--dark-border) !important;
+}
+
+[data-theme="dark"] .sidebar {
+    background-color: var(--dark-sidebar) !important;
+    border-right: 1px solid var(--dark-border) !important;
+}
+
+[data-theme="dark"] .border, 
+[data-theme="dark"] .border-top, 
+[data-theme="dark"] .border-bottom, 
+[data-theme="dark"] .border-start, 
+[data-theme="dark"] .border-end {
+    border-color: var(--dark-border) !important;
+}
+
+[data-theme="dark"] .sidebar .sidebar-menu ul li a {
+    color: var(--dark-text-muted);
+}
+
+[data-theme="dark"] .sidebar .sidebar-menu ul li a.active,
+[data-theme="dark"] .sidebar .sidebar-menu ul li a:hover {
+    color: #fff !important;
+    background: rgba(242, 101, 34, 0.2) !important;
+}
+
+/* Cards */
+[data-theme="dark"] .card,
+[data-theme="dark"] .card-body,
+[data-theme="dark"] .card-header,
+[data-theme="dark"] .benefit-item {
+    background-color: var(--dark-bg) !important;
+    color: var(--dark-text-muted) !important;
+}
+
+[data-theme="dark"] .sidebar-logo,
+[data-theme="dark"] .sidebar-inner,
+[data-theme="dark"] .sidebar-header {
+    background-color: var(--dark-sidebar) !important;
+}
+
+[data-theme="dark"] .sidebar-logo img {
+    max-width: 70px !important;
+    height: auto !important;
+    object-fit: contain !important;
+    display: inline-block !important;
+}
+
+[data-theme="dark"] .modern-profile .user-profile {
+    background-color: #161b22 !important;
+    color: var(--dark-text-muted) !important;
+}
+
+[data-theme="dark"] .modern-profile .user-profile h6 {
+    color: #fff !important;
+}
+
+[data-theme="dark"] .sidebar-menu .submenu ul {
+    background: rgba(255, 255, 255, 0.03) !important;
+}
+
+[data-theme="dark"] .card-footer {
+    background-color: var(--dark-card) !important;
+    border-color: var(--dark-border) !important;
+    color: var(--dark-text);
+}
+
+[data-theme="dark"] .card h1,
+[data-theme="dark"] .card h2,
+[data-theme="dark"] .card h3,
+[data-theme="dark"] .card h4,
+[data-theme="dark"] .card h5,
+[data-theme="dark"] .card h6,
+[data-theme="dark"] .stats-value,
+[data-theme="dark"] .card-title {
+    color: #fff !important;
+}
+
+[data-theme="dark"] .text-dark,
+[data-theme="dark"] .text-gray-9 {
+    color: var(--dark-text) !important;
+}
+
+[data-theme="dark"] .text-muted,
+[data-theme="dark"] .stats-label {
+    color: var(--dark-text-muted) !important;
+}
+
+/* Inputs & Forms */
+[data-theme="dark"] .form-control,
+[data-theme="dark"] .input-group-text,
+[data-theme="dark"] .form-select {
+    background-color: #0d1117 !important;
+    border-color: var(--dark-border) !important;
+    color: var(--dark-text) !important;
+}
+
+[data-theme="dark"] .form-control::placeholder,
+[data-theme="dark"] .form-select::placeholder {
+    color: #484f58 !important;
+}
+
+[data-theme="dark"] label,
+[data-theme="dark"] .form-label,
+[data-theme="dark"] .text-dark,
+[data-theme="dark"] .card-title,
+[data-theme="dark"] .section-title {
+    color: #ffffff !important;
+}
+
+[data-theme="dark"] .text-muted,
+[data-theme="dark"] .stats-label,
+[data-theme="dark"] .small-text,
+[data-theme="dark"] .text-secondary {
+    color: #8b949e !important;
+}
+
+/* Modals & Dropdowns */
+[data-theme="dark"] .modal-content,
+[data-theme="dark"] .dropdown-menu {
+    background-color: var(--dark-card) !important;
+    border: 1px solid var(--dark-border);
+    color: var(--dark-text);
+}
+
+[data-theme="dark"] .dropdown-item {
+    color: var(--dark-text) !important;
+}
+
+[data-theme="dark"] .dropdown-item i {
+    color: var(--dark-text-muted) !important;
+}
+
+[data-theme="dark"] .dropdown-item:hover {
+    background-color: #30363d;
+    color: #fff;
+}
+
+/* Tables */
+[data-theme="dark"] .table {
+    color: var(--dark-text);
+    border-color: var(--dark-border);
+}
+
+[data-theme="dark"] .table thead th {
+    background-color: #161b22;
+    color: #fff;
+    border-bottom: 2px solid var(--dark-border);
+}
+
+[data-theme="dark"] .table tbody tr td {
+    border-bottom: 1px solid var(--dark-border);
+}
+
+/* UI Transitions */
+body,
+.card,
+.header,
+.sidebar,
+.modal-content,
+.dropdown-menu {
+    transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
+}
+
+/* Specific Service Card Backgrounds (Transparent/Subtle variants) */
+[data-theme="dark"] .bg-transparent-dark {
+    background-color: rgba(255, 255, 255, 0.05) !important;
+}
+
+[data-theme="dark"] .bg-success-subtle {
+    background-color: rgba(45, 203, 115, 0.1) !important;
+    border: 1px solid rgba(45, 203, 115, 0.2) !important;
+}
+
+[data-theme="dark"] .bg-warning-subtle {
+    background-color: rgba(255, 193, 7, 0.1) !important;
+    border: 1px solid rgba(255, 193, 7, 0.2) !important;
+}
+
+[data-theme="dark"] .bg-danger-subtle {
+    background-color: rgba(231, 13, 13, 0.1) !important;
+    border: 1px solid rgba(231, 13, 13, 0.2) !important;
+}
+
+[data-theme="dark"] .bg-info-subtle {
+    background-color: rgba(27, 132, 255, 0.1) !important;
+    border: 1px solid rgba(27, 132, 255, 0.2) !important;
+}
+
+[data-theme="dark"] .network-card {
+    background-color: var(--dark-card) !important;
+    border-color: var(--dark-border) !important;
+    color: #fff !important;
+}
+
+[data-theme="dark"] .network-card.active {
+    background-color: rgba(13, 110, 253, 0.1) !important;
+    border-color: #0d6efd !important;
+}
+
+[data-theme="dark"] .network-card:hover {
+    border-color: #0d6efd !important;
+    background-color: rgba(255, 255, 255, 0.05) !important;
+}
+
+[data-theme="dark"] .greeting-content h2 {
+    color: #fff;
+}
+
+[data-theme="dark"] .action-label,
+[data-theme="dark"] .balance-title,
+[data-theme="dark"] .service-name {
+    color: #ffffff !important;
+}
+
+[data-theme="dark"] .wallet-action-card {
+    background-color: var(--dark-card) !important;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3) !important;
+}
+
+[data-theme="dark"] .wallet-footer {
+    border-top-color: var(--dark-border) !important;
+}
+
+/* AI Widget Dark Mode Support */
+[data-theme="dark"] #ai-chat-window {
+    background: rgba(22, 27, 34, 0.9);
+    border-color: var(--dark-border);
+}
+
+[data-theme="dark"] .ai-msg-ai {
+    background: #30363d;
+    color: var(--dark-text);
+}
+
+[data-theme="dark"] .ai-chat-input-area {
+    background: var(--dark-card);
+    border-top-color: var(--dark-border);
+}
+
+[data-theme="dark"] .ai-input-group {
+    background: #0d1117;
+    border-color: var(--dark-border);
+}
+
+[data-theme="dark"] .ai-input-group input {
+    color: var(--dark-text);
+}
+
+[data-theme="dark"] .bg-white {
+    background-color: var(--dark-card) !important;
+}
+
+/* Mobile Dropdown Fix */
+[data-theme="dark"] .mobile-user-menu .dropdown-menu {
+    background-color: var(--dark-card) !important;
+    border: 1px solid var(--dark-border) !important;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5) !important;
+}
+
+[data-theme="dark"] .mobile-user-menu .dropdown-item:hover {
+    background-color: rgba(255, 255, 255, 0.05) !important;
+}
+
+/* Custom premium rounded scrollbars for dark mode */
+[data-theme="dark"] ::-webkit-scrollbar {
+    width: 8px;
+}
+
+[data-theme="dark"] ::-webkit-scrollbar-track {
+    background: var(--dark-bg);
+}
+
+[data-theme="dark"] ::-webkit-scrollbar-thumb {
+    background: #30363d;
+    border-radius: 10px;
+}
+
+[data-theme="dark"] ::-webkit-scrollbar-thumb:hover {
+    background: #484f58;
+}

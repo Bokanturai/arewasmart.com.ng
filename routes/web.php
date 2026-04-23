@@ -26,7 +26,7 @@ use App\Http\Controllers\Verification\NinPhoneVerificationController;
 use App\Http\Controllers\Action\SmeDataController;
 use App\Http\Controllers\Action\NecoNabtedController;
 use App\Http\Controllers\WebsiteController;
-use App\Http\Controllers\AiCommentController;
+use App\Http\Controllers\Ai\AiCommentController;
 
 
 
@@ -319,7 +319,11 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/ask', [AiCommentController::class, 'ask'])->name('ai.ask');
         Route::post('/chat', [AiCommentController::class, 'chat'])->name('ai.chat');
         Route::get('/history', [AiCommentController::class, 'fetchHistory'])->name('ai.history');
+        Route::post('/receipt', [AiCommentController::class, 'getReceipt'])->name('ai.receipt');
     });
+
+
+
 
     // Gift Card Routes
     Route::prefix('gift-cards')->name('gift-card.')->group(function () {

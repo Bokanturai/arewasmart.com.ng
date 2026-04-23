@@ -298,7 +298,7 @@
     position: sticky;
     top: 0;
     z-index: 1020;
-    background-color: #fff; /* or your preferred background color */
+    background-color: transparent; 
 }
 
 /* Submenu styling */

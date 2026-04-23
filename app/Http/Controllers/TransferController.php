@@ -104,8 +104,12 @@ class TransferController extends Controller
         $user = Auth::user();
         // 0. Preliminary Status Checks
         if ($user->status !== 'active') {
+             if ($request->wantsJson()) {
+                 return response()->json(['success' => false, 'message' => "Your account is currently {$user->status}. Access denied."], 403);
+             }
              return redirect()->back()->with('error', "Your account is currently {$user->status}. Access denied.");
         }
+
         $senderWallet = $user->wallet;
         $amount = $request->amount;
         
@@ -115,8 +119,12 @@ class TransferController extends Controller
                            (now()->timestamp - session('biometric_verified_at')) < 60; // 60 seconds window
 
         if (!$isBiometricValid && !Hash::check($request->pin, $user->pin)) {
+             if ($request->wantsJson()) {
+                 return response()->json(['success' => false, 'message' => 'Incorrect Transaction PIN.'], 403);
+             }
              return back()->with('error', 'Incorrect Transaction PIN.');
         }
+
 
         // Clear biometric flag after use for security
         if ($isBiometricValid) session()->forget('biometric_verified_at');
@@ -124,12 +132,15 @@ class TransferController extends Controller
         // Get Receiver
         $receiverWallet = Wallet::where('wallet_number', $request->wallet_id)->first();
         if (!$receiverWallet) {
+            if ($request->wantsJson()) return response()->json(['success' => false, 'message' => 'Receiver wallet not found.'], 404);
             return back()->with('error', 'Receiver wallet not found.');
         }
         
         if ($senderWallet->id === $receiverWallet->id) {
+            if ($request->wantsJson()) return response()->json(['success' => false, 'message' => 'You cannot transfer money to yourself.'], 422);
             return back()->with('error', 'You cannot transfer money to yourself.');
         }
+
 
         // Get Service Charge
         // Assuming there is a service field for P2P. 
@@ -146,8 +157,10 @@ class TransferController extends Controller
         $totalDeduction = $amount + $charge;
 
         if ($senderWallet->balance < $totalDeduction) {
+            if ($request->wantsJson()) return response()->json(['success' => false, 'message' => 'Insufficient balance.'], 422);
             return back()->with('error', 'Insufficient balance.');
         }
+
 
         DB::beginTransaction();
 
@@ -200,6 +213,18 @@ class TransferController extends Controller
 
             DB::commit();
 
+            if ($request->wantsJson()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Transfer successful!',
+                    'data' => [
+                        'transaction' => $senderTransaction,
+                        'amount' => $amount,
+                        'receiver' => $receiverWallet->user->first_name
+                    ]
+                ]);
+            }
+
             return view('thankyou2', [
                 'transaction' => $senderTransaction,
                 'sender' => $user,
@@ -208,9 +233,12 @@ class TransferController extends Controller
                 'date' => now()
             ]);
 
+
         } catch (\Exception $e) {
             DB::rollBack();
+            if ($request->wantsJson()) return response()->json(['success' => false, 'message' => 'Transaction failed: ' . $e->getMessage()], 500);
             return back()->with('error', 'Transaction failed: ' . $e->getMessage());
         }
+
     }
 }

@@ -105,13 +105,14 @@
     <div class="container-fluid px-0 px-md-3 mt-3">
         
         <!-- Welcome Greeting -->
-        <div class="row mb-3 px-3">
+        <div class="row mb-4 px-3">
             <div class="col-12">
                 <div class="d-flex align-items-center gap-3">
                     <img src="{{ Auth::user()->photo ?? asset('assets/img/profiles/avatar-31.jpg') }}"
                          class="rounded-circle border border-2 border-primary shadow-sm"
                          style="width: 45px; height: 45px; object-fit: cover;"
-                         alt="User Avatar">
+                         alt="User Avatar"
+                         loading="lazy">
                     <div>
                         <h5 class="fw-bold text-dark mb-0 fs-15">
                             Hello! {{ $timeGreeting }}, {{ Auth::user()->first_name ?? 'BOSS' }} 👋
@@ -181,21 +182,21 @@
         </div>
 
         <!-- 2. Alerts Section -->
-        <div class="row g-0 mt-n2">
+        <div class="row g-0 mt-4">
             <div class="col-12 px-0 px-md-3">
                 @include('pages.alart')
             </div>
         </div>
 
         <!-- 3. Quick Services Section -->
-        <div class="row g-0 mt-n2">
+        <div class="row g-0 mt-2">
             <div class="col-12 px-0 px-md-3">
                 @include('pages.dashboard.services')
             </div>
         </div>
 
         <!-- 4. Transactions & Statistics Section -->
-        <div class="row g-0 mt-n5 d-none d-lg-flex">
+        <div class="row g-0 mt-4 mb-5 d-none d-lg-flex">
             <div class="col-12 px-0 px-md-3">
                 @include('pages.dashboard.trans')
             </div>

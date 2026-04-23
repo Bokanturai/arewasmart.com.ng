@@ -24,6 +24,7 @@ class DashboardController extends Controller
         $virtualAccount = VirtualAccount::where('user_id', $user->id)->first();
         $bonusHistory = BonusHistory::where('user_id', $user->id)
             ->orderBy('id', 'desc')
+            ->take(5)
             ->get();
 
         // Date Filtering Logic

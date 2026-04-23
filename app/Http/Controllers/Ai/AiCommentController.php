@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Ai;
 
+use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
@@ -187,15 +188,6 @@ class AiCommentController extends Controller
     }
 
     /**
-     * Systematically fetch all relevant database context for the user.
-     * DEPRECATED: Use AiContextTrait instead.
-     */
-    private function fetchUserFinancialContext()
-    {
-        // Handled by AiContextTrait
-    }
-
-    /**
      * Call the Deepseek API.
      */
     private function callDeepseek($systemPrompt, $userMessage, $history = [])
@@ -214,9 +206,17 @@ class AiCommentController extends Controller
             foreach ($history as $msg) {
                 if (isset($msg['role']) && isset($msg['content']) && 
                    ($msg['role'] !== 'user' || $msg['content'] !== $userMessage)) {
-                    $messages[] = $msg;
+                    
+                    // Map non-standard roles (like 'admin') to 'assistant' for Deepseek compatibility
+                    $role = $msg['role'];
+                    if (!in_array($role, ['system', 'user', 'assistant', 'tool'])) {
+                        $role = 'assistant';
+                    }
+
+                    $messages[] = ['role' => $role, 'content' => $msg['content']];
                 }
             }
+
 
             $messages[] = ['role' => 'user', 'content' => $userMessage];
 
@@ -251,5 +251,65 @@ class AiCommentController extends Controller
             Log::error('Deepseek Exception in AiCommentController: ' . $e->getMessage());
             return ['success' => false, 'message' => 'Something went wrong with the AI service.'];
         }
+    }
+
+    /**
+     * Fetch a rendered receipt card for the AI widget.
+     */
+    public function getReceipt(Request $request)
+    {
+        $ref = $request->input('ref');
+        if (!$ref) return response()->json(['success' => false, 'message' => 'Reference required'], 400);
+
+        $tx = Transaction::where('transaction_ref', $ref)
+            ->where('user_id', auth()->id())
+            ->first();
+
+        if (!$tx) return response()->json(['success' => false, 'message' => 'Transaction not found'], 404);
+
+        $data = [
+            'ref' => $tx->transaction_ref,
+            'amount' => $tx->amount,
+            'paid' => ($tx->net_amount > 0) ? $tx->net_amount : $tx->amount,
+            'date' => $tx->created_at,
+            'receiverName' => null,
+            'serviceName' => 'Service Purchase',
+            'network' => 'N/A',
+            'mobile' => 'N/A',
+            'token' => null,
+        ];
+
+        $meta = is_array($tx->metadata) ? $tx->metadata : json_decode($tx->metadata ?? '[]', true);
+        
+        if (isset($meta['service']) && $meta['service'] === 'withdrawal' || str_starts_with($tx->transaction_ref, 'WDL')) {
+            $data['serviceName'] = 'Wallet Withdrawal';
+            $data['network'] = $meta['bankName'] ?? 'Bank Transfer';
+            $data['mobile'] = $meta['account_no'] ?? 'N/A';
+            $data['receiverName'] = $meta['account_name'] ?? null;
+        } else {
+            $data['network'] = $meta['network'] ?? $data['network'];
+            $data['mobile'] = $meta['phone_number'] ?? $meta['account_number'] ?? $data['mobile'];
+            $data['token'] = $meta['token'] ?? $data['token'];
+
+            if ($data['token']) {
+                $data['serviceName'] = 'Educational Pin';
+            } elseif (str_contains(strtolower($data['network'] ?? ''), 'data')) {
+                $data['serviceName'] = 'Data Purchase';
+            } elseif (isset($meta['service']) && $meta['service'] === 'P2P') {
+                $data['serviceName'] = 'P2P Transfer';
+                $data['mobile'] = $meta['receiver_wallet'] ?? 'N/A';
+                $data['receiverName'] = $meta['receiver_name'] ?? null;
+            } elseif ($data['network'] !== 'N/A') {
+                $data['serviceName'] = 'Airtime Purchase';
+            }
+        }
+
+
+        $html = view('ai.receipt_card', $data)->render();
+
+        return response()->json([
+            'success' => true,
+            'html' => $html
+        ]);
     }
 }

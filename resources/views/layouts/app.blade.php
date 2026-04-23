@@ -4,6 +4,16 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
+    
+    <script>
+        // Inline anti-flash script for Dark Mode
+        (function() {
+            const theme = localStorage.getItem('theme') || 'light';
+            if (theme === 'dark') {
+                document.documentElement.setAttribute('data-theme', 'dark');
+            }
+        })();
+    </script>
 
    
 
@@ -67,6 +77,9 @@
 
     <!-- Bootstrap Icons -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+    
+    <!-- Dark Mode CSS -->
+    <link rel="stylesheet" href="{{ asset('assets/css/dark_mode.css') }}">
 
     <!-- Font Awesome CDN -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
@@ -110,7 +123,7 @@
         </div>
     </div>
    <!-- ===== Footer Start ===== -->
-<footer class="footer bg-primary text-light py-2 mt-1">
+<footer class="footer bg-primary text-light py-2 mt-4">
   <div class="container-fluid">
     <div class="row align-items-center justify-content-between">
 
@@ -213,6 +226,7 @@
     <script src="{{ asset('assets/js/bvnservices.js') }}"></script>
     <script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="{{ asset('assets/js/sweetalert.js') }}"></script>
+    <script src="{{ asset('assets/js/theme_toggle.js') }}"></script>
 
 
     <script>
@@ -339,6 +353,6 @@
             });
         });
     </script>
-    @include('layouts.partials.ai_widget')
+    @include('ai.widget')
 </body>
 </html>

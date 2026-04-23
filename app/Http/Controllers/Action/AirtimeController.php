@@ -90,8 +90,12 @@ class AirtimeController extends Controller
         
         // 0. Preliminary Status Checks
         if ($user->status !== 'active') {
+             if ($request->wantsJson()) {
+                 return response()->json(['status' => 'error', 'message' => "Your account is currently {$user->status}. Access denied."], 403);
+             }
              return redirect()->back()->with('error', "Your account is currently {$user->status}. Access denied.");
         }
+
 
         // 1. Idempotency Check (Prevent duplicate requests within 60 seconds)
         $recentTransaction = \App\Models\Report::where('user_id', $user->id)
@@ -102,8 +106,12 @@ class AirtimeController extends Controller
             ->first();
 
         if ($recentTransaction) {
+            if ($request->wantsJson()) {
+                return response()->json(['status' => 'error', 'message' => 'A similar transaction was recently processed. Please wait a moment.'], 422);
+            }
             return redirect()->back()->with('error', 'A similar transaction was recently processed. Please wait a moment before trying again.');
         }
+
 
         // 2. Find the Airtime Service & Field
         $service = Service::where('name', 'Airtime')->first();
@@ -136,12 +144,17 @@ class AirtimeController extends Controller
         // 4. Check Wallet Balance & Status
         $wallet = Wallet::where('user_id', $user->id)->first();
         if (!$wallet || $wallet->balance < $payableAmount) {
-            return redirect()->back()->with('error', 'Insufficient wallet balance! You need ₦' . number_format($payableAmount, 2));
+
+            $msg = 'Insufficient wallet balance! You need ₦' . number_format($payableAmount, 2);
+            if ($request->wantsJson()) return response()->json(['status' => 'error', 'message' => $msg], 422);
+            return redirect()->back()->with('error', $msg);
         }
 
         if ($wallet->status !== 'active') {
+            if ($request->wantsJson()) return response()->json(['status' => 'error', 'message' => 'Your wallet is not active.'], 403);
             return redirect()->back()->with('error', 'Your wallet is not active. Please contact support.');
         }
+
 
         // 5. Initialize Records (Mark as Processing)
         DB::beginTransaction();
@@ -153,13 +166,16 @@ class AirtimeController extends Controller
             $transaction = Transaction::create([
                 'transaction_ref' => $requestId,
                 'user_id'         => $user->id,
-                'amount'          => $payableAmount,
+                'amount'          => $amount,
+                'fee'             => 0,
+                'net_amount'      => $payableAmount,
                 'description'     => "Airtime purchase of ₦{$amount} for {$mobile} ({$networkKey})",
                 'type'            => 'debit',
-                'status'          => 'processing', // Use processing state
+                'status'          => 'processing',
                 'performed_by'    => $user->first_name . ' ' . $user->last_name,
                 'approved_by'     => $user->id,
             ]);
+
 
             $report = \App\Models\Report::create([
                 'user_id'      => $user->id,
@@ -179,8 +195,10 @@ class AirtimeController extends Controller
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error('Airtime Initialization Error: ' . $e->getMessage());
+            if ($request->wantsJson()) return response()->json(['status' => 'error', 'message' => 'Failed to initialize transaction.'], 500);
             return redirect()->back()->with('error', 'Failed to initialize transaction. Please try again.');
         }
+
 
         // 6. Call Airtime API (OUTSIDE the DB Transaction)
         try {
@@ -208,7 +226,7 @@ class AirtimeController extends Controller
 
             if ($isSuccessful) {
                 $transaction->update([
-                    'status'   => 'successful', // Use standardized 'successful'
+                    'status'   => 'completed', 
                     'metadata' => json_encode([
                         'phone'        => $mobile,
                         'network'      => $networkKey,
@@ -216,7 +234,19 @@ class AirtimeController extends Controller
                         'api_response' => $data,
                     ]),
                 ]);
-                $report->update(['status' => 'successful', 'description' => "Successful: Airtime purchase for {$mobile}"]);
+                if ($request->wantsJson()) {
+                    return response()->json([
+                        'status' => 'success',
+                        'message' => 'Airtime purchase successful!',
+                        'data' => [
+                            'ref' => $requestId,
+                            'mobile' => $mobile,
+                            'amount' => $amount,
+                            'paid' => $payableAmount,
+                            'network' => $networkKey
+                        ]
+                    ]);
+                }
 
                 return redirect()->route('thankyou')->with([
                     'success' => 'Airtime purchase successful!',
@@ -226,6 +256,7 @@ class AirtimeController extends Controller
                     'paid'    => $payableAmount,
                     'network' => $networkKey
                 ]);
+
             }
 
             // API Failed - REFUND
@@ -239,7 +270,10 @@ class AirtimeController extends Controller
             });
 
             Log::error('Airtime API Error', ['response' => $data, 'ref' => $requestId]);
-            return redirect()->back()->with('error', 'Airtime purchase failed. ' . ($data['message'] ?? 'Unknown error'));
+            $msg = 'Airtime purchase failed. ' . ($data['message'] ?? 'Unknown error');
+            if ($request->wantsJson()) return response()->json(['status' => 'error', 'message' => $msg], 400);
+            return redirect()->back()->with('error', $msg);
+
 
         } catch (\Exception $e) {
             // Unexpected Error (e.g. timeout) - Mark as failed and REFUND
@@ -253,7 +287,9 @@ class AirtimeController extends Controller
             });
 
             Log::error('Airtime API Exception: ' . $e->getMessage());
+            if ($request->wantsJson()) return response()->json(['status' => 'error', 'message' => 'Connection error. Your wallet has been refunded.'], 500);
             return redirect()->back()->with('error', 'Connection error. Your wallet has been refunded.');
         }
+
     }
 }

@@ -101,6 +101,13 @@
 
                 <!-- Right Side - Icons & Profile -->
                 <div class="d-flex align-items-center">
+                    <!-- Theme Toggle (Dark/Light) -->
+                    <div class="me-1">
+                        <a href="javascript:void(0);" class="btn btn-menubar theme-toggle-btn" title="Switch to Dark Mode">
+                            <i class="ti ti-moon"></i>
+                        </a>
+                    </div>
+                    
                     <!-- Fullscreen -->
                     <div class="me-1">
                         <a href="#" class="btn btn-menubar btnFullscreen">
@@ -222,11 +229,20 @@
                 <i class="fa fa-ellipsis-v"></i>
             </a>
             <div class="dropdown-menu dropdown-menu-end">
-                <a class="dropdown-item" href="{{ route('profile.edit') }}">My Profile</a>
-                <a class="dropdown-item" href="{{ route('profile.edit') }}">Settings</a>
+                <a class="dropdown-item" href="{{ route('profile.edit') }}">
+                    <i class="ti ti-user-circle me-2"></i>My Profile
+                </a>
+                <a class="dropdown-item" href="{{ route('profile.edit') }}">
+                    <i class="ti ti-settings me-2"></i>Settings
+                </a>
+                <a class="dropdown-item theme-toggle-btn" href="javascript:void(0);">
+                    <i class="ti ti-moon me-2"></i>Dark Mode
+                </a>
                 <form method="POST" action="{{ route('logout') }}">
                     @csrf
-                    <a class="dropdown-item" href="{{ route('logout') }}" onclick="event.preventDefault(); this.closest('form').submit();">Logout</a>
+                    <a class="dropdown-item" href="{{ route('logout') }}" onclick="event.preventDefault(); this.closest('form').submit();">
+                        <i class="ti ti-login me-2"></i>Logout
+                    </a>
                 </form>
             </div>
         </div>

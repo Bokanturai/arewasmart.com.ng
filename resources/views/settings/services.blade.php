@@ -11,6 +11,16 @@
             --glass-border: rgba(255, 255, 255, 0.2);
             --card-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
             --accent-glow: 0 0 15px rgba(233, 60, 17, 0.3);
+            --item-bg: #f8f9fa;
+            --item-border: transparent;
+        }
+
+        [data-theme="dark"] {
+            --glass-bg: rgba(22, 27, 34, 0.8);
+            --glass-border: rgba(255, 255, 255, 0.1);
+            --card-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            --item-bg: #0d1117;
+            --item-border: rgba(255, 255, 255, 0.05);
         }
         
         .settings-container {
@@ -156,9 +166,9 @@
 
         /* Stats Cards */
         .stat-card {
-            background: #fff;
+            background: var(--glass-bg);
             padding: 1.25rem;
-            border: 1px solid #f1f1f1;
+            border: 1px solid var(--item-border);
             transition: all 0.3s ease;
             height: 100%;
             border-radius: 20px;
@@ -175,7 +185,7 @@
 
         /* Info Item Styling */
         .info-item {
-            background: #f8f9fa;
+            background: var(--item-bg);
             padding: 1rem;
             border-radius: 1rem;
             border: 1px solid transparent;
@@ -199,7 +209,44 @@
         .modal-content-premium {
             border: none;
             border-radius: 1.5rem;
-            background: #fff;
+            background: var(--glass-bg);
+        }
+
+        [data-theme="dark"] .settings-nav {
+            background: var(--dark-card);
+        }
+        [data-theme="dark"] .settings-nav .nav-link:not(.active) {
+            color: var(--dark-text-muted);
+        }
+        [data-theme="dark"] .settings-nav .nav-link:hover:not(.active) {
+            background: rgba(255, 255, 255, 0.05);
+        }
+        [data-theme="dark"] .avatar-container {
+            background: var(--dark-bg);
+        }
+        [data-theme="dark"] .stat-card h5 {
+            color: #fff !important;
+        }
+        [data-theme="dark"] .edit-badge-main {
+            border-color: var(--dark-card);
+        }
+        [data-theme="dark"] .info-item:hover {
+            background: var(--dark-card);
+        }
+        [data-theme="dark"] .bg-primary-subtle {
+            background: rgba(233, 60, 17, 0.15) !important;
+        }
+        [data-theme="dark"] .bg-success-subtle {
+            background: rgba(25, 135, 84, 0.15) !important;
+        }
+        [data-theme="dark"] .bg-warning-subtle {
+            background: rgba(255, 193, 7, 0.15) !important;
+        }
+        [data-theme="dark"] .bg-info-subtle {
+            background: rgba(13, 110, 253, 0.15) !important;
+        }
+        [data-theme="dark"] .bg-danger-subtle {
+            background: rgba(220, 53, 69, 0.15) !important;
         }
     </style>
 

@@ -139,9 +139,9 @@
                                     @php
                                         $displayNetworks = [
                                             'MTN'      => ['name' => 'MTN',    'img' => 'mtn.jpg', 'val' => 'MTN'],
-                                            'AIRTEL'   => ['name' => 'Airtel', 'img' => 'Airtel.png', 'val' => 'AIRTEL'],
                                             'GLO'      => ['name' => 'Glo',    'img' => 'glo.jpg', 'val' => 'GLO'],
                                             '9MOBILE'  => ['name' => '9Mobile','img' => '9Mobile.jpg', 'val' => '9MOBILE'],
+                                            'AIRTEL'   => ['name' => 'Airtel', 'img' => 'Airtel.png', 'val' => 'AIRTEL'],
                                         ];
                                     @endphp
                                     @foreach($displayNetworks as $id => $net)
