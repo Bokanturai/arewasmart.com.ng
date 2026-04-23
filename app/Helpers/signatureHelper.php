@@ -33,7 +33,7 @@ class signatureHelper
     {
         // Filter empty string from the array
         $filtered_data = array_filter($data, function ($value) {
-            return $value !== '';
+            return $value !== '' && $value !== null;
         });
 
         // Sort the array by its keys in ascending order
@@ -42,8 +42,12 @@ class signatureHelper
         // Remove the sign key if it exists
         unset($filtered_data['sign']);
 
-        // Build and return the query string
-        return urldecode(http_build_query($filtered_data));
+        $pairs = [];
+        foreach ($filtered_data as $key => $value) {
+            $pairs[] = "$key=$value";
+        }
+
+        return implode('&', $pairs);
     }
 
     /**
@@ -76,12 +80,29 @@ class signatureHelper
     {
         // Retrieve the public key resource
         $publicKey = self::validate_rsa_key($public_key, 'public');
-        // Calculate the MD5 of the notification payload without the sign field. The param_sort function removes the sign field.
-        $md5 = strtoupper(md5(self::params_sort($data)));
-        // Verify the signature using the public key and SHA-1 algorithm
-        $is_verified = openssl_verify($md5, base64_decode(urldecode($signature)), $publicKey, OPENSSL_ALGO_SHA1);
+        
+        // Build the signing string and calculate MD5
+        $paramsString = self::params_sort($data);
+        $md5 = strtoupper(md5($paramsString));
+        
+        // Safely handle signature encoding
+        // If it contains '%', it's likely URL-encoded. If not, treat as plain base64.
+        $rawSignature = str_contains($signature, '%') ? urldecode($signature) : $signature;
+        $decodedSig = base64_decode($rawSignature);
 
-        return $is_verified;
+        // Verify the signature using the public key and SHA-1 algorithm
+        $is_verified = openssl_verify($md5, $decodedSig, $publicKey, OPENSSL_ALGO_SHA1);
+
+        if ($is_verified !== 1) {
+            \Illuminate\Support\Facades\Log::error('Palmpay Signature Verification Failed', [
+                'built_string' => $paramsString,
+                'md5_hash' => $md5,
+                'signature_received' => $signature,
+                'openssl_error' => openssl_error_string()
+            ]);
+        }
+
+        return $is_verified === 1;
     }
 
     /**
