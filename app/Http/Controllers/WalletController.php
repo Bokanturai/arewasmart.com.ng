@@ -59,10 +59,16 @@ class WalletController extends Controller
                 ? $result['message']
                 : 'Wallet creation failed. Please try again later.';
 
+            if ($request->wantsJson()) {
+                return response()->json(['status' => 'error', 'message' => $message], 400);
+            }
             return redirect()->route('wallet')->with(['error' => $message]);
         }
 
         // Success
+        if ($request->wantsJson()) {
+            return response()->json(['status' => 'success', 'message' => $result['message'], 'data' => $result]);
+        }
         return redirect()->route('wallet')->with(['success' => $result['message']]);
     }
 

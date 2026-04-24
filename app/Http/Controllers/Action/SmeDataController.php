@@ -146,6 +146,9 @@ class SmeDataController extends Controller
         $lock = Cache::lock($lockKey, 30); // 30-second lock
 
         if (!$lock->get()) {
+            if ($request->wantsJson()) {
+                return response()->json(['status' => 'error', 'message' => 'A transaction is already in progress.'], 429);
+            }
             return back()->with('error', 'A transaction is already in progress. Please wait a moment.');
         }
 
@@ -153,13 +156,20 @@ class SmeDataController extends Controller
             // Verify Transaction PIN
             if (!Hash::check($request->pin, $user->pin)) {
                 $lock->release();
+                if ($request->wantsJson()) {
+                    return response()->json(['status' => 'error', 'message' => 'Invalid transaction PIN.'], 403);
+                }
                 return back()->with('error', 'Invalid transaction PIN.');
             }
 
             // status check for user account
             if (($user->status ?? 'inactive') !== 'active') {
                 $lock->release();
-                return redirect()->back()->with('error', "Your account is currently " . ($user->status ?? 'inactive') . ". Access denied.");
+                $msg = "Your account is currently " . ($user->status ?? 'inactive') . ". Access denied.";
+                if ($request->wantsJson()) {
+                    return response()->json(['status' => 'error', 'message' => $msg], 403);
+                }
+                return redirect()->back()->with('error', $msg);
             }
 
             $requestId = RequestIdHelper::generateRequestId();
@@ -173,6 +183,9 @@ class SmeDataController extends Controller
 
             if (!$plan) {
                 $lock->release();
+                if ($request->wantsJson()) {
+                    return response()->json(['status' => 'error', 'message' => 'Invalid or disabled data plan selected.'], 400);
+                }
                 return back()->with('error', 'Invalid or disabled data plan selected.');
             }
 
@@ -184,12 +197,20 @@ class SmeDataController extends Controller
             $wallet = Wallet::where('user_id', $user->id)->first();
             if (!$wallet || $wallet->balance < $payableAmount) {
                 $lock->release();
-                return redirect()->back()->with('error', 'Insufficient wallet balance! You need ₦' . number_format($payableAmount, 2));
+                $msg = 'Insufficient wallet balance! You need ₦' . number_format($payableAmount, 2);
+                if ($request->wantsJson()) {
+                    return response()->json(['status' => 'error', 'message' => $msg], 402);
+                }
+                return redirect()->back()->with('error', $msg);
             }
 
             if (($wallet->status ?? 'inactive') !== 'active') {
                 $lock->release();
-                return redirect()->back()->with('error', 'Your wallet is not active. Please contact support.');
+                $msg = 'Your wallet is not active. Please contact support.';
+                if ($request->wantsJson()) {
+                    return response()->json(['status' => 'error', 'message' => $msg], 403);
+                }
+                return redirect()->back()->with('error', $msg);
             }
 
             DB::beginTransaction();
@@ -259,6 +280,10 @@ class SmeDataController extends Controller
 
                     DB::commit();
                     $lock->release();
+
+                    if ($request->wantsJson()) {
+                        return response()->json(['status' => 'error', 'message' => $response['message'] ?? 'Data purchase failed.'], 400);
+                    }
                     return redirect()->back()->with('error', $response['message'] ?? 'Data purchase failed. Please try again later.');
                 }
 
@@ -278,6 +303,20 @@ class SmeDataController extends Controller
                 DB::commit();
                 $lock->release();
 
+                if ($request->wantsJson()) {
+                    return response()->json([
+                        'status' => 'success',
+                        'message' => 'Data purchase successful!',
+                        'data' => [
+                            'ref' => $transactionRef,
+                            'mobile' => $mobileno,
+                            'network' => $plan->network . ' Data',
+                            'amount' => $payableAmount,
+                            'paid' => $payableAmount,
+                        ]
+                    ]);
+                }
+
                 return redirect()->route('thankyou')->with([
                     'success'  => 'Data purchase successful!',
                     'ref'      => $transactionRef,
@@ -291,11 +330,17 @@ class SmeDataController extends Controller
                 DB::rollBack();
                 $lock->release();
                 Log::error('SME Data Purchase Exception: ' . $e->getMessage());
+                if ($request->wantsJson()) {
+                    return response()->json(['status' => 'error', 'message' => 'Something went wrong.'], 500);
+                }
                 return back()->with('error', 'Something went wrong. Please try again.');
             }
         } catch (\Exception $e) {
             if (isset($lock)) $lock->release();
             Log::error('SME Data Outer Exception: ' . $e->getMessage());
+            if ($request->wantsJson()) {
+                return response()->json(['status' => 'error', 'message' => 'An error occurred.'], 500);
+            }
             return back()->with('error', 'An error occurred. Please try again.');
         }
     }

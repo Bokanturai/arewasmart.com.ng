@@ -188,6 +188,28 @@ class AiCommentController extends Controller
     }
 
     /**
+     * Persist a message to the AI chat history.
+     */
+    public function saveMessage(Request $request)
+    {
+        $request->validate([
+            'content' => 'required|string',
+            'role' => 'required|in:user,assistant',
+            'type' => 'required|string',
+        ]);
+
+        $chat = AiChat::create([
+            'user_id' => auth()->id(),
+            'role' => $request->role,
+            'type' => $request->type,
+            'content' => $request->content,
+            'status' => 'saved'
+        ]);
+
+        return response()->json(['success' => true, 'chat' => $chat]);
+    }
+
+    /**
      * Call the Deepseek API.
      */
     private function callDeepseek($systemPrompt, $userMessage, $history = [])

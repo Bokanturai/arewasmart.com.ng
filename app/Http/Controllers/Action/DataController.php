@@ -102,16 +102,28 @@ class DataController extends Controller
         $request->validate([
             'network'  => 'required|string',
             'mobileno' => 'required|numeric|digits:11',
-            'bundle'   => 'required|string'
+            'bundle'   => 'required|string',
+            'pin'      => 'required|numeric|digits:5'
         ]);
 
         $user = Auth::user();
+
+        // Verify Transaction PIN
+        if (!\Illuminate\Support\Facades\Hash::check($request->pin, $user->pin)) {
+            if ($request->wantsJson()) {
+                return response()->json(['status' => 'error', 'message' => 'Invalid transaction PIN.'], 403);
+            }
+            return back()->with('error', 'Invalid transaction PIN.');
+        }
         
         // Backend Double-Click/Idempotency Prevention
         $lockKey = 'data_purchase_lock_' . $user->id;
         $lock = Cache::lock($lockKey, 30); // 30-second lock
 
         if (!$lock->get()) {
+            if ($request->wantsJson()) {
+                return response()->json(['status' => 'error', 'message' => 'A transaction is already in progress. Please wait a moment.'], 429);
+            }
             return back()->with('error', 'A transaction is already in progress. Please wait a moment.');
         }
 
@@ -120,12 +132,19 @@ class DataController extends Controller
 
         // 0. Preliminary Account Status Check
         if (($user->status ?? 'inactive') !== 'active') {
-             return redirect()->back()->with('error', "Your account is currently " . ($user->status ?? 'inactive') . ". Access denied.");
+             $msg = "Your account is currently " . ($user->status ?? 'inactive') . ". Access denied.";
+             if ($request->wantsJson()) {
+                 return response()->json(['status' => 'error', 'message' => $msg], 403);
+             }
+             return redirect()->back()->with('error', $msg);
         }
 
         $wallet    = Wallet::where('user_id', $user->id)->first();
 
         if (!$wallet) {
+            if ($request->wantsJson()) {
+                return response()->json(['status' => 'error', 'message' => 'Wallet not found.'], 404);
+            }
             return back()->with('error', 'Wallet not found.');
         }
 
@@ -137,6 +156,9 @@ class DataController extends Controller
             ->first();
 
         if (!$variation) {
+             if ($request->wantsJson()) {
+                 return response()->json(['status' => 'error', 'message' => 'Invalid data bundle selected for the chosen network.'], 400);
+             }
              return back()->with('error', 'Invalid data bundle selected for the chosen network.');
         }
         
@@ -203,18 +225,29 @@ class DataController extends Controller
             
             if (!$wallet) {
                 DB::rollBack();
+                if ($request->wantsJson()) {
+                    return response()->json(['status' => 'error', 'message' => 'Wallet not found.'], 404);
+                }
                 return back()->with('error', 'Wallet not found.');
             }
 
             if ($wallet->balance < $payableAmount) {
                 DB::rollBack();
-                return back()->with('error', 'Insufficient wallet balance! You need ₦' . number_format($payableAmount, 2));
+                $msg = 'Insufficient wallet balance! You need ₦' . number_format($payableAmount, 2);
+                if ($request->wantsJson()) {
+                    return response()->json(['status' => 'error', 'message' => $msg], 402);
+                }
+                return back()->with('error', $msg);
             }
 
             // Wallet Status Check
             if (($wallet->status ?? 'inactive') !== 'active') {
                 DB::rollBack();
-                return back()->with('error', 'Your wallet is not active. Please contact support.');
+                $msg = 'Your wallet is not active. Please contact support.';
+                if ($request->wantsJson()) {
+                    return response()->json(['status' => 'error', 'message' => $msg], 403);
+                }
+                return back()->with('error', $msg);
             }
 
             $oldBalance = $wallet->balance;
@@ -287,6 +320,20 @@ class DataController extends Controller
 
                     DB::commit();
 
+                    if ($request->wantsJson()) {
+                        return response()->json([
+                            'status' => 'success',
+                            'message' => 'Data purchase successful!',
+                            'data' => [
+                                'ref' => $requestId,
+                                'mobile' => $request->mobileno,
+                                'amount' => $amount,
+                                'paid' => $payableAmount,
+                                'network' => $networkKey
+                            ]
+                        ]);
+                    }
+
                     return redirect()->route('thankyou')->with([
                         'success' => 'Data purchase successful!',
                         'ref'     => $requestId,
@@ -336,11 +383,17 @@ class DataController extends Controller
             }
 
             DB::commit();
+            if ($request->wantsJson()) {
+                return response()->json(['status' => 'error', 'message' => $errorMsg], 400);
+            }
             return back()->with('error', $errorMsg);
 
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error('Data purchase exception: ' . $e->getMessage());
+            if ($request->wantsJson()) {
+                return response()->json(['status' => 'error', 'message' => 'Something went wrong. Please try again.'], 500);
+            }
             return back()->with('error', 'Something went wrong. Please try again.');
         }
     }

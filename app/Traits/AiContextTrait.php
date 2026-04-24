@@ -42,6 +42,9 @@ trait AiContextTrait
         // 6. Service Catalogue (Conditional Pricing)
         $serviceContext = $this->fetchServiceCatalogue($user);
 
+        // 6b. Data Plans & Reliability
+        $dataPlansContext = $this->fetchDataPlansContext();
+
         // 7. Recent Interactions (Unified Memory)
         $interactionContext = $this->fetchRecentInteractionsContext($userId);
 
@@ -51,6 +54,7 @@ trait AiContextTrait
                "$vaContext\n\n" .
                "$reportContext\n\n" .
                "SERVICE CATALOGUE & PRICING:\n$serviceContext\n\n" .
+               "DATA PLANS RELIABILITY:\n$dataPlansContext\n\n" .
                "RECENT UNIFIED INTERACTIONS:\n$interactionContext\n\n" .
                "RECENT ACTIVITY (LAST 5 DAYS):\n$recentActivity\n\n" .
                "--- END OF AUTHORIZED CONTEXT ---";
@@ -137,6 +141,29 @@ trait AiContextTrait
         return $output;
     }
 
+    private function fetchDataPlansContext()
+    {
+        try {
+            $sme = \Illuminate\Support\Facades\DB::table('sme_datas')->where('status', 'enabled')->get();
+            $normal = \Illuminate\Support\Facades\DB::table('data_variations')->where('status', 'enabled')->get();
+            
+            $output = "AVAILABLE DATA PLANS (Reliability Info):\n";
+            if ($sme->isEmpty() && $normal->isEmpty()) return "DATA PLANS: No enabled plans found in database.";
+
+            foreach ($sme as $p) {
+                $reliability = $p->failure_count == 0 ? "Excellent" : ($p->failure_count < 3 ? "Good" : "Unstable");
+                $output .= "- SME [Network: {$p->network}]: {$p->size} (Ref ID: {$p->data_id}, Type: {$p->plan_type}) [Reliability: {$reliability}]\n";
+            }
+            foreach ($normal as $p) {
+                $network = explode('-', $p->service_id)[0] ?? 'unknown';
+                $output .= "- Normal [Network: {$network}]: {$p->name} (Ref Code: {$p->variation_code}) [Reliability: Excellent]\n";
+            }
+            return $output;
+        } catch (\Exception $e) {
+            return "DATA PLANS: Error fetching plans.";
+        }
+    }
+
     private function fetchRecentInteractionsContext($userId)
     {
         $chats = AiChat::where('user_id', $userId)
@@ -197,14 +224,22 @@ AREWA SMART CORE RULES:
 197:    - IPE Clearance: Requires Tracking ID (min 15 chars). Includes auto-refund if API fails.
 198:    - CAC Registration: Requires business name, type, and document uploads (NIN, Signature, Passport).
 199:    - Status: Users can manually click the "Check Status" icon in history to refresh results.
-200:    - Response: Your answers MUST be short (1-3 sentences max) and understandable.
-201: 7. Action Proposals:
-202:    - You can initiate Airtime or P2P Transfers by outputting a JSON block at the very end of your response.
-203:    - For P2P: {"action": "p2p_transfer", "params": {"wallet_id": "...", "amount": 0, "description": "..."}}
-204:    - For Airtime: {"action": "airtime", "params": {"phone_number": "...", "network": "...", "amount": 0}}
-205:    - Network MUST be one of: mtn, airtel, glo, 9mobile.
-206:    - Tell the user: "I can initiate this for you. Please confirm the details and enter your PIN to proceed."
-207: 8. Personalization: You have access to RECENT UNIFIED INTERACTIONS. Use this history to remember user concerns, previous requests, and patterns across Support, Global, and Comments.
+201:    - Response: Your answers MUST be short (1-3 sentences max) and understandable.
+202: 7. Action Proposals:
+203:    - You can initiate Airtime, Data, P2P Transfers, or Virtual Account creation by outputting a JSON block at the very end of your response.
+204:    - For P2P: {"action": "p2p_transfer", "params": {"wallet_id": "...", "amount": 0, "description": "..."}}
+205:    - For Airtime: {"action": "airtime", "params": {"phone_number": "...", "network": "...", "amount": 0}}
+206:    - For Normal Data: {"action": "data_purchase", "params": {"data_type": "normal", "phone_number": "...", "network": "...", "bundle_code": "...", "plan_name": "...", "amount": 0}}
+207:    - For SME Data: {"action": "data_purchase", "params": {"data_type": "sme", "phone_number": "...", "network": "...", "plan_id": "...", "plan_name": "...", "plan_type": "...", "amount": 0}}
+208:    - For Virtual Account: {"action": "virtual_account", "params": {}}
+209:    - Proactive Account Creation: If the user asks about funding their wallet or account details but the context shows "VIRTUAL ACCOUNTS: None assigned", you MUST explain that they don't have one yet and output the `virtual_account` action JSON to help them create it.
+210:    - Data Plan Preference: Always prioritize and suggest "Normal" data plans as the best option. ONLY offer or show "SME" data plans if the user specifically mentions "SME".
+211:    - Data Reliability Advice: Always advise the user to buy data plans that have a low failure record (marked as "Excellent" or "Good" reliability in context). If a plan is "Unstable", warn them or suggest a better alternative.
+212:    - Network MUST be one of: mtn, airtel, glo, 9mobile. (Use MTN, AIRTEL etc for SME).
+214:    - Phone Validation: Always ensure the phone number provided is exactly 11 digits before initiating any purchase.
+215:    - Balance Check: You have access to the user's wallet balance. If they ask for a plan that costs more than their balance, inform them and suggest a cheaper plan or tell them to fund their account. Output the `virtual_account` action if they need to fund and don't have an account.
+216:    - Tell the user: "I can initiate this for you. Please confirm the details to proceed." (Omit PIN mention for virtual accounts).
+212: 8. Personalization: You have access to RECENT UNIFIED INTERACTIONS. Use this history to remember user concerns, previous requests, and patterns across Support, Global, and Comments.
 
 TEXT;
 

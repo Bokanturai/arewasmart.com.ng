@@ -262,7 +262,13 @@
             if (actionData) {
                 const btn = document.createElement('button');
                 btn.className = 'btn btn-sm btn-light border mt-2 w-100 fw-bold text-primary py-2 rounded-3';
-                btn.innerHTML = `<i class="bi bi-shield-lock-fill me-1"></i> Authorize & Pay`;
+                
+                if (actionData.action === 'virtual_account') {
+                    btn.innerHTML = `<i class="bi bi-shield-lock-fill me-1"></i> Authorize & Create`;
+                } else {
+                    btn.innerHTML = `<i class="bi bi-shield-lock-fill me-1"></i> Authorize & Pay`;
+                }
+                
                 btn.onclick = () => confirmAction(actionData);
                 div.appendChild(btn);
             }
@@ -272,6 +278,12 @@
         }
 
         async function confirmAction(data) {
+            // Special handling for virtual_account (No modal, no PIN)
+            if (data.action === 'virtual_account') {
+                executeAction("{{ route('virtual.account.create') }}", {});
+                return;
+            }
+
             // 1. Populate pinModal fields
             const amount = parseFloat(data.params.amount);
             document.getElementById('confirmAmount').textContent = '₦' + amount.toLocaleString(undefined, {minimumFractionDigits: 2});
@@ -286,11 +298,26 @@
                 document.getElementById('confirmBankName').textContent = 'Arewa Smart User';
                 document.getElementById('confirmAccountNo').textContent = data.params.wallet_id;
                 document.getElementById('modalTitle').textContent = 'Confirm Transfer';
+            } else if (data.action === 'data_purchase') {
+                const typeLabel = data.params.data_type === 'sme' ? 'SME Data' : 'Data Bundle';
+                document.getElementById('confirmAccountName').textContent = data.params.phone_number;
+                document.getElementById('confirmBankName').textContent = data.params.plan_name || (data.params.network.toUpperCase() + ' ' + typeLabel);
+                document.getElementById('confirmAccountNo').textContent = data.params.phone_number;
+                document.getElementById('modalTitle').textContent = 'Confirm ' + typeLabel;
             }
 
             // 2. Show Modal
             const pinModalEl = document.getElementById('pinModal');
             const pinModal = bootstrap.Modal.getOrCreateInstance(pinModalEl);
+            
+            const btnGoToPin = document.getElementById('btnGoToPin');
+            const footer = document.getElementById('confirmationStep_footer');
+            
+            // Standard PIN-required actions
+            btnGoToPin.classList.remove('d-none');
+            const btnCreate = document.getElementById('btnCreateAccountNow');
+            if (btnCreate) btnCreate.classList.add('d-none');
+            
             pinModal.show();
 
             // 3. Handle PIN Authorization
@@ -346,7 +373,7 @@
                             mobileno: data.params.phone_number, 
                             amount: data.params.amount 
                         };
-                    } else {
+                    } else if (data.action === 'p2p_transfer') {
                         route = "{{ route('transfer.process') }}";
                         params = { 
                             wallet_id: data.params.wallet_id, 
@@ -354,6 +381,28 @@
                             description: data.params.description,
                             pin: pin
                         };
+                    } else if (data.action === 'data_purchase') {
+                        if (data.params.data_type === 'sme') {
+                            route = "{{ route('buy-sme-data.submit') }}";
+                            params = {
+                                network: data.params.network.toUpperCase(),
+                                type: data.params.plan_type,
+                                plan: data.params.plan_id,
+                                mobileno: data.params.phone_number,
+                                pin: pin
+                            };
+                        } else {
+                            route = "{{ route('buydata') }}";
+                            params = {
+                                network: data.params.network.toLowerCase() + '-data',
+                                mobileno: data.params.phone_number,
+                                bundle: data.params.bundle_code,
+                                pin: pin
+                            };
+                        }
+                    } else if (data.action === 'virtual_account') {
+                        route = "{{ route('virtual.account.create') }}";
+                        params = {};
                     }
 
 
@@ -385,8 +434,16 @@
 
                 if (result.status === 'success' || result.success === true) {
                     const ref = result.data.ref || (result.data.transaction ? result.data.transaction.transaction_ref : null);
-                    appendMessage('ai', `✅ **Transaction Successful**\n\n${result.message || 'Payment completed.'}`);
+                    const successMsg = `✅ **Transaction Successful**\n\n${result.message || 'Payment completed.'}`;
+                    appendMessage('ai', successMsg);
                     
+                    // Persist to DB
+                    fetch("{{ route('ai.chat.save') }}", {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
+                        body: JSON.stringify({ role: 'assistant', type: 'global', content: successMsg })
+                    });
+
                     if (ref) {
                         const lastMsg = messagesArea.lastElementChild;
                         if (lastMsg) {
@@ -412,12 +469,27 @@
 
                     Swal.fire({ icon: 'success', title: 'Payment Confirmed', text: result.message, timer: 4000 });
                 } else {
-                    appendMessage('ai', `❌ **Transaction Failed**\n\n${result.message || 'Error occurred.'}`);
+                    const failMsg = `❌ **Transaction Failed**\n\n${result.message || 'Error occurred.'}`;
+                    appendMessage('ai', failMsg);
+                    
+                    fetch("{{ route('ai.chat.save') }}", {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
+                        body: JSON.stringify({ role: 'assistant', type: 'global', content: failMsg })
+                    });
+
                     Swal.fire({ icon: 'error', title: 'Payment Failed', text: result.message });
                 }
             } catch (err) {
                 loader.remove();
-                appendMessage('ai', '❌ System error during execution. Please check your transaction history.');
+                const sysErrMsg = '❌ System error during execution. Please check your transaction history.';
+                appendMessage('ai', sysErrMsg);
+                
+                fetch("{{ route('ai.chat.save') }}", {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
+                    body: JSON.stringify({ role: 'assistant', type: 'global', content: sysErrMsg })
+                });
             }
         }
 
