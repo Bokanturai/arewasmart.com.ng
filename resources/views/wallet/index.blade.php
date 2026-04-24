@@ -88,6 +88,21 @@
                                         </div>
                                     @endif
 
+                                    <!-- Warning Alert -->
+                                    <div class="alert alert-warning border-0 shadow-sm mb-4" style="border-radius: 15px; background-color: rgba(255, 193, 7, 0.1);">
+                                        <div class="d-flex align-items-start align-items-md-center">
+                                            <div class="bg-warning bg-opacity-25 rounded-circle p-2 me-3">
+                                                <i class="bi bi-exclamation-triangle-fill text-warning"></i>
+                                            </div>
+                                            <div>
+                                                <h6 class="mb-1 fw-bold text-dark" style="font-size: 0.9rem;">Important: Avoid Same-Amount Transfers</h6>
+                                                <p class="mb-0 small text-muted" style="line-height: 1.4;">
+                                                    To avoid funding delays, please do not make multiple transfers of the <strong>exact same amount</strong> within 3 minutes. Use slightly different amounts (e.g., ₦1,000 and ₦1,001) for instant credit.
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+
                                     @if($virtualAccount)
                                         <div class="bg-light p-3 mb-4" style="border-radius: 20px;">
                                             <div class="mb-3">
