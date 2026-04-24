@@ -38,6 +38,11 @@ class PaymentWebhookController extends Controller
             $this->processReservedAccountTransaction($payload);
             return response('success', 200)->header('Content-Type', 'text/plain');
         } catch (\Throwable $e) {
+            if ($e->getMessage() === 'RATE_LIMIT_SAME_AMOUNT') {
+                Log::info('Rate limit (same amount) hit. Returning 429 to trigger retry.', ['payload' => $payload]);
+                return response()->json(['error' => 'Rate limit hit. Retry later.'], 429);
+            }
+
             Log::error('Error processing webhook: '.$e->getMessage(), [
                 'trace' => $e->getTraceAsString(),
                 'payload' => $payload
@@ -159,17 +164,17 @@ class PaymentWebhookController extends Controller
                     return;
                 }
 
-                // 2. Rate Limit Check (3-minute rule)
-                // Check if any credit transaction was completed for this user in the last 3 minutes
-                $recentCredit = Transaction::where('user_id', $userId)
+                // 2. Rate Limit Check (3-minute rule for SAME AMOUNT)
+                // Check if a credit transaction with the EXACT SAME AMOUNT was completed for this user in the last 3 minutes
+                $recentSameAmount = Transaction::where('user_id', $userId)
                     ->where('type', 'credit')
                     ->where('status', 'completed')
+                    ->where('amount', $amountPaid)
                     ->where('created_at', '>=', now()->subMinutes(3))
                     ->exists();
 
-                if ($recentCredit) {
-                    Log::warning("Rate limit hit for user $userId. Skipping order $orderNo (Only one funding per 3 minutes allowed).");
-                    return;
+                if ($recentSameAmount) {
+                    throw new \Exception('RATE_LIMIT_SAME_AMOUNT');
                 }
 
                 // 3. Process Funding (Only if orderStatus is success)

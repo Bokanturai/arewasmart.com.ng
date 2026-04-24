@@ -3,8 +3,26 @@
     :root {
         --ai-primary: #F26522;
         --ai-secondary: #ff8c52;
-        --ai-bg: rgba(255, 255, 255, 0.9);
-        --ai-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+        --ai-bg: rgba(255, 255, 255, 0.98);
+        --ai-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+        --ai-msg-ai-bg: #ffffff;
+        --ai-msg-ai-text: #333333;
+        --ai-chat-bg: rgba(248, 249, 250, 0.8);
+        --ai-input-area-bg: #ffffff;
+        --ai-input-bg: #f8f9fa;
+        --ai-border: #eeeeee;
+        --ai-text-muted: #666666;
+    }
+
+    [data-theme="dark"] {
+        --ai-bg: rgba(26, 26, 39, 0.98);
+        --ai-msg-ai-bg: #2b2b40;
+        --ai-msg-ai-text: #e0e0e0;
+        --ai-chat-bg: rgba(15, 15, 25, 0.8);
+        --ai-input-area-bg: #1a1a27;
+        --ai-input-bg: #2b2b40;
+        --ai-border: #3f3f5f;
+        --ai-text-muted: #aaaaaa;
     }
 
     #ai-assistant-toggle {
@@ -35,18 +53,18 @@
         position: fixed;
         bottom: 100px;
         right: 30px;
-        width: 380px;
-        height: 550px;
+        width: 400px;
+        height: 600px;
         background: var(--ai-bg);
-        backdrop-filter: blur(15px);
-        border: 1px solid rgba(255, 255, 255, 0.3);
+        backdrop-filter: blur(20px);
+        border: 1px solid var(--ai-border);
         border-radius: 24px;
         box-shadow: var(--ai-shadow);
-        z-index: 1039;
+        z-index: 2000; /* Higher z-index to stay above other elements */
         display: none;
         flex-direction: column;
         overflow: hidden;
-        animation: slideInUp 0.4s ease-out;
+        animation: slideInUp 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     }
 
     @keyframes slideInUp {
@@ -70,7 +88,7 @@
         display: flex;
         flex-direction: column;
         gap: 15px;
-        background: rgba(248, 249, 250, 0.5);
+        background: var(--ai-chat-bg);
     }
 
     .ai-msg {
@@ -83,11 +101,12 @@
     }
 
     .ai-msg-ai {
-        background: white;
-        color: #333;
+        background: var(--ai-msg-ai-bg);
+        color: var(--ai-msg-ai-text);
         align-self: flex-start;
         border-bottom-left-radius: 4px;
         box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        border: 1px solid var(--ai-border);
     }
 
     .ai-msg-user {
@@ -100,16 +119,16 @@
 
     .ai-chat-input-area {
         padding: 15px;
-        background: white;
-        border-top: 1px solid #eee;
+        background: var(--ai-input-area-bg);
+        border-top: 1px solid var(--ai-border);
     }
 
     .ai-input-group {
         display: flex;
-        background: #f8f9fa;
+        background: var(--ai-input-bg);
         border-radius: 30px;
         padding: 5px 5px 5px 15px;
-        border: 1px solid #eee;
+        border: 1px solid var(--ai-border);
     }
 
     .ai-input-group input {
@@ -119,6 +138,7 @@
         padding: 8px 0;
         font-size: 0.9rem;
         outline: none;
+        color: var(--ai-msg-ai-text);
     }
 
     .ai-send-btn {
@@ -141,8 +161,17 @@
     @keyframes bounce { from { transform: translateY(0); } to { transform: translateY(-6px); } }
 
     @media (max-width: 480px) {
-        #ai-chat-window { width: calc(100% - 40px); right: 20px; left: 20px; height: 70vh; bottom: 80px; }
-        #ai-assistant-toggle { bottom: 20px; right: 20px; width: 50px; height: 50px; }
+        #ai-chat-window { 
+            width: 100%; 
+            right: 0; 
+            left: 0; 
+            height: 90vh; 
+            bottom: 0; 
+            border-radius: 30px 30px 0 0;
+            border-bottom: none;
+        }
+        #ai-assistant-toggle { bottom: 25px; right: 20px; width: 60px; height: 60px; }
+        .ai-chat-header { padding: 15px 20px; border-radius: 30px 30px 0 0; }
     }
 </style>
 
@@ -261,7 +290,10 @@
 
             if (actionData) {
                 const btn = document.createElement('button');
-                btn.className = 'btn btn-sm btn-light border mt-2 w-100 fw-bold text-primary py-2 rounded-3';
+                btn.className = 'btn btn-sm mt-2 w-100 fw-bold py-2 rounded-3';
+                btn.style.backgroundColor = 'var(--ai-input-bg)';
+                btn.style.color = 'var(--ai-primary)';
+                btn.style.border = '1px solid var(--ai-border)';
                 
                 if (actionData.action === 'virtual_account') {
                     btn.innerHTML = `<i class="bi bi-shield-lock-fill me-1"></i> Authorize & Create`;
