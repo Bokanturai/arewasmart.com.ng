@@ -7,6 +7,18 @@
  And wire: #confirmPinBtn click → verify pin → submit form.
 --}}
 
+{{-- ══ STYLES ══════════════════════════════════════════════════════════════ --}}
+<style>
+    /* Ensure PIN modal is the absolute top element on the page, above AI widgets (z-index: 2000) */
+    #pinModal {
+        z-index: 10001 !important;
+    }
+    /* Ensure the backdrop is also above other fixed elements but below the modal */
+    .modal-backdrop {
+        z-index: 10000 !important;
+    }
+</style>
+
 {{-- ══ MODAL ══════════════════════════════════════════════════════════════ --}}
 <div class="modal fade" id="pinModal" tabindex="-1" aria-hidden="true"
      data-bs-backdrop="static" data-bs-keyboard="false">

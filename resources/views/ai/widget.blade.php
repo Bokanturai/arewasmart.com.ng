@@ -60,7 +60,7 @@
         border: 1px solid var(--ai-border);
         border-radius: 24px;
         box-shadow: var(--ai-shadow);
-        z-index: 2000; /* Higher z-index to stay above other elements */
+        z-index: 1045; /* Below Bootstrap Modals (1050+) but above Navbar/Sidebar (1020-1030) */
         display: none;
         flex-direction: column;
         overflow: hidden;
