@@ -85,6 +85,31 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
 
     @stack('styles')
+    
+    <style>
+        /* Global Modal Fixes — Ensuring all modals work like pin.blade.php */
+        .modal {
+            z-index: 10001 !important;
+        }
+        .modal-backdrop {
+            z-index: 10000 !important;
+        }
+        /* Standardizing Premium Modal Look */
+        .modal-content {
+            border-radius: 20px !important;
+            border: none !important;
+            box-shadow: 0 10px 50px rgba(0, 0, 0, 0.2) !important;
+            overflow: hidden;
+        }
+        .modal-header {
+            border-bottom: none !important;
+            padding: 1.5rem 1.5rem 1rem !important;
+        }
+        .modal-footer {
+            border-top: none !important;
+            padding: 1rem 1.5rem 1.5rem !important;
+        }
+    </style>
 </head>
 
 <body>
@@ -261,6 +286,40 @@
     </script>
 
     @stack('scripts')
+
+    <script>
+        /* 
+           Modal Stability & UX Enhancement Script
+           - Ensures no stuck backdrops
+           - Re-enables scrolling if modals crash
+           - Automatically resets forms on close for a clean experience
+        */
+        document.addEventListener('hidden.bs.modal', function (event) {
+            const openModals = document.querySelectorAll('.modal.show');
+            
+            // 1. Cleanup Backdrops & Scroll
+            if (openModals.length === 0) {
+                document.querySelectorAll('.modal-backdrop').forEach(el => el.remove());
+                document.body.style.overflow = 'auto';
+                document.body.classList.remove('modal-open');
+            }
+
+            // 2. Form Reset (Optional but recommended for stability)
+            const modal = event.target;
+            const form = modal.querySelector('form');
+            if (form && !form.classList.contains('no-reset')) {
+                form.reset();
+            }
+        });
+
+        // Ensure all modals are centered if they don't have the class
+        document.addEventListener('show.bs.modal', function (event) {
+            const modalDialog = event.target.querySelector('.modal-dialog');
+            if (modalDialog && !modalDialog.classList.contains('modal-dialog-centered')) {
+                modalDialog.classList.add('modal-dialog-centered');
+            }
+        });
+    </script>
 
     <script>
         // PWA Implementation
