@@ -5,7 +5,7 @@
     ],
     "target": {
       "namespace": "android_app",
-      "package_name": "com.arewasmart.app",
+      "package_name": "com.arewasmart",
       "sha256_cert_fingerprints": [
         "60:63:F5:8F:65:5A:3C:14:8F:4E:23:B6:BE:95:16:51:10:6A:0B:56:DC:4F:85:7F:4D:2F:F9:92:06:77:00:B3"
       ]
