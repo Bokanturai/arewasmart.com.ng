@@ -3,8 +3,7 @@
 
     <style>
         :root {
-            --primary-navy: #0a192f;
-            --accent-blue: #d37102;
+            --primary-navy: #d37102;
             --text-muted: #64748b;
             --border-color: #e2e8f0;
             --bg-light: #f8f9fa;

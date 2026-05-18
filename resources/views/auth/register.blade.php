@@ -110,7 +110,7 @@
                 <div class="form-check">
                     <input class="form-check-input" type="checkbox" id="terms" name="terms" required>
                     <label class="form-check-label text-muted small" for="terms">
-                        I agree to the <a href="javascript:void(0);" data-bs-toggle="modal" data-bs-target="#termsModal" class="text-primary fw-bold">Terms & Privacy</a>
+                        I agree to the <a href="{{ route('terms') }}" target="_blank" class="text-primary fw-bold">Terms &amp; Privacy</a>
                     </label>
                 </div>
             </div>
@@ -131,23 +131,5 @@
     {{-- Footer Text --}}
     <p class="auth-footer-text">&copy; {{ date('Y') }} Arewa Smart. All rights reserved.</p>
 
-    {{-- Terms Modal --}}
-    @push('modals')
-    <div class="modal fade" id="termsModal" tabindex="-1" aria-labelledby="termsModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered modal-lg modal-dialog-scrollable">
-            <div class="modal-content shadow-lg border-0 rounded-20px overflow-hidden">
-                <div class="modal-header bg-primary text-white border-0 py-3">
-                    <h5 class="modal-title fw-bold" id="termsModalLabel">Terms & Conditions</h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body p-4 bg-white">
-                    @include('auth.partials.terms-content')
-                </div>
-                <div class="modal-footer border-0 bg-light p-3">
-                    <button type="button" class="btn btn-secondary px-4 py-2" style="border-radius: 8px;" data-bs-dismiss="modal">I Understand</button>
-                </div>
-            </div>
-        </div>
-    </div>
-    @endpush
+
 </x-guest-layout>

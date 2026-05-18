@@ -42,6 +42,10 @@ Route::get('/', function () {
 
 Route::post('/support/send', [SupportController::class, 'sendContactMessage'])->name('support.send');
 
+Route::get('/terms', function () {
+    return view('auth.terms');
+})->name('terms');
+
 Route::middleware(['auth'])->group(function () {
 
 
