@@ -1,0 +1,48 @@
+{
+  "packageId": "com.arewasmart",
+  "host": "arewasmart.com.ng",
+  "name": "Arewa Smart App",
+  "launcherName": "Arewa Smart",
+  "display": "standalone",
+  "themeColor": "#F26522",
+  "themeColorDark": "#000000",
+  "navigationColor": "#FFFFFF",
+  "navigationColorDark": "#000000",
+  "navigationDividerColor": "#000000",
+  "navigationDividerColorDark": "#000000",
+  "backgroundColor": "#FFFFFF",
+  "enableNotifications": true,
+  "startUrl": "/login",
+  "iconUrl": "https://arewasmart.com.ng/assets/img/logo/app-logo.png",
+  "maskableIconUrl": "https://arewasmart.com.ng/assets/img/logo/app-logo.png",
+  "splashScreenFadeOutDuration": 300,
+  "signingKey": {
+    "path": "./android.keystore",
+    "alias": "android"
+  },
+  "appVersionName": "2.0.2",
+  "appVersionCode": 9,
+  "shortcuts": [],
+  "generatorApp": "bubblewrap-cli",
+  "webManifestUrl": "https://arewasmart.com.ng/manifest.json",
+  "fallbackType": "customtabs",
+  "features": {},
+  "alphaDependencies": {
+    "enabled": false
+  },
+  "enableSiteSettingsShortcut": true,
+  "isChromeOSOnly": false,
+  "isMetaQuest": false,
+  "minSdkVersion": 21,
+  "orientation": "any",
+  "fingerprints": [
+    "60:63:F5:8F:65:5A:3C:14:8F:4E:23:B6:BE:95:16:51:10:6A:0B:56:DC:4F:85:7F:4D:2F:F9:92:06:77:00:B3",
+    "57:2D:7C:6B:21:10:59:98:3E:AA:4A:A6:36:98:6D:EF:72:8E:3D:F8:93:31:02:3D:FC:7A:BF:1F:84:2A:41:DE"
+  ],
+  "additionalTrustedOrigins": [
+    "https://arewasmart.com.ng"
+  ],
+  "retainedBundles": [],
+  "displayOverride": [],
+  "appVersion": "2.0.2"
+}
