@@ -604,11 +604,21 @@
             const accountName = accountNameHidden.value;
 
             if (!amount || parseFloat(amount) < 100) {
-                alert('Please enter a valid amount (Min ₦100)');
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Invalid Amount',
+                    text: 'Please enter a valid amount (Min ₦100).',
+                    confirmButtonColor: '#ffc107',
+                });
                 return;
             }
             if (!accountName) {
-                alert('Please wait for account name verification.');
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Account Not Verified',
+                    text: 'Please wait for account name verification.',
+                    confirmButtonColor: '#ffc107',
+                });
                 return;
             }
 

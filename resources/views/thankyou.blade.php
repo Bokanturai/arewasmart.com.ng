@@ -28,6 +28,17 @@
 
     @php
         $discount = $amount - $paid;
+
+        // Detect educational PIN purchase (WAEC, NECO, NABTED, JAMB)
+        $eduKeywords = ['waec', 'neco', 'nabted', 'nabteb', 'jamb'];
+        $networkLower = strtolower($network ?? '');
+        $serviceNameLower = strtolower($serviceName ?? '');
+        $isEduPin = $token && (
+            collect($eduKeywords)->contains(fn($k) => str_contains($networkLower, $k) || str_contains($serviceNameLower, $k))
+        );
+
+        // $serial is passed from session or DB metadata (may be null)
+        $serial = $serial ?? null;
     @endphp
 
     <div class="container-fluid px-0 px-md-3 py-3 py-sm-5 d-flex flex-column align-items-center bg-light min-vh-100">
@@ -95,7 +106,99 @@
                     </div>
                 </div>
 
-                @if($token)
+                {{-- ── Educational PIN Section (WAEC / NECO / NABTED / JAMB) ── --}}
+                @if($isEduPin)
+                <div class="mb-4">
+                    {{-- PIN Card --}}
+                    <div class="edu-pin-card rounded-4 p-0 overflow-hidden border border-2" style="border-color: #4f46e5 !important; background: linear-gradient(135deg, #eef2ff 0%, #f0fdf4 100%);">
+                        
+                        {{-- Card Header --}}
+                        <div class="d-flex align-items-center gap-2 px-3 py-2" style="background: linear-gradient(90deg, #4f46e5 0%, #7c3aed 100%);">
+                            <i class="bi bi-shield-lock-fill text-white" style="font-size: 1rem;"></i>
+                            <span class="text-white fw-bold small text-uppercase ls-wider">{{ strtoupper($network) }} Examination PIN</span>
+                        </div>
+
+                        {{-- PIN Row --}}
+                        <div class="px-3 py-3">
+                            <div class="d-flex align-items-center justify-content-between mb-1">
+                                <span class="text-muted extra-small fw-semibold text-uppercase" style="letter-spacing: 0.06em;">
+                                    <i class="bi bi-key-fill me-1 text-indigo"></i>PIN / Access Code
+                                </span>
+                                <button 
+                                    onclick="copyToClipboard('{{ $token }}', 'pin-copied-badge')" 
+                                    class="btn btn-sm px-2 py-0 rounded-2 border-0 no-print"
+                                    id="copy-pin-btn"
+                                    style="background: rgba(79,70,229,0.1); color: #4f46e5; font-size: 0.7rem;"
+                                    title="Copy PIN">
+                                    <i class="bi bi-clipboard me-1"></i>Copy
+                                </button>
+                            </div>
+                            <div class="pin-display d-flex align-items-center gap-2 rounded-3 p-2" style="background: rgba(79,70,229,0.07);">
+                                <span class="font-monospace fw-extrabold text-dark flex-grow-1" style="font-size: 1.18rem; letter-spacing: 2px; word-break: break-all;" id="edu-pin-value">{{ $token }}</span>
+                                <span class="badge text-success border border-success-subtle rounded-pill extra-small d-none" id="pin-copied-badge" style="background: rgba(22,163,74,0.1);">
+                                    <i class="bi bi-check2 me-1"></i>Copied!
+                                </span>
+                            </div>
+                        </div>
+
+                        {{-- Serial Number Row (shown only if serial exists) --}}
+                        @if($serial)
+                        <div class="px-3 pb-3 pt-0">
+                            <div class="d-flex align-items-center justify-content-between mb-1">
+                                <span class="text-muted extra-small fw-semibold text-uppercase" style="letter-spacing: 0.06em;">
+                                    <i class="bi bi-hash me-1 text-secondary"></i>Serial Number
+                                </span>
+                                <button 
+                                    onclick="copyToClipboard('{{ $serial }}', 'serial-copied-badge')" 
+                                    class="btn btn-sm px-2 py-0 rounded-2 border-0 no-print"
+                                    id="copy-serial-btn"
+                                    style="background: rgba(100,116,139,0.12); color: #475569; font-size: 0.7rem;"
+                                    title="Copy Serial Number">
+                                    <i class="bi bi-clipboard me-1"></i>Copy
+                                </button>
+                            </div>
+                            <div class="d-flex align-items-center gap-2 rounded-3 p-2" style="background: rgba(100,116,139,0.07);">
+                                <span class="font-monospace fw-bold text-secondary flex-grow-1" style="font-size: 0.95rem; letter-spacing: 1.5px; word-break: break-all;" id="edu-serial-value">{{ $serial }}</span>
+                                <span class="badge text-success border border-success-subtle rounded-pill extra-small d-none" id="serial-copied-badge" style="background: rgba(22,163,74,0.1);">
+                                    <i class="bi bi-check2 me-1"></i>Copied!
+                                </span>
+                            </div>
+                        </div>
+
+                        {{-- Combined Copy Row --}}
+                        <div class="px-3 pb-3">
+                            <button 
+                                onclick="copyBoth('{{ $token }}', '{{ $serial }}')" 
+                                class="btn w-100 py-2 rounded-3 fw-bold extra-small border-0 no-print d-flex align-items-center justify-content-center gap-2"
+                                style="background: linear-gradient(90deg, #4f46e5 0%, #7c3aed 100%); color: #fff;">
+                                <i class="bi bi-clipboard2-check-fill"></i>Copy PIN + Serial
+                            </button>
+                        </div>
+                        @else
+                        {{-- No serial: show note and single copy button --}}
+                        <div class="px-3 pb-3">
+                            <p class="text-muted extra-small mb-2 text-center" style="font-size: 0.72rem;">
+                                <i class="bi bi-info-circle me-1"></i>Serial number was not provided by the provider for this transaction.
+                            </p>
+                            <button 
+                                onclick="copyToClipboard('{{ $token }}', 'pin-copied-badge')" 
+                                class="btn w-100 py-2 rounded-3 fw-bold extra-small border-0 no-print d-flex align-items-center justify-content-center gap-2"
+                                style="background: linear-gradient(90deg, #4f46e5 0%, #7c3aed 100%); color: #fff;">
+                                <i class="bi bi-clipboard-check-fill"></i>Copy PIN
+                            </button>
+                        </div>
+                        @endif
+                    </div>
+
+                    {{-- Usage instruction --}}
+                    <p class="text-muted text-center mt-2 mb-0" style="font-size: 0.72rem;">
+                        <i class="bi bi-exclamation-triangle-fill text-warning me-1"></i>
+                        Keep your PIN safe. Do not share it with anyone.
+                    </p>
+                </div>
+
+                {{-- ── Generic Token Section (non-educational) ── --}}
+                @elseif($token)
                 <div class="bg-primary bg-opacity-10 rounded-4 p-3 text-center mb-4 border border-primary border-opacity-10 shadow-sm">
                     <span class="text-primary small fw-bold text-uppercase ls-wider d-block mb-1">Examination PIN / Token</span>
                     <div class="text-primary fs-12 fw-extrabold font-monospace letter-spacing-1">{{ $token }}</div>
@@ -142,9 +245,9 @@
                                 <i class="bi bi-share me-2"></i>Share
                             </button>
                         </div>
-                        @if($token)
+                        @if($token && !$isEduPin)
                         <div class="col-12">
-                            <button onclick="copyToClipboard('{{ $token }}')" class="btn btn-primary bg-gradient w-100 rounded-3 py-2 fw-bold extra-small shadow-sm mb-2 d-flex align-items-center justify-content-center border-0">
+                            <button onclick="copyToClipboard('{{ $token }}', null)" class="btn btn-primary bg-gradient w-100 rounded-3 py-2 fw-bold extra-small shadow-sm mb-2 d-flex align-items-center justify-content-center border-0">
                                 <i class="bi bi-clipboard-check me-2"></i>Copy PIN
                             </button>
                         </div>
@@ -233,24 +336,66 @@
             }
         }
 
-        function copyToClipboard(text) {
-            if (navigator.clipboard) {
-                navigator.clipboard.writeText(text).then(() => {
+        /**
+         * Copy text to clipboard and show a badge feedback element.
+         * @param {string} text - Text to copy
+         * @param {string|null} badgeId - ID of badge element to show temporarily, or null for alert
+         */
+        function copyToClipboard(text, badgeId) {
+            const doCopy = () => {
+                if (badgeId) {
+                    const badge = document.getElementById(badgeId);
+                    if (badge) {
+                        badge.classList.remove('d-none');
+                        setTimeout(() => badge.classList.add('d-none'), 2500);
+                    }
+                } else {
                     alert('PIN copied to clipboard successfully!');
+                }
+            };
+
+            if (navigator.clipboard) {
+                navigator.clipboard.writeText(text).then(doCopy).catch(() => {
+                    fallbackCopy(text);
+                    doCopy();
                 });
             } else {
-                const textArea = document.createElement("textarea");
-                textArea.value = text;
-                document.body.appendChild(textArea);
-                textArea.select();
-                try {
-                    document.execCommand('copy');
-                    alert('PIN copied to clipboard successfully!');
-                } catch (err) {
-                    alert('Failed to copy PIN. Please copy it manually.');
-                }
-                document.body.removeChild(textArea);
+                fallbackCopy(text);
+                doCopy();
             }
+        }
+
+        /**
+         * Copy both PIN and Serial Number together
+         */
+        function copyBoth(pin, serial) {
+            const combined = `PIN: ${pin}\nSerial: ${serial}`;
+            if (navigator.clipboard) {
+                navigator.clipboard.writeText(combined).then(() => {
+                    alert('PIN and Serial Number copied to clipboard!');
+                }).catch(() => {
+                    fallbackCopy(combined);
+                    alert('PIN and Serial Number copied to clipboard!');
+                });
+            } else {
+                fallbackCopy(combined);
+                alert('PIN and Serial Number copied to clipboard!');
+            }
+        }
+
+        function fallbackCopy(text) {
+            const textArea = document.createElement("textarea");
+            textArea.value = text;
+            textArea.style.position = 'fixed';
+            textArea.style.opacity = '0';
+            document.body.appendChild(textArea);
+            textArea.select();
+            try {
+                document.execCommand('copy');
+            } catch (err) {
+                console.warn('Fallback copy failed:', err);
+            }
+            document.body.removeChild(textArea);
         }
     </script>
     <style>
@@ -262,6 +407,24 @@
         .transition-all { transition: all 0.2s ease; }
         .hover-translate-x:hover { transform: translateX(-4px); }
         .letter-spacing-1 { letter-spacing: 1px; }
+        .text-indigo { color: #4f46e5; }
+
+        /* Educational PIN card hover effect */
+        .edu-pin-card {
+            transition: box-shadow 0.2s ease;
+        }
+        .edu-pin-card:hover {
+            box-shadow: 0 4px 24px rgba(79,70,229,0.13) !important;
+        }
+
+        /* PIN display pulse animation on load */
+        @keyframes pinReveal {
+            from { opacity: 0; transform: translateY(6px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+        .pin-display {
+            animation: pinReveal 0.5s ease both;
+        }
     </style>
     @endpush
 </x-app-layout>

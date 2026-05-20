@@ -289,49 +289,91 @@ class AiCommentController extends Controller
 
         if (!$tx) return response()->json(['success' => false, 'message' => 'Transaction not found'], 404);
 
+        // ── Base data from main transaction record ─────────────────────────────
         $data = [
-            'ref' => $tx->transaction_ref,
-            'amount' => $tx->amount,
-            'paid' => ($tx->net_amount > 0) ? $tx->net_amount : $tx->amount,
-            'date' => $tx->created_at,
+            'ref'          => $tx->transaction_ref,
+            'amount'       => $tx->amount,
+            'paid'         => ($tx->net_amount > 0) ? $tx->net_amount : $tx->amount,
+            'date'         => $tx->created_at,
             'receiverName' => null,
-            'serviceName' => 'Service Purchase',
-            'network' => 'N/A',
-            'mobile' => 'N/A',
-            'token' => null,
+            'serviceName'  => 'Service Purchase',
+            'network'      => 'N/A',
+            'mobile'       => 'N/A',
+            'token'        => null,
+            'serial'       => null,
         ];
 
+        // ── Metadata as fallback when top-level fields are missing ─────────────
         $meta = is_array($tx->metadata) ? $tx->metadata : json_decode($tx->metadata ?? '[]', true);
-        
+
         if (isset($meta['service']) && $meta['service'] === 'withdrawal' || str_starts_with($tx->transaction_ref, 'WDL')) {
-            $data['serviceName'] = 'Wallet Withdrawal';
-            $data['network'] = $meta['bankName'] ?? 'Bank Transfer';
-            $data['mobile'] = $meta['account_no'] ?? 'N/A';
+            // ── Withdrawal ──────────────────────────────────────────────────────
+            $data['serviceName']  = 'Wallet Withdrawal';
+            $data['network']      = $meta['bankName'] ?? 'Bank Transfer';
+            $data['mobile']       = $meta['account_no'] ?? 'N/A';
             $data['receiverName'] = $meta['account_name'] ?? null;
         } else {
-            $data['network'] = $meta['network'] ?? $data['network'];
-            $data['mobile'] = $meta['phone_number'] ?? $meta['account_number'] ?? $data['mobile'];
-            $data['token'] = $meta['token'] ?? $data['token'];
+            // ── All other services ───────────────────────────────────────────────
 
-            if ($data['token']) {
-                $data['serviceName'] = 'Educational Pin';
-            } elseif (str_contains(strtolower($data['network'] ?? ''), 'data')) {
-                $data['serviceName'] = 'Data Purchase';
-            } elseif (isset($meta['service']) && $meta['service'] === 'P2P') {
-                $data['serviceName'] = 'P2P Transfer';
-                $data['mobile'] = $meta['receiver_wallet'] ?? 'N/A';
+            // Network / provider (metadata fallback)
+            $data['network'] = $meta['network']
+                ?? $meta['service']
+                ?? $meta['exam_name']
+                ?? $data['network'];
+
+            // Phone / recipient (metadata fallback)
+            $data['mobile'] = $meta['phone_number']
+                ?? $meta['phone']
+                ?? $meta['mobileno']
+                ?? $meta['account_number']
+                ?? $data['mobile'];
+
+            // PIN / token — check all possible metadata keys
+            $data['token'] = $meta['token']
+                ?? $meta['purchased_code']
+                ?? $meta['purchased_pin']
+                ?? $data['token'];
+
+            // Serial number (WAEC / NECO / NABTED / JAMB) — metadata fallback only
+            $data['serial'] = $meta['serial_number'] ?? $meta['serial'] ?? null;
+
+            // Profile ID (JAMB) — stored in mobile if no phone
+            if (isset($meta['profile_id']) && $data['mobile'] === 'N/A') {
+                $data['mobile'] = $meta['profile_id'];
+            }
+
+            // Receiver info (P2P transfer)
+            if (isset($meta['service']) && $meta['service'] === 'P2P') {
+                $data['serviceName']  = 'P2P Transfer';
+                $data['mobile']       = $meta['receiver_wallet'] ?? 'N/A';
                 $data['receiverName'] = $meta['receiver_name'] ?? null;
-            } elseif ($data['network'] !== 'N/A') {
-                $data['serviceName'] = 'Airtime Purchase';
+            }
+
+            // ── Service name detection (using enriched data) ─────────────────────
+            if (!isset($meta['service']) || $meta['service'] !== 'P2P') {
+                $networkLower = strtolower($data['network']);
+                $eduKeywords  = ['waec', 'neco', 'nabted', 'nabteb', 'jamb'];
+                $isEdu = $data['token'] && collect($eduKeywords)->contains(
+                    fn($k) => str_contains($networkLower, $k)
+                );
+
+                if ($isEdu) {
+                    $data['serviceName'] = strtoupper($data['network']) . ' Pin Purchase';
+                } elseif (str_contains($networkLower, 'data')) {
+                    $data['serviceName'] = 'Data Purchase';
+                } elseif ($data['token']) {
+                    $data['serviceName'] = 'Educational Pin';
+                } elseif ($data['network'] !== 'N/A') {
+                    $data['serviceName'] = 'Airtime Purchase';
+                }
             }
         }
-
 
         $html = view('ai.receipt_card', $data)->render();
 
         return response()->json([
             'success' => true,
-            'html' => $html
+            'html'    => $html,
         ]);
     }
 }

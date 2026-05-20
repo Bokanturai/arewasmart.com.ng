@@ -10,7 +10,7 @@
 {{-- ══ MODAL ══════════════════════════════════════════════════════════════ --}}
 <div class="modal fade" id="pinModal" tabindex="-1" aria-hidden="true"
      data-bs-backdrop="static" data-bs-keyboard="false">
-    <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-dialog modal-dialog-centered mx-auto" style="max-width: 400px; width: calc(100% - 1.5rem);">
         <div class="modal-content border-0 shadow-lg overflow-hidden" style="border-radius: 20px;">
 
             {{-- ── Header ───────────────────────────────────────────────── --}}
@@ -73,6 +73,47 @@
                 {{-- STEP 2 — PIN Entry --}}
                 <div id="pinStep" class="d-none">
 
+                    <style>
+                        .pin-keypad {
+                            max-width: 260px;
+                            margin: 20px auto 10px auto;
+                        }
+                        .keypad-btn {
+                            width: 60px;
+                            height: 60px;
+                            font-size: 1.4rem;
+                            display: inline-flex;
+                            align-items: center;
+                            justify-content: center;
+                            border-radius: 50% !important;
+                            transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+                            border: 1px solid rgba(0, 0, 0, 0.05);
+                            background-color: #f8f9fa;
+                            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04) !important;
+                            margin: 0 auto;
+                            user-select: none;
+                        }
+                        .keypad-btn:hover {
+                            background-color: #e9ecef;
+                            border-color: rgba(0, 0, 0, 0.08);
+                            transform: scale(1.08);
+                            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.08) !important;
+                        }
+                        .keypad-btn:active {
+                            background-color: #dee2e6;
+                            transform: scale(0.92);
+                            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.06) !important;
+                        }
+                        .keypad-btn.text-danger:hover {
+                            background-color: rgba(220, 53, 69, 0.1);
+                            color: #dc3545 !important;
+                        }
+                        .keypad-btn.text-warning:hover {
+                            background-color: rgba(255, 193, 7, 0.1);
+                            color: #ffc107 !important;
+                        }
+                    </style>
+
                     <div class="text-center mb-4">
                         <div class="bg-success bg-opacity-10 rounded-circle d-inline-flex align-items-center justify-content-center mb-3"
                              style="width:60px;height:60px;">
@@ -95,7 +136,7 @@
                                    maxlength="5"
                                    inputmode="numeric"
                                    pattern="\d{5}"
-                                   autocomplete="off"
+                                   autocomplete="new-password"
                                    style="letter-spacing:8px;">
                             <button type="button"
                                     class="btn btn-light border-0 shadow-sm px-3"
@@ -111,6 +152,26 @@
                                 <i class="bi bi-x-circle-fill flex-shrink-0"></i>
                                 <span id="pinErrorText"></span>
                             </div>
+                        </div>
+                    </div>
+
+                    {{-- On-Screen Keypad --}}
+                    <div class="pin-keypad mt-3 mb-4">
+                        <div class="d-grid gap-3" style="grid-template-columns: repeat(3, 1fr);">
+                            @foreach([1,2,3,4,5,6,7,8,9] as $num)
+                                <button type="button" class="btn btn-light keypad-btn fw-bold text-dark rounded-circle shadow-sm" data-val="{{ $num }}">
+                                    {{ $num }}
+                                </button>
+                            @endforeach
+                            <button type="button" class="btn btn-light text-danger keypad-btn fw-bold rounded-circle shadow-sm" data-action="clear" aria-label="Clear PIN">
+                                C
+                            </button>
+                            <button type="button" class="btn btn-light keypad-btn fw-bold text-dark rounded-circle shadow-sm" data-val="0">
+                                0
+                            </button>
+                            <button type="button" class="btn btn-light text-warning keypad-btn fw-bold rounded-circle shadow-sm" data-action="delete" aria-label="Delete last digit">
+                                <i class="bi bi-backspace-fill"></i>
+                            </button>
                         </div>
                     </div>
 
@@ -137,6 +198,9 @@
 
             {{-- Step 2 Footer --}}
             <div class="modal-footer border-0 px-4 pb-4 pt-0 gap-2 flex-nowrap d-none" id="pinStep_footer">
+                <button type="button" class="btn btn-light fw-semibold shadow-sm rounded-pill flex-fill" id="btnBackToConfirm">
+                    <i class="bi bi-arrow-left me-1"></i> Back
+                </button>
                 <button type="button" class="btn btn-success fw-bold shadow-sm rounded-pill flex-fill" id="confirmPinBtn">
                     <span id="pinLoader" class="spinner-border spinner-border-sm me-2 d-none" role="status" aria-hidden="true"></span>
                     <i class="bi bi-shield-lock-fill me-1" id="pinBtnIcon"></i>
@@ -151,7 +215,13 @@
 {{-- ══ MODAL INTERNAL SCRIPT (self-contained) ══════════════════════════════ --}}
 <script>
 (function () {
-    document.addEventListener('DOMContentLoaded', function () {
+    function initPinModal() {
+        const modalEl = document.getElementById('pinModal');
+        if (!modalEl || modalEl.dataset.initialized === 'true') {
+            return;
+        }
+        modalEl.dataset.initialized = 'true';
+
         const pinInput       = document.getElementById('pinInput');
         const toggleBtn      = document.getElementById('togglePinVisibility');
         const toggleIcon     = document.getElementById('togglePinIcon');
@@ -162,9 +232,18 @@
         const confirmStep    = document.getElementById('confirmationStep');
         const pinStep        = document.getElementById('pinStep');
 
+        // Detect if mobile/touch device
+        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        if (isMobile && pinInput) {
+            pinInput.setAttribute('readonly', 'true');
+            pinInput.style.cursor = 'default';
+        }
+
         /* ── Toggle PIN visibility ──────────────────── */
         if (toggleBtn && pinInput) {
-            toggleBtn.addEventListener('click', () => {
+            toggleBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
                 const isPassword = pinInput.type === 'password';
                 pinInput.type    = isPassword ? 'text' : 'password';
                 toggleIcon.className = isPassword ? 'bi bi-eye-slash' : 'bi bi-eye';
@@ -183,7 +262,11 @@
                 const ms = document.getElementById('modalSubtitle');
                 if (mt) mt.textContent = 'Authorize Transaction';
                 if (ms) ms.textContent = 'Step 2 of 2 — Security PIN';
-                setTimeout(() => pinInput?.focus(), 80);
+                
+                // Focus PIN input for desktop users
+                if (!isMobile) {
+                    setTimeout(() => pinInput?.focus(), 80);
+                }
             });
         }
 
@@ -203,7 +286,6 @@
         }
 
         /* ── Reset on modal close ───────────────────── */
-        const modalEl = document.getElementById('pinModal');
         if (modalEl) {
             modalEl.addEventListener('hidden.bs.modal', () => {
                 // Reset steps
@@ -236,6 +318,159 @@
             });
         }
 
-    });
+        /* ── Keypad Button Taps ─────────────────────── */
+        modalEl.querySelectorAll('.keypad-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                // Micro Haptic feedback for touch devices
+                if ('vibrate' in navigator) {
+                    try { navigator.vibrate(15); } catch(e) {}
+                }
+
+                const val = btn.getAttribute('data-val');
+                const action = btn.getAttribute('data-action');
+
+                if (val !== null) {
+                    if (pinInput.value.length < 5) {
+                        pinInput.value += val;
+                        pinInput.dispatchEvent(new Event('input', { bubbles: true }));
+                    }
+                } else if (action === 'clear') {
+                    pinInput.value = '';
+                    pinInput.dispatchEvent(new Event('input', { bubbles: true }));
+                } else if (action === 'delete') {
+                    pinInput.value = pinInput.value.slice(0, -1);
+                    pinInput.dispatchEvent(new Event('input', { bubbles: true }));
+                }
+            });
+        });
+
+        /* ── Keyboard & Input filters ───────────────── */
+        if (pinInput) {
+            // Filter non-digit characters (for paste or direct typing)
+            pinInput.addEventListener('input', () => {
+                pinInput.value = pinInput.value.replace(/\D/g, '');
+            });
+
+            // Enter key submits PIN
+            pinInput.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    document.getElementById('confirmPinBtn')?.click();
+                }
+            });
+        }
+
+        // Global keydown handler when PIN Step is visible
+        if (!window.pinKeydownListenerAdded) {
+            window.pinKeydownListenerAdded = true;
+            document.addEventListener('keydown', function (e) {
+                // Check if pinStep is active
+                const activePinStep = document.getElementById('pinStep');
+                if (!activePinStep || activePinStep.classList.contains('d-none')) return;
+
+                const activePinInput = document.getElementById('pinInput');
+                if (!activePinInput) return;
+
+                // Don't intercept if focus is in another input/textarea
+                if (e.target.tagName === 'INPUT' && e.target !== activePinInput) return;
+                if (e.target.tagName === 'TEXTAREA' || e.target.tagName === 'SELECT') return;
+
+                // If pinInput is focused and editable on desktop, let standard keyboard event pass
+                if (document.activeElement === activePinInput && !activePinInput.hasAttribute('readonly')) {
+                    return;
+                }
+
+                // Otherwise, process manually for high-speed typing
+                if (e.key >= '0' && e.key <= '9') {
+                    if (activePinInput.value.length < 5) {
+                        activePinInput.value += e.key;
+                        activePinInput.dispatchEvent(new Event('input', { bubbles: true }));
+                    }
+                    e.preventDefault();
+                } else if (e.key === 'Backspace') {
+                    activePinInput.value = activePinInput.value.slice(0, -1);
+                    activePinInput.dispatchEvent(new Event('input', { bubbles: true }));
+                    e.preventDefault();
+                } else if (e.key === 'Enter') {
+                    e.preventDefault();
+                    document.getElementById('confirmPinBtn')?.click();
+                }
+            });
+        }
+
+        /* ── Auto-Lock on Tab Switch / Device Lock ── */
+        document.addEventListener('visibilitychange', () => {
+            if (document.visibilityState === 'hidden') {
+                const activeModal = document.getElementById('pinModal');
+                if (activeModal && activeModal.classList.contains('show')) {
+                    try {
+                        const bsModal = bootstrap.Modal.getInstance(activeModal) || new bootstrap.Modal(activeModal);
+                        bsModal.hide();
+                    } catch (err) {
+                        console.warn('Failed auto-closing modal:', err);
+                    }
+                }
+            }
+        });
+
+        /* ── Global Centralized Interceptor for 429 Rate Limiting ── */
+        // Intercept native fetch requests
+        if (!window.pinFetchInterceptorAdded) {
+            window.pinFetchInterceptorAdded = true;
+            const originalFetch = window.fetch;
+            window.fetch = function(...args) {
+                return originalFetch(...args).then(response => {
+                    try {
+                        const url = typeof args[0] === 'string' ? args[0] : (args[0] instanceof URL ? args[0].href : '');
+                        if (response.status === 429 && url.indexOf('verify-pin') !== -1) {
+                            showGlobalRateLimitError();
+                        }
+                    } catch (err) {
+                        console.error('Fetch intercept error:', err);
+                    }
+                    return response;
+                });
+            };
+        }
+
+        // Intercept jQuery AJAX requests safely
+        const bindJQueryInterceptor = () => {
+            if (window.jQuery && !window.pinJQueryInterceptorAdded) {
+                window.pinJQueryInterceptorAdded = true;
+                window.jQuery(document).ajaxError(function(event, jqXHR, ajaxSettings) {
+                    if (ajaxSettings.url && ajaxSettings.url.indexOf('verify-pin') !== -1 && jqXHR.status === 429) {
+                        showGlobalRateLimitError();
+                    }
+                });
+            }
+        };
+        bindJQueryInterceptor();
+        window.addEventListener('load', bindJQueryInterceptor);
+
+        function showGlobalRateLimitError() {
+            const errEl = document.getElementById('pinError');
+            if (errEl) errEl.classList.remove('d-none');
+            const errText = document.getElementById('pinErrorText');
+            if (errText) errText.textContent = 'Too many failed attempts. Please try again in 1 minute.';
+
+            // Reset the authorize button state
+            const btn  = document.getElementById('confirmPinBtn');
+            const text = document.getElementById('confirmPinText');
+            const ldr  = document.getElementById('pinLoader');
+            const ico  = document.getElementById('pinBtnIcon');
+            if (btn)  btn.disabled = false;
+            if (text) text.textContent = 'Authorize Now';
+            if (ldr)  ldr.classList.add('d-none');
+            if (ico)  ico.classList.remove('d-none');
+        }
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initPinModal);
+    } else {
+        initPinModal();
+    }
 })();
 </script>

@@ -618,7 +618,12 @@
                 // Special check for Step 1 (Business Details visibility)
                 if (stepIndex === 0) {
                     if (serviceSelect.value === '') {
-                        alert('Please select a Registration Type.');
+                        Swal.fire({
+                            icon: 'warning',
+                            title: 'Type Required',
+                            text: 'Please select a Registration Type.',
+                            confirmButtonColor: '#ffc107',
+                        });
                         return false;
                     }
                 }
@@ -633,7 +638,12 @@
                 });
 
                 if (!isValid) {
-                    alert('Please fill in all required fields.');
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Required Fields Incomplete',
+                        text: 'Please fill in all required fields.',
+                        confirmButtonColor: '#ffc107',
+                    });
                 }
 
                 return isValid;

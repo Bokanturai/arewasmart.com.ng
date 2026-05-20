@@ -15,6 +15,10 @@ return Application::configure(basePath: dirname(__DIR__))
             '/palmpay/webhook',
             
         ]);
+
+        $middleware->alias([
+            'kyc.completed' => \App\Http\Middleware\EnsureProfileIsCompleted::class,
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //

@@ -13,6 +13,17 @@
                 document.documentElement.setAttribute('data-theme', 'dark');
             }
         })();
+
+        /*
+         * Global Safety Net — Prevents unhandled Promise rejections from
+         * surfacing as native browser alert() dialogs. Errors are logged
+         * to the console for debugging but NEVER shown as popups to users.
+         */
+        window.addEventListener('unhandledrejection', function(event) {
+            // Log to console for debugging, but suppress the native browser dialog
+            console.warn('[Arewa Smart] Unhandled promise rejection suppressed:', event.reason);
+            event.preventDefault();
+        });
     </script>
 
    
@@ -164,7 +175,7 @@
       <!-- Right Side: Social & Quick Links -->
       <div class="col-md-6 text-center text-md-end">
         <div class="d-inline-flex align-items-center gap-3">
-           <a href="javascript:void(0);" class="text-light text-decoration-none footer-social install-app-btn" title="Install Application">
+          <a href="https://play.google.com/store/apps/details?id=com.arewasmart&pcampaignid=web_share" target="_blank" class="text-light text-decoration-none footer-social install-app-btn" title="Install Application">
             <i class="ti ti-download fs-18"></i>
           </a>
           <a href="https://www.facebook.com/arewasmartidea" target="_blank" class="text-light text-decoration-none footer-social">
@@ -322,95 +333,100 @@
     </script>
 
     <script>
-        // PWA Implementation
+        // PWA Implementation & Service Worker (Crucial for TWA / Play Store installation verification)
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('/sw.js')
-                    .then(reg => console.log('Service Worker registered', reg))
+                    .then(reg => {
+                        console.log('Service Worker registered', reg);
+                        // Check for service worker updates immediately
+                        reg.addEventListener('updatefound', () => {
+                            const newWorker = reg.installing;
+                            if (newWorker) {
+                                newWorker.addEventListener('statechange', () => {
+                                    if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                                        console.log('New service worker installed. Reloading...');
+                                        window.location.reload();
+                                    }
+                                });
+                            }
+                        });
+                    })
                     .catch(err => console.log('Service Worker registration failed', err));
             });
-        }
 
-        let deferredPrompt;
-        const installBtns = document.querySelectorAll('.install-app-btn');
-
-        window.addEventListener('beforeinstallprompt', (e) => {
-            // Prevent Chrome 67 and earlier from automatically showing the prompt
-            e.preventDefault();
-            // Stash the event so it can be triggered later.
-            deferredPrompt = e;
-            
-            // Show all install buttons
-            installBtns.forEach(btn => btn.style.display = 'inline-flex');
-
-            // Check if we should show SweetAlert (once every 24 hours)
-            const lastPrompt = localStorage.getItem('pwa_install_prompt_last');
-            const now = new Date().getTime();
-            const twentyFourHours = 24 * 60 * 60 * 1000;
-
-            if (!lastPrompt || (now - lastPrompt > twentyFourHours)) {
-                setTimeout(() => {
-                    Swal.fire({
-                        title: 'Install Arewa Smart?',
-                        text: 'Install our application on your device for a better experience and quick access!',
-                        icon: 'info',
-                        showCancelButton: true,
-                        confirmButtonColor: '#F26522',
-                        cancelButtonColor: '#6c757d',
-                        confirmButtonText: 'Yes, Install now',
-                        cancelButtonText: 'Maybe later'
-                    }).then((result) => {
-                        if (result.isConfirmed) {
-                            triggerInstall();
-                        }
-                        // Update last prompt time regardless of choice
-                        localStorage.setItem('pwa_install_prompt_last', now);
-                    });
-                }, 3000); // 3-second delay after load
-            }
-        });
-
-        installBtns.forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                if (deferredPrompt) {
-                    triggerInstall();
-                } else {
-                    Swal.fire({
-                        title: 'Installation Ready?',
-                        text: 'To install this app, please use Google Chrome or Microsoft Edge. If you are already using them, wait a few seconds or ensure your connection is stable.',
-                        icon: 'info',
-                        confirmButtonColor: '#F26522'
-                    });
+            // Reload the page when the new active service worker takes control
+            let refreshing = false;
+            navigator.serviceWorker.addEventListener('controllerchange', () => {
+                if (!refreshing) {
+                    refreshing = true;
+                    console.log('Controller changed. Reloading page...');
+                    window.location.reload();
                 }
             });
-        });
-
-        function triggerInstall() {
-            if (deferredPrompt) {
-                deferredPrompt.prompt();
-                deferredPrompt.userChoice.then((choiceResult) => {
-                    if (choiceResult.outcome === 'accepted') {
-                        console.log('User accepted the install prompt');
-                        installBtns.forEach(btn => btn.style.display = 'none');
-                    } else {
-                        console.log('User dismissed the install prompt');
-                    }
-                    deferredPrompt = null;
-                });
-            }
         }
 
-        window.addEventListener('appinstalled', (evt) => {
-            console.log('App was installed');
+        // Helper to detect if running in standalone mode (as installed App or TWA)
+        function isRunningInApp() {
+            const isStandalone = window.matchMedia('(display-mode: standalone)').matches;
+            const isSafariStandalone = window.navigator.standalone === true;
+            const isAndroidApp = window.document.referrer.includes('android-app://') || 
+                                 navigator.userAgent.toLowerCase().includes('wv') || 
+                                 navigator.userAgent.toLowerCase().includes('webview');
+            
+            return isStandalone || isSafariStandalone || isAndroidApp;
+        }
+
+        const installBtns = document.querySelectorAll('.install-app-btn');
+        const playStoreUrl = 'https://play.google.com/store/apps/details?id=com.arewasmart&pcampaignid=web_share';
+
+        // Configure visibility and click handlers for install buttons
+        if (isRunningInApp()) {
+            // Hide install buttons if they are already using the Play Store app
             installBtns.forEach(btn => btn.style.display = 'none');
-            Swal.fire({
-                title: 'Installed!',
-                text: 'Application has been successfully installed.',
-                icon: 'success',
-                timer: 3000,
-                showConfirmButton: false
+        } else {
+            // Show install buttons and link them directly to the Play Store
+            installBtns.forEach(btn => {
+                btn.style.display = 'inline-flex';
+                btn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    window.open(playStoreUrl, '_blank');
+                });
             });
-        });
+
+            // Prompt mobile browser visitors to install our Play Store app (once every 24 hours)
+            const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+            if (isMobile) {
+                const lastPlaystorePrompt = localStorage.getItem('playstore_install_prompt_last');
+                const now = new Date().getTime();
+                const twentyFourHours = 24 * 60 * 60 * 1000;
+
+                if (!lastPlaystorePrompt || (now - lastPlaystorePrompt > twentyFourHours)) {
+                    setTimeout(() => {
+                        Swal.fire({
+                            title: 'Arewa Smart App is on Play Store!',
+                            text: 'Get our official app on the Google Play Store for faster access, better security, and a premium experience!',
+                            icon: 'info',
+                            showCancelButton: true,
+                            confirmButtonColor: '#F26522',
+                            cancelButtonColor: '#6c757d',
+                            confirmButtonText: '<i class="fab fa-google-play me-2"></i> Install App',
+                            cancelButtonText: 'Maybe later',
+                            customClass: {
+                                confirmButton: 'btn btn-primary px-4 py-2',
+                                cancelButton: 'btn btn-secondary px-4 py-2'
+                            },
+                            buttonsStyling: true
+                        }).then((result) => {
+                            if (result.isConfirmed) {
+                                window.open(playStoreUrl, '_blank');
+                            }
+                            localStorage.setItem('playstore_install_prompt_last', now);
+                        });
+                    }, 4000); // 4-second delay
+                }
+            }
+        }
     </script>
     @include('ai.widget')
 </body>

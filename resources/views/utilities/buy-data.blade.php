@@ -525,7 +525,7 @@
             const confirmBtn = $(this);
             const pin = $('#pinInput').val().trim();
             if (!pin) return;
-            confirmBtn.disabled = true;
+            confirmBtn.prop('disabled', true);
             $('#pinLoader').removeClass('d-none');
             fetch("{{ route('verify.pin') }}", {
                 method: "POST",
@@ -539,9 +539,18 @@
                     document.getElementById('buyDataForm').submit();
                 } else {
                     Swal.fire({ icon: 'error', title: 'Invalid PIN', text: 'Please check your transaction PIN.' });
-                    confirmBtn.disabled = false;
+                    confirmBtn.prop('disabled', false);
                     $('#pinLoader').addClass('d-none');
                 }
+            })
+            .catch(() => {
+                // Silently show error inside the modal — never let this bubble as a native browser alert
+                const errEl = document.getElementById('pinError');
+                const errText = document.getElementById('pinErrorText');
+                if (errText) errText.textContent = 'Connection error. Please check your internet and try again.';
+                if (errEl) errEl.classList.remove('d-none');
+                confirmBtn.prop('disabled', false);
+                $('#pinLoader').addClass('d-none');
             });
         });
 

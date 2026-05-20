@@ -262,6 +262,13 @@ class EducationalController extends Controller
                 ?? $result['cards'][0]['Pin']
                 ?? null;
 
+            // Extract serial number if available from API response
+            $serialNumber = $result['cards'][0]['Serial']
+                ?? $result['cards'][0]['SerialNumber']
+                ?? $result['serial_number']
+                ?? $result['serialNumber']
+                ?? null;
+
             $finalToken      = $purchasedCode ?? 'Check History';
             $transDescription = "Educational pin purchase ({$description}) - PIN: {$finalToken}";
 
@@ -279,6 +286,7 @@ class EducationalController extends Controller
                     'phone'          => $request->mobileno,
                     'service'        => $request->service,
                     'purchased_code' => $finalToken,
+                    'serial_number'  => $serialNumber,
                     'api_response'   => $result,
                 ]),
             ]);
@@ -307,6 +315,7 @@ class EducationalController extends Controller
                     Mail::to($targetEmail)->queue(new EducationalPurchaseNotification([
                         'customer_name'    => $user->name,
                         'pin'              => $finalToken,
+                        'serial_number'    => $serialNumber,
                         'amount'           => $fee,
                         'reference'        => $requestId,
                         'service_type'     => $description,
@@ -318,12 +327,16 @@ class EducationalController extends Controller
             }
 
             return redirect()->route('thankyou')->with([
-                'success' => 'Educational pin purchase successful!',
-                'ref'     => $requestId,
-                'mobile'  => $request->mobileno,
-                'amount'  => $fee,
-                'token'   => $finalToken,
-                'network' => strtoupper($request->service),
+                'success'     => 'Educational pin purchase successful!',
+                'ref'         => $requestId,
+                'mobile'      => $request->mobileno,
+                'amount'      => $fee,
+                'paid'        => $fee,
+                'token'       => $finalToken,
+                'serial'      => $serialNumber,
+                'network'     => strtoupper($request->service),
+                'serviceName' => 'Educational Pin (' . strtoupper($request->service) . ')',
+                'date'        => now()->toDateTimeString(),
             ]);
 
         } catch (\Exception $e) {
@@ -556,6 +569,13 @@ class EducationalController extends Controller
                 ?? $result['cards'][0]['Pin']
                 ?? null;
 
+            // Extract serial number if available from API response
+            $serialNumber = $result['cards'][0]['Serial']
+                ?? $result['cards'][0]['SerialNumber']
+                ?? $result['serial_number']
+                ?? $result['serialNumber']
+                ?? null;
+
             $finalToken      = $purchasedCode ?? 'Check History';
             $transDescription = "{$description} Purchase - Profile: {$request->profile_id} - PIN: {$finalToken}";
 
@@ -575,6 +595,7 @@ class EducationalController extends Controller
                     'service_type'   => $description,
                     'email'          => $request->email ?? null,
                     'purchased_code' => $finalToken,
+                    'serial_number'  => $serialNumber,
                     'api_response'   => $result,
                 ]),
             ]);
@@ -604,6 +625,7 @@ class EducationalController extends Controller
                         'customer_name'    => $payerName,
                         'profile_id'       => $request->profile_id,
                         'pin'              => $finalToken,
+                        'serial_number'    => $serialNumber,
                         'amount'           => $fee,
                         'reference'        => $requestId,
                         'service_type'     => $description,
@@ -615,12 +637,16 @@ class EducationalController extends Controller
             }
 
             return redirect()->route('thankyou')->with([
-                'success' => 'JAMB PIN purchase successful!',
-                'ref'     => $requestId,
-                'mobile'  => $request->mobileno,
-                'amount'  => $fee,
-                'token'   => $finalToken,
-                'network' => strtoupper($description),
+                'success'     => 'JAMB PIN purchase successful!',
+                'ref'         => $requestId,
+                'mobile'      => $request->mobileno,
+                'amount'      => $fee,
+                'paid'        => $fee,
+                'token'       => $finalToken,
+                'serial'      => $serialNumber,
+                'network'     => strtoupper($description),
+                'serviceName' => $description . ' Purchase',
+                'date'        => now()->toDateTimeString(),
             ]);
 
         } catch (\Exception $e) {

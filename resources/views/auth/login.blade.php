@@ -76,6 +76,25 @@
             {{-- Submit Button --}}
             <button type="submit" class="btn btn-primary w-100 mb-3 py-2">Sign In</button>
 
+            {{-- Social Login Divider --}}
+            <div class="d-flex align-items-center my-4">
+                <hr class="flex-grow-1 border-light-subtle m-0">
+                <span class="mx-3 text-muted small fw-semibold text-uppercase" style="font-size: 11px; letter-spacing: 0.5px; white-space: nowrap;">Or continue with</span>
+                <hr class="flex-grow-1 border-light-subtle m-0">
+            </div>
+
+            {{-- Social Login Buttons --}}
+            <div class="d-flex gap-3 mb-4">
+                <a href="#" class="btn btn-outline-light w-50 d-flex align-items-center justify-content-center border py-2 text-dark font-medium shadow-sm hover-elevated" style="background-color: #f8f9fa; border-color: #e2e8f0 !important; border-radius: 8px;">
+                    <i class="fab fa-google text-danger me-2 fs-18"></i>
+                    <span class="small fw-bold text-secondary">Google</span>
+                </a>
+                <a href="#" class="btn btn-outline-light w-50 d-flex align-items-center justify-content-center border py-2 text-dark font-medium shadow-sm hover-elevated" style="background-color: #f8f9fa; border-color: #e2e8f0 !important; border-radius: 8px;">
+                    <i class="fab fa-facebook-f text-primary me-2 fs-18"></i>
+                    <span class="small fw-bold text-secondary">Facebook</span>
+                </a>
+            </div>
+
 
             {{-- Register Link --}}
             <div class="text-center">

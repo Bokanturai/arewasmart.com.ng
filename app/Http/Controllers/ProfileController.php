@@ -50,14 +50,14 @@ class ProfileController extends Controller
         $user = Auth::user();
         
         $rules = [
-            'first_name' => 'required|string|max:255|min:2',
-            'last_name' => 'required|string|max:255|min:2',
+            'first_name' => empty($user->first_name) ? 'required|string|max:255|min:2' : 'nullable|string|max:255|min:2',
+            'last_name' => empty($user->last_name) ? 'required|string|max:255|min:2' : 'nullable|string|max:255|min:2',
             'middle_name' => 'nullable|string|max:255',
-            'phone_no' => 'required|string|max:15|min:10|regex:/^[0-9+\-\s()]+$/',
-            'lga' => 'required|string|max:255',
-            'state' => 'required|string|max:255',
-            'address' => 'required|string|max:500',
-            'pin' => 'required|digits:5',
+            'phone_no' => empty($user->phone_no) ? 'required|string|max:15|min:10|regex:/^[0-9+\-\s()]+$/|unique:users,phone_no,' . $user->id : 'nullable|string|max:15|min:10|regex:/^[0-9+\-\s()]+$/|unique:users,phone_no,' . $user->id,
+            'lga' => empty($user->lga) ? 'required|string|max:255' : 'nullable|string|max:255',
+            'state' => empty($user->state) ? 'required|string|max:255' : 'nullable|string|max:255',
+            'address' => empty($user->address) ? 'required|string|max:500' : 'nullable|string|max:500',
+            'pin' => empty($user->pin) ? 'required|digits:5' : 'nullable|digits:5',
             'termsCheck' => 'required|string|max:500', 
         ];
 
@@ -68,23 +68,39 @@ class ProfileController extends Controller
         }
 
         $validated = $request->validate($rules, [
+            'phone_no.unique' => 'The phone number has already been taken by another user. Please use a different phone number.',
+            'bvn.unique' => 'The BVN has already been taken by another user. Please verify your BVN or contact support.',
             'pin.required' => 'Transaction PIN is required.',
             'pin.digits' => 'PIN must be exactly 5 digits.',
         ]);
 
         try {
-            $updateData = [
-                'first_name' => $validated['first_name'],
-                'last_name' => $validated['last_name'],
-                'middle_name' => $validated['middle_name'] ?? null,
-                'phone_no' => $validated['phone_no'],
-                'lga' => $validated['lga'],
-                'state' => $validated['state'],
-                'address' => $validated['address'],
-                'pin' => bcrypt($validated['pin']), 
-                'profile_completed' => true, 
-            ];
+            $updateData = [];
 
+            if (!empty($validated['first_name'])) {
+                $updateData['first_name'] = $validated['first_name'];
+            }
+            if (!empty($validated['last_name'])) {
+                $updateData['last_name'] = $validated['last_name'];
+            }
+            if (isset($validated['middle_name'])) {
+                $updateData['middle_name'] = $validated['middle_name'];
+            }
+            if (!empty($validated['phone_no'])) {
+                $updateData['phone_no'] = $validated['phone_no'];
+            }
+            if (!empty($validated['lga'])) {
+                $updateData['lga'] = $validated['lga'];
+            }
+            if (!empty($validated['state'])) {
+                $updateData['state'] = $validated['state'];
+            }
+            if (!empty($validated['address'])) {
+                $updateData['address'] = $validated['address'];
+            }
+            if (!empty($validated['pin'])) {
+                $updateData['pin'] = bcrypt($validated['pin']);
+            }
             if (!empty($validated['bvn'])) {
                 $updateData['bvn'] = $validated['bvn'];
             }
@@ -100,8 +116,24 @@ class ProfileController extends Controller
             }
 
             return redirect()->route('dashboard')->with('success', 'Account successfully! Welcome aboard! 🎉');
+        } catch (\Illuminate\Database\QueryException $e) {
+            \Log::error('Profile update database error: ' . $e->getMessage());
+            // Intercept database integrity / duplicate errors
+            if ($e->getCode() == '23000' || str_contains($e->getMessage(), 'Duplicate entry')) {
+                $errorMessage = 'A user with this email, phone number, or BVN already exists. Please verify your details.';
+                if (str_contains($e->getMessage(), 'phone_no')) {
+                    $errorMessage = 'The phone number is already registered with another account.';
+                } elseif (str_contains($e->getMessage(), 'bvn')) {
+                    $errorMessage = 'The BVN is already registered with another account.';
+                } elseif (str_contains($e->getMessage(), 'email')) {
+                    $errorMessage = 'The email address is already registered with another account.';
+                }
+                return redirect()->back()->withInput()->with('error', $errorMessage);
+            }
+            return redirect()->back()->withInput()->with('error', 'Information update failed, contact support.');
         } catch (\Exception $e) {
-            return redirect()->back()->with('error', 'Failed to update profile: ' . $e->getMessage());
+            \Log::error('Profile update unexpected error: ' . $e->getMessage());
+            return redirect()->back()->withInput()->with('error', 'An unexpected error occurred while completing your profile. Please try again.');
         }
     }
 

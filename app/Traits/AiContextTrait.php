@@ -48,7 +48,7 @@ trait AiContextTrait
         // 7. Recent Interactions (Unified Memory)
         $interactionContext = $this->fetchRecentInteractionsContext($userId);
 
-        return "--- AUTHORIZED USER CONTEXT (ID: $userId | NAME: $userName) ---\n\n" . 
+        return "--- AUTHORIZED USER CONTEXT (ID: $userId | NAME: $userName) ---\n\n" .
                "CURRENT FOCUS RECORD:\n$recordContext\n\n" .
                "$financialContext\n\n" .
                "$vaContext\n\n" .
@@ -60,6 +60,104 @@ trait AiContextTrait
                "--- END OF AUTHORIZED CONTEXT ---";
     }
 
+    /**
+     * Decode and normalise a transaction's metadata JSON into a clean array.
+     * Returns an empty array if metadata is absent or unparseable.
+     */
+    private function resolveTransactionMeta(Transaction $tx): array
+    {
+        $raw = $tx->metadata;
+        if (!$raw) return [];
+        $decoded = is_array($raw) ? $raw : json_decode($raw, true);
+        return is_array($decoded) ? $decoded : [];
+    }
+
+    /**
+     * Build a rich detail string for one transaction.
+     * Top-level transaction fields are always included.
+     * Metadata fields are added ONLY when the information is not already
+     * present on the main record — metadata is strictly a fallback source.
+     */
+    private function buildTransactionContext(Transaction $tx): string
+    {
+        $meta = $this->resolveTransactionMeta($tx);
+
+        $lines = [
+            "Ref:         {$tx->transaction_ref}",
+            "Amount:      ₦" . number_format($tx->amount, 2),
+            "Status:      {$tx->status}",
+            "Date:        " . $tx->created_at->format('d M Y, h:i A'),
+            "Description: {$tx->description}",
+        ];
+
+        // Net amount / discount (from DB column first)
+        $netAmount = $tx->net_amount ?? null;
+        if ($netAmount && $netAmount != $tx->amount) {
+            $discount = $tx->amount - $netAmount;
+            $lines[] = "Net Paid:    ₦" . number_format($netAmount, 2) . " (saved ₦" . number_format($discount, 2) . ")";
+        }
+
+        // ── Metadata fallback — only append if not already in description ──
+
+        // Phone / recipient number
+        $phone = $meta['phone'] ?? $meta['phone_number'] ?? $meta['mobileno'] ?? null;
+        if ($phone && !str_contains($tx->description ?? '', $phone)) {
+            $lines[] = "Phone:       {$phone}";
+        }
+
+        // Network / provider / exam name
+        $network = $meta['network'] ?? $meta['service'] ?? $meta['exam_name'] ?? $meta['service_type'] ?? null;
+        if ($network && !str_contains(strtolower($tx->description ?? ''), strtolower($network))) {
+            $lines[] = "Network:     " . strtoupper($network);
+        }
+
+        // Receiver info (P2P transfer / bank withdrawal)
+        $receiverName = $meta['account_name'] ?? $meta['receiver_name'] ?? null;
+        $receiverAcct = $meta['account_no'] ?? $meta['receiver_wallet'] ?? $meta['account_number'] ?? null;
+        $bankName     = $meta['bankName'] ?? $meta['bank_name'] ?? null;
+        if ($receiverName) $lines[] = "Receiver:    {$receiverName}";
+        if ($receiverAcct) $lines[] = "Account:     {$receiverAcct}";
+        if ($bankName)     $lines[] = "Bank:        {$bankName}";
+
+        // Educational PIN / token
+        $pin = $meta['purchased_code'] ?? $meta['purchased_pin'] ?? $meta['token'] ?? null;
+        if ($pin && $pin !== 'Check History') {
+            $lines[] = "PIN/Token:   {$pin}";
+        }
+
+        // Serial number (WAEC / NECO / NABTED / JAMB)
+        $serial = $meta['serial_number'] ?? $meta['serial'] ?? null;
+        if ($serial) {
+            $lines[] = "Serial No:   {$serial}";
+        }
+
+        // Profile ID (JAMB)
+        $profileId = $meta['profile_id'] ?? null;
+        if ($profileId) {
+            $lines[] = "Profile ID:  {$profileId}";
+        }
+
+        // Meter number (electricity)
+        $meter = $meta['meter_number'] ?? $meta['billersCode'] ?? null;
+        if ($meter) {
+            $lines[] = "Meter No:    {$meter}";
+        }
+
+        // Electricity prepaid token (different from edu pin)
+        $elecToken = $meta['token'] ?? null;
+        if ($elecToken && !$pin && $meter) {
+            $lines[] = "Elec Token:  {$elecToken}";
+        }
+
+        // IUC number (cable TV)
+        $iuc = $meta['iuc'] ?? $meta['iuc_number'] ?? null;
+        if ($iuc) {
+            $lines[] = "IUC Number:  {$iuc}";
+        }
+
+        return implode("\n", $lines);
+    }
+
     private function fetchSpecificRecordContext($reference, $userId)
     {
         if (!$reference) return "No specific record reference provided.";
@@ -69,9 +167,10 @@ trait AiContextTrait
             return "Type: Agent Service ({$service->service_type})\nName: {$service->service_name}\nStatus: {$service->status}\nAmount: ₦" . number_format($service->amount, 2) . "\nRef: {$service->reference}\nDescription: {$service->description}";
         }
 
+        // For a specific transaction, always include full metadata-enriched detail
         $transaction = Transaction::where('transaction_ref', $reference)->where('user_id', $userId)->first();
         if ($transaction) {
-            return "Type: Transaction\nDescription: {$transaction->description}\nStatus: {$transaction->status}\nAmount: ₦" . number_format($transaction->amount, 2) . "\nPayer: {$transaction->payer_name}\nRef: {$transaction->transaction_ref}";
+            return "Type: Transaction\n" . $this->buildTransactionContext($transaction);
         }
 
         $report = Report::where('ref', $reference)->where('user_id', $userId)->first();
@@ -87,7 +186,7 @@ trait AiContextTrait
         $wallet = $user->wallet;
         $balance = $wallet ? $wallet->balance : 0;
         $bonus = $wallet ? $wallet->bonus : 0;
-        
+
         return "FINANCIAL SUMMARY:\n" .
                "- Available Balance: ₦" . number_format($balance, 2) . "\n" .
                "- Account Bonus: ₦" . number_format($bonus, 2) . "\n" .
@@ -100,7 +199,7 @@ trait AiContextTrait
     {
         $accounts = VirtualAccount::where('user_id', $userId)->get();
         if ($accounts->isEmpty()) return "VIRTUAL ACCOUNTS: None assigned.";
-        
+
         $output = "VIRTUAL ACCOUNTS (For Deposits):\n";
         foreach ($accounts as $acc) {
             $output .= "- {$acc->bankName}: {$acc->accountNo} ({$acc->accountName}) [{$acc->status}]\n";
@@ -123,7 +222,7 @@ trait AiContextTrait
     private function fetchServiceCatalogue($user)
     {
         $role = $user->role ?? 'user';
-        $services = Service::where('is_active', true)->with(['fields' => function($q) {
+        $services = Service::where('is_active', true)->with(['fields' => function ($q) {
             $q->where('is_active', true);
         }])->get();
 
@@ -144,9 +243,9 @@ trait AiContextTrait
     private function fetchDataPlansContext()
     {
         try {
-            $sme = \Illuminate\Support\Facades\DB::table('sme_datas')->where('status', 'enabled')->get();
+            $sme    = \Illuminate\Support\Facades\DB::table('sme_datas')->where('status', 'enabled')->get();
             $normal = \Illuminate\Support\Facades\DB::table('data_variations')->where('status', 'enabled')->get();
-            
+
             $output = "AVAILABLE DATA PLANS (Reliability Info):\n";
             if ($sme->isEmpty() && $normal->isEmpty()) return "DATA PLANS: No enabled plans found in database.";
 
@@ -175,9 +274,9 @@ trait AiContextTrait
 
         $output = "RECENT USER INTERACTIONS (Last 15 messages across all channels):\n";
         foreach ($chats->reverse() as $chat) {
-            $time = $chat->created_at->format('m-d H:i');
-            $type = strtoupper($chat->type);
-            $role = strtoupper($chat->role);
+            $time  = $chat->created_at->format('m-d H:i');
+            $type  = strtoupper($chat->type);
+            $role  = strtoupper($chat->role);
             $output .= "[$time] $type | $role: {$chat->content}\n";
         }
         return $output;
@@ -185,15 +284,71 @@ trait AiContextTrait
 
     private function fetchRecentActivity($userId)
     {
-        $fiveDaysAgo = now()->subDays(5);
-        $transactions = Transaction::where('user_id', $userId)->where('created_at', '>=', $fiveDaysAgo)->latest()->take(20)->get();
-        $services = AgentService::where('user_id', $userId)->where('created_at', '>=', $fiveDaysAgo)->latest()->take(20)->get();
+        $fiveDaysAgo  = now()->subDays(5);
+        $transactions = Transaction::where('user_id', $userId)
+            ->where('created_at', '>=', $fiveDaysAgo)
+            ->latest()
+            ->take(20)
+            ->get();
+        $services = AgentService::where('user_id', $userId)
+            ->where('created_at', '>=', $fiveDaysAgo)
+            ->latest()
+            ->take(20)
+            ->get();
 
         if ($transactions->isEmpty() && $services->isEmpty()) return "No activity in the last 5 days.";
 
         $output = "TRANSACTIONS:\n";
         foreach ($transactions as $tx) {
-            $output .= "- [{$tx->created_at->format('m-d h:i')}] {$tx->description}: ₦" . number_format($tx->amount, 2) . " [{$tx->status}]\n";
+            // Core line — always from the main transaction record
+            $line = "- [{$tx->created_at->format('m-d h:i')}] {$tx->description}: ₦" . number_format($tx->amount, 2) . " [{$tx->status}]";
+
+            // ── Metadata fallback: append extra details ONLY when not in description ──
+            $meta   = $this->resolveTransactionMeta($tx);
+            $extras = [];
+
+            $phone = $meta['phone'] ?? $meta['phone_number'] ?? $meta['mobileno'] ?? null;
+            if ($phone && !str_contains($tx->description ?? '', $phone)) {
+                $extras[] = "Phone: {$phone}";
+            }
+
+            $network = $meta['network'] ?? $meta['service'] ?? $meta['exam_name'] ?? null;
+            if ($network && !str_contains(strtolower($tx->description ?? ''), strtolower($network))) {
+                $extras[] = "Network: " . strtoupper($network);
+            }
+
+            $pin = $meta['purchased_code'] ?? $meta['purchased_pin'] ?? $meta['token'] ?? null;
+            if ($pin && $pin !== 'Check History') {
+                $extras[] = "PIN: {$pin}";
+            }
+
+            $serial = $meta['serial_number'] ?? $meta['serial'] ?? null;
+            if ($serial) {
+                $extras[] = "Serial: {$serial}";
+            }
+
+            $meter = $meta['meter_number'] ?? $meta['billersCode'] ?? null;
+            if ($meter && !$pin) {
+                $extras[] = "Meter: {$meter}";
+                $elecToken = $meta['token'] ?? null;
+                if ($elecToken) $extras[] = "Token: {$elecToken}";
+            }
+
+            $receiverName = $meta['account_name'] ?? $meta['receiver_name'] ?? null;
+            $bankName     = $meta['bankName'] ?? $meta['bank_name'] ?? null;
+            if ($receiverName) $extras[] = "To: {$receiverName}";
+            if ($bankName)     $extras[] = "Bank: {$bankName}";
+
+            $netAmount = $tx->net_amount ?? null;
+            if ($netAmount && $netAmount != $tx->amount) {
+                $extras[] = "Paid: ₦" . number_format($netAmount, 2);
+            }
+
+            if (!empty($extras)) {
+                $line .= " [" . implode(' | ', $extras) . "]";
+            }
+
+            $output .= $line . "\n";
         }
 
         $output .= "\nAGENT SERVICES:\n";
@@ -209,37 +364,38 @@ trait AiContextTrait
      */
     public function getAiSystemPrompt($action, $context = '', $userName = 'Valued User')
     {
-        $today = now()->format('l, d F Y');
+        $today  = now()->format('l, d F Y');
         $userId = auth()->id();
-        
+
         $rules = <<<TEXT
 AREWA SMART CORE RULES:
 1. Nature: We are a premium digital service intermediary (NIN, BVN, Utilities, Gift cards and Agency Banking).
 2. Refunds: Strictly for system errors by Arewa Smart. User errors or 3rd party API failures are non-refundable.
 3. Tone: Expert, warm, highly professional. Use Nigerian business etiquette (respectful and direct). Be concise.
-193: 4. Security: You can propose transactions but NOT execute them. The user must confirm with their PIN. Never ask for the PIN.
-194: 5. Pricing Rule: You have access to service prices in the context. ONLY mention prices if the user specifically asks for them.
-195: 6. Usage Guide:
-196:    - NIN Validation: Requires 11-digit NIN. Non-refundable.
-197:    - IPE Clearance: Requires Tracking ID (min 15 chars). Includes auto-refund if API fails.
-198:    - CAC Registration: Requires business name, type, and document uploads (NIN, Signature, Passport).
-199:    - Status: Users can manually click the "Check Status" icon in history to refresh results.
-201:    - Response: Your answers MUST be short (1-3 sentences max) and understandable.
-202: 7. Action Proposals:
-203:    - You can initiate Airtime, Data, P2P Transfers, or Virtual Account creation by outputting a JSON block at the very end of your response.
-204:    - For P2P: {"action": "p2p_transfer", "params": {"wallet_id": "...", "amount": 0, "description": "..."}}
-205:    - For Airtime: {"action": "airtime", "params": {"phone_number": "...", "network": "...", "amount": 0}}
-206:    - For Normal Data: {"action": "data_purchase", "params": {"data_type": "normal", "phone_number": "...", "network": "...", "bundle_code": "...", "plan_name": "...", "amount": 0}}
-207:    - For SME Data: {"action": "data_purchase", "params": {"data_type": "sme", "phone_number": "...", "network": "...", "plan_id": "...", "plan_name": "...", "plan_type": "...", "amount": 0}}
-208:    - For Virtual Account: {"action": "virtual_account", "params": {}}
-209:    - Proactive Account Creation: If the user asks about funding their wallet or account details but the context shows "VIRTUAL ACCOUNTS: None assigned", you MUST explain that they don't have one yet and output the `virtual_account` action JSON to help them create it.
-210:    - Data Plan Preference: Always prioritize and suggest "Normal" data plans as the best option. ONLY offer or show "SME" data plans if the user specifically mentions "SME".
-211:    - Data Reliability Advice: Always advise the user to buy data plans that have a low failure record (marked as "Excellent" or "Good" reliability in context). If a plan is "Unstable", warn them or suggest a better alternative.
-212:    - Network MUST be one of: mtn, airtel, glo, 9mobile. (Use MTN, AIRTEL etc for SME).
-214:    - Phone Validation: Always ensure the phone number provided is exactly 11 digits before initiating any purchase.
-215:    - Balance Check: You have access to the user's wallet balance. If they ask for a plan that costs more than their balance, inform them and suggest a cheaper plan or tell them to fund their account. Output the `virtual_account` action if they need to fund and don't have an account.
-216:    - Tell the user: "I can initiate this for you. Please confirm the details to proceed." (Omit PIN mention for virtual accounts).
-212: 8. Personalization: You have access to RECENT UNIFIED INTERACTIONS. Use this history to remember user concerns, previous requests, and patterns across Support, Global, and Comments.
+4. Security: You can propose transactions but NOT execute them. The user must confirm with their PIN. Never ask for the PIN.
+5. Pricing Rule: You have access to service prices in the context. ONLY mention prices if the user specifically asks for them.
+6. Usage Guide:
+   - NIN Validation: Requires 11-digit NIN. Non-refundable.
+   - IPE Clearance: Requires Tracking ID (min 15 chars). Includes auto-refund if API fails.
+   - CAC Registration: Requires business name, type, and document uploads (NIN, Signature, Passport).
+   - Status: Users can manually click the "Check Status" icon in history to refresh results.
+   - Response: Your answers MUST be short (1-3 sentences max) and understandable.
+7. Action Proposals:
+   - You can initiate Airtime, Data, P2P Transfers, or Virtual Account creation by outputting a JSON block at the very end of your response.
+   - For P2P: {"action": "p2p_transfer", "params": {"wallet_id": "...", "amount": 0, "description": "..."}}
+   - For Airtime: {"action": "airtime", "params": {"phone_number": "...", "network": "...", "amount": 0}}
+   - For Normal Data: {"action": "data_purchase", "params": {"data_type": "normal", "phone_number": "...", "network": "...", "bundle_code": "...", "plan_name": "...", "amount": 0}}
+   - For SME Data: {"action": "data_purchase", "params": {"data_type": "sme", "phone_number": "...", "network": "...", "plan_id": "...", "plan_name": "...", "plan_type": "...", "amount": 0}}
+   - For Virtual Account: {"action": "virtual_account", "params": {}}
+   - Proactive Account Creation: If the user asks about funding their wallet or account details but the context shows "VIRTUAL ACCOUNTS: None assigned", you MUST explain that they don't have one yet and output the `virtual_account` action JSON to help them create it.
+   - Data Plan Preference: Always prioritize and suggest "Normal" data plans as the best option. ONLY offer or show "SME" data plans if the user specifically mentions "SME".
+   - Data Reliability Advice: Always advise the user to buy data plans that have a low failure record (marked as "Excellent" or "Good" reliability in context). If a plan is "Unstable", warn them or suggest a better alternative.
+   - Network MUST be one of: mtn, airtel, glo, 9mobile. (Use MTN, AIRTEL etc for SME).
+   - Phone Validation: Always ensure the phone number provided is exactly 11 digits before initiating any purchase.
+   - Balance Check: You have access to the user's wallet balance. If they ask for a plan that costs more than their balance, inform them and suggest a cheaper plan or tell them to fund their account. Output the `virtual_account` action if they need to fund and don't have an account.
+   - Tell the user: "I can initiate this for you. Please confirm the details to proceed." (Omit PIN mention for virtual accounts).
+8. Personalization: You have access to RECENT UNIFIED INTERACTIONS. Use this history to remember user concerns, previous requests, and patterns across Support, Global, and Comments.
+9. Transaction Details: Each transaction entry in RECENT ACTIVITY may include additional details in square brackets (Phone, Network, PIN, Serial, Meter, Token, etc.) sourced from the transaction metadata. When a user asks for a specific detail (their WAEC PIN, serial number, electricity token, recipient name, etc.), scan these entries and provide the exact value. If the detail is not in the context, acknowledge it is unavailable and direct them to support.
 
 TEXT;
 
@@ -262,13 +418,13 @@ TEXT;
         if ($action === 'summarize') {
             return $base . "\n\nTASK: Summarize the official feedback for this transaction and explain it simply. Advise on next steps.";
         }
-        
+
         if ($action === 'support') {
             return $base . "\n\nTASK: You are providing formal technical support. Be empathetic but stick to platform terms. Help the user resolve their issue or explain the status of their request.";
         }
 
         if ($action === 'chat') {
-            return $base . "\n\nTASK: You are a Dashboard Assistant. Help the user navigate the platform, explain features (NIN, BVN, Wallet), or answer questions about their account status and history.";
+            return $base . "\n\nTASK: You are a Dashboard Assistant. Help the user navigate the platform, explain features (NIN, BVN, Wallet), or answer questions about their account status and history. When a user asks for a transaction-specific detail (PIN, serial number, phone number, electricity token, meter number, recipient, etc.), always check the RECENT ACTIVITY and CURRENT FOCUS RECORD in your context first. Provide the exact value if available; do not make it up.";
         }
 
         return $base . "\n\nTASK: Answer the user's question accurately using the provided context.";

@@ -159,13 +159,34 @@ class NecoNabtedController extends Controller
                 }
 
                 // Success - Finalize
-                $purchasedPin = $result['pins'] ?? 'Check History';
-                
-                // If 'pins' is empty but 'data' exists (and is a string), try parsing it
-                if ($purchasedPin === 'Check History' && isset($result['data']) && is_string($result['data'])) {
-                    $nestedData = json_decode($result['data'], true);
-                    $purchasedPin = $nestedData['pin'] ?? 'Check History';
+                // The pins field may be a string (pin only) or an array/object with pin+serial
+                $purchasedPin = null;
+                $serialNumber = null;
+
+                if (isset($result['pins'])) {
+                    $pinsData = $result['pins'];
+                    if (is_array($pinsData)) {
+                        // Array of pin objects: [{pin: '...', serial: '...'}, ...]
+                        $firstPin = $pinsData[0] ?? $pinsData;
+                        $purchasedPin = $firstPin['pin'] ?? $firstPin['Pin'] ?? $firstPin['pincode'] ?? null;
+                        $serialNumber = $firstPin['serial'] ?? $firstPin['Serial'] ?? $firstPin['serial_number'] ?? $firstPin['SerialNumber'] ?? null;
+                    } elseif (is_string($pinsData) && !empty($pinsData)) {
+                        $purchasedPin = $pinsData;
+                    }
                 }
+
+                // Fallback: try 'data' field (nested JSON)
+                if (!$purchasedPin && isset($result['data']) && is_string($result['data'])) {
+                    $nestedData = json_decode($result['data'], true);
+                    $purchasedPin = $nestedData['pin'] ?? $nestedData['Pin'] ?? null;
+                    $serialNumber = $serialNumber ?? $nestedData['serial'] ?? $nestedData['Serial'] ?? $nestedData['serial_number'] ?? null;
+                }
+
+                // Also check top-level serial
+                $serialNumber = $serialNumber
+                    ?? $result['serial'] ?? $result['serial_number'] ?? $result['Serial'] ?? null;
+
+                $purchasedPin = $purchasedPin ?? 'Check History';
                 
                 $finalDescription = $description . " - PIN: " . $purchasedPin;
 
@@ -180,10 +201,11 @@ class NecoNabtedController extends Controller
                     'performed_by'    => $user->first_name . ' ' . $user->last_name,
                     'approved_by'     => $user->id,
                     'metadata'        => json_encode([
-                        'phone'        => $request->mobileno,
-                        'exam_name'    => $examName,
-                        'purchased_pin'=> $purchasedPin,
-                        'api_response' => $result
+                        'phone'         => $request->mobileno,
+                        'exam_name'     => $examName,
+                        'purchased_pin' => $purchasedPin,
+                        'serial_number' => $serialNumber,
+                        'api_response'  => $result
                     ]),
                 ]);
 
@@ -207,12 +229,16 @@ class NecoNabtedController extends Controller
                 $lock->release();
 
                 return redirect()->route('thankyou')->with([
-                    'success' => strtoupper($examName) . ' PIN purchase successful!',
-                    'ref'     => $requestId,
-                    'mobile'  => $request->mobileno,
-                    'amount'  => $payableAmount,
-                    'token'   => $purchasedPin,
-                    'network' => strtoupper($examName),
+                    'success'     => strtoupper($examName) . ' PIN purchase successful!',
+                    'ref'         => $requestId,
+                    'mobile'      => $request->mobileno,
+                    'amount'      => $payableAmount,
+                    'paid'        => $payableAmount,
+                    'token'       => $purchasedPin,
+                    'serial'      => $serialNumber,
+                    'network'     => strtoupper($examName),
+                    'serviceName' => strtoupper($examName) . ' Pin Purchase',
+                    'date'        => now()->toDateTimeString(),
                 ]);
 
             } catch (\Exception $e) {

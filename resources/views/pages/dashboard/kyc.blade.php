@@ -30,7 +30,7 @@
                                 <div class="col-md-4">
                                     <div class="form-floating">
                                         <input type="text" class="form-control" id="first_name" name="first_name" 
-                                            value="{{ old('first_name', Auth::user()->first_name) }}" required
+                                            value="{{ old('first_name', Auth::user()->first_name) }}" {{ Auth::user()->first_name ? '' : 'required' }}
                                             placeholder="First Name">
                                         <label for="first_name">First Name</label>
                                     </div>
@@ -39,7 +39,7 @@
                                 <div class="col-md-4">
                                     <div class="form-floating">
                                         <input type="text" class="form-control" id="last_name" name="last_name"
-                                            value="{{ old('last_name', Auth::user()->last_name ?? '') }}" required
+                                            value="{{ old('last_name', Auth::user()->last_name ?? '') }}" {{ Auth::user()->last_name ? '' : 'required' }}
                                             placeholder="Last Name">
                                         <label for="last_name">Last Name</label>
                                     </div>
@@ -57,7 +57,7 @@
                                 <div class="col-md-6">
                                     <div class="form-floating">
                                         <input type="tel" class="form-control" id="phone_no" name="phone_no"
-                                            value="{{ old('phone_no', Auth::user()->phone_no ?? '') }}" minlength="11" maxlength="11" required
+                                            value="{{ old('phone_no', Auth::user()->phone_no ?? '') }}" minlength="11" maxlength="11" {{ Auth::user()->phone_no ? '' : 'required' }}
                                             placeholder="Phone Number">
                                         <label for="phone_no">Phone Number</label>
                                     </div>
@@ -77,7 +77,7 @@
                                 <div class="col-md-4">
                                     <div class="mb-3">
                                         <label class="form-label fw-semibold" for="state">State <span class="text-danger">*</span></label>
-                                        <select class="form-select" id="state" name="state" required>
+                                        <select class="form-select" id="state" name="state" {{ Auth::user()->state ? '' : 'required' }}>
                                             <option value="" disabled {{ old('state', Auth::user()->state ?? '') == '' ? 'selected' : '' }}>Choose State</option>
                                             @php
                                                 $states = [
@@ -101,7 +101,7 @@
                                 <div class="col-md-4">
                                     <div class="mb-3">
                                         <label class="form-label fw-semibold" for="lga">LGA <span class="text-danger">*</span></label>
-                                        <select class="form-select" id="lga" name="lga" required>
+                                        <select class="form-select" id="lga" name="lga" {{ Auth::user()->lga ? '' : 'required' }}>
                                             <option value="" disabled selected>Select State First</option>
                                         </select>
                                         <div class="invalid-feedback">Please select your LGA.</div>
@@ -112,7 +112,7 @@
                                     <div class="mb-3">
                                         <label class="form-label fw-semibold" for="address">Address <span class="text-danger">*</span></label>
                                         <input type="text" class="form-control" id="address" name="address"
-                                            value="{{ old('address', Auth::user()->address ?? '') }}" required
+                                            value="{{ old('address', Auth::user()->address ?? '') }}" {{ Auth::user()->address ? '' : 'required' }}
                                             placeholder="Enter your address">
                                     </div>
                                 </div>
@@ -132,7 +132,7 @@
                                 <div class="col-md-6">
                                     <div class="form-floating">
                                         <input type="text" class="form-control" id="bvn" name="bvn"
-                                            value="{{ old('bvn', Auth::user()->bvn ?? '') }}" required maxlength="11"
+                                            value="{{ old('bvn', Auth::user()->bvn ?? '') }}" {{ Auth::user()->bvn ? '' : 'required' }} maxlength="11"
                                             placeholder="BVN Number">
                                         <label for="bvn">BVN Number</label>
                                     </div>
@@ -153,7 +153,7 @@
                                 <div class="col-md-6">
                                     <div class="form-floating">
                                         <input type="password" class="form-control" id="transaction_pin" name="pin"
-                                            inputmode="numeric" pattern="[0-9]{5}" minlength="5" maxlength="5" required
+                                            inputmode="numeric" pattern="[0-9]{5}" minlength="5" maxlength="5" {{ Auth::user()->pin ? '' : 'required' }}
                                             placeholder="5-digit PIN" aria-describedby="pinHelp">
                                         <label for="transaction_pin">5-digit Transaction PIN</label>
                                     </div>

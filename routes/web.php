@@ -64,11 +64,13 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/profile/pin', [ProfileController::class, 'updatePin'])->name('profile.pin');
 
 
-    Route::prefix('wallet')->group(function () {
-        Route::get('/', [WalletController::class, 'index'])->name('wallet');
-        Route::post('/create-virtual-account', [WalletController::class, 'createWallet'])->name('virtual.account.create');
-        Route::post('/claim-bonus', [WalletController::class, 'claimBonus'])->name('wallet.claimBonus');
-    });
+    Route::middleware(['kyc.completed'])->group(function () {
+
+        Route::prefix('wallet')->group(function () {
+            Route::get('/', [WalletController::class, 'index'])->name('wallet');
+            Route::post('/create-virtual-account', [WalletController::class, 'createWallet'])->name('virtual.account.create');
+            Route::post('/claim-bonus', [WalletController::class, 'claimBonus'])->name('wallet.claimBonus');
+        });
 
 
     /*
@@ -347,6 +349,8 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/sync-banks', [\App\Http\Controllers\Action\WithdrawController::class, 'syncBanks'])->name('syncBanks');
         Route::post('/verify-account', [\App\Http\Controllers\Action\WithdrawController::class, 'verifyAccount'])->name('verifyAccount');
         Route::post('/process', [\App\Http\Controllers\Action\WithdrawController::class, 'processWithdrawal'])->name('process');
+    });
+
     });
 
 });

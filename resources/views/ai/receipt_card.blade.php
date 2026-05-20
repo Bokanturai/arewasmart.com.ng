@@ -42,6 +42,28 @@
             </div>
         </div>
 
+        {{-- Educational PIN & Serial block --}}
+        @if(!empty($token) && $token !== 'Check History')
+        <div class="mt-2 rounded-3 overflow-hidden border" style="border-color: #4f46e5 !important;">
+            <div class="px-2 py-1 d-flex align-items-center gap-1" style="background: linear-gradient(90deg,#4f46e5,#7c3aed);">
+                <i class="bi bi-shield-lock-fill text-white" style="font-size: 0.7rem;"></i>
+                <span class="text-white fw-bold" style="font-size: 9px; letter-spacing: 0.05em;">{{ strtoupper($network ?? 'EXAM') }} PIN</span>
+            </div>
+            <div class="px-2 py-2" style="background: #f0f0ff;">
+                <div style="font-size: 9px; color: #6b7280; text-transform: uppercase; letter-spacing: 0.05em;">PIN / Access Code</div>
+                <div class="font-monospace fw-bold text-dark" style="font-size: 13px; letter-spacing: 1.5px; word-break: break-all;">{{ $token }}</div>
+                @if(!empty($serial))
+                <div class="mt-1 pt-1 border-top" style="border-color: #d1d5db !important;">
+                    <div style="font-size: 9px; color: #6b7280; text-transform: uppercase; letter-spacing: 0.05em;">Serial Number</div>
+                    <div class="font-monospace text-secondary fw-semibold" style="font-size: 11px; letter-spacing: 1px; word-break: break-all;">{{ $serial }}</div>
+                </div>
+                @else
+                <div class="mt-1" style="font-size: 9px; color: #9ca3af; font-style: italic;">Serial not provided by provider.</div>
+                @endif
+            </div>
+        </div>
+        @endif
+
         <div class="d-grid gap-2 mt-3">
             <button onclick="downloadChatReceipt('{{ $ref }}')" class="btn btn-sm btn-primary py-2 rounded-3 shadow-sm fw-bold" style="font-size: 11px;">
                 <i class="bi bi-download me-1"></i> Download PDF

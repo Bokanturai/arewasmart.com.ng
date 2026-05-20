@@ -678,3 +678,61 @@ Template Name: Smarthr - Bootstrap Admin Template
 	if($('#edit_customleave_select').length > 0) {
 		$('#edit_customleave_select').multiselect();
 	}
+
+	// Active connection drop monitoring: Redirect active users to the premium offline page
+	window.addEventListener('offline', function() {
+		if (!window.location.pathname.includes('/ofline/')) {
+			// Save the current URL to session storage so they can resume once connection is restored
+			sessionStorage.setItem('offline_fallback_url', window.location.href);
+			window.location.href = '/ofline/index.html';
+		}
+	});
+
+	// PWA Cache Privacy Guard: Erase all stored caches dynamically on logout for security
+	$(document).on('click submit', 'a[href*="logout"], button[form*="logout"], form[action*="logout"]', function() {
+		if ('serviceWorker' in navigator) {
+			caches.keys().then(names => {
+				for (let name of names) {
+					caches.delete(name);
+				}
+			});
+			console.log('Session cache cleared successfully.');
+		}
+	});
+
+	// Automatic Session Verification: Detects expired sessions instantly on focus or load and redirects to login
+	function checkSessionStatus() {
+		// Only check if we are not already on the login or offline page
+		if (window.location.pathname.includes('/login') || window.location.pathname.includes('/ofline/')) {
+			return;
+		}
+
+		// Perform a lightweight check by fetching the current page via AJAX with X-Requested-With
+		fetch(window.location.href, {
+			method: 'GET',
+			headers: {
+				'X-Requested-With': 'XMLHttpRequest'
+			}
+		}).then(response => {
+			// If Laravel redirects AJAX to login, or returns a 401/419 status, the session is expired
+			if (response.redirected && response.url.includes('/login')) {
+				window.location.href = response.url;
+			} else if (response.status === 401 || response.status === 419) {
+				window.location.href = '/login';
+			}
+		}).catch(err => {
+			console.log('Session status check skipped (offline).');
+		});
+	}
+
+	// Trigger session status check on initial page load
+	$(document).ready(function() {
+		checkSessionStatus();
+	});
+
+	// Trigger whenever the app is reopened, focused, or switched back to
+	document.addEventListener('visibilitychange', function() {
+		if (document.visibilityState === 'visible') {
+			checkSessionStatus();
+		}
+	});

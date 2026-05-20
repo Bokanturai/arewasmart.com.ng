@@ -2,6 +2,13 @@
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 <head>
     @include('layouts.partials.head')
+    <script>
+        /* Global Safety Net — Silently absorbs unhandled Promise rejections */
+        window.addEventListener('unhandledrejection', function(event) {
+            console.warn('[Arewa Smart] Unhandled promise rejection suppressed:', event.reason);
+            event.preventDefault();
+        });
+    </script>
     <style>
         :root {
             /* Project Branding Tokens */
@@ -50,17 +57,6 @@
             position: relative;
         }
 
-        .auth-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 3px;
-            background: var(--auth-primary);
-            border-top-left-radius: var(--auth-card-radius);
-            border-top-right-radius: var(--auth-card-radius);
-        }
 
         .auth-logo {
             text-align: center;

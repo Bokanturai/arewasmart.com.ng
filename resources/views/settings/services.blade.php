@@ -670,8 +670,30 @@
                     const formData = new FormData(photoForm);
                     formData.set('photo', blob, 'profile.jpg');
                     fetch(photoForm.action, { method: 'POST', body: formData, headers: { 'X-Requested-With': 'XMLHttpRequest' }})
-                    .then(response => response.ok ? window.location.reload() : alert('Failed'))
-                    .catch(() => alert('Error uploading profile'));
+                    .then(response => {
+                        if (response.ok) {
+                            window.location.reload();
+                        } else {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Upload Failed',
+                                text: 'Failed to upload profile picture.',
+                                confirmButtonColor: '#ffc107',
+                            });
+                            this.innerHTML = 'Save';
+                            this.disabled = false;
+                        }
+                    })
+                    .catch(() => {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Upload Error',
+                            text: 'Error occurred while uploading profile picture.',
+                            confirmButtonColor: '#ffc107',
+                        });
+                        this.innerHTML = 'Save';
+                        this.disabled = false;
+                    });
                 }, 'image/jpeg', 0.9);
             });
         }

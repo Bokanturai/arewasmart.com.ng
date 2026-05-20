@@ -739,7 +739,12 @@
             proceedAttestationBtn.addEventListener('click', function () {
                 const ninInput = document.querySelector('input[name="nin"]');
                 if (!ninInput.value || ninInput.value.length !== 11) {
-                    alert('Please enter a valid 11-digit NIN first.');
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Invalid NIN',
+                        text: 'Please enter a valid 11-digit NIN first.',
+                        confirmButtonColor: '#ffc107',
+                    });
                     ninInput.focus();
                     return;
                 }
@@ -791,7 +796,12 @@
                         currentStep.classList.add('d-none');
                         document.getElementById(nextStepId).classList.remove('d-none');
                     } else {
-                        alert('Please fill all required fields in this step.');
+                        Swal.fire({
+                            icon: 'warning',
+                            title: 'Incomplete Fields',
+                            text: 'Please fill all required fields in this step.',
+                            confirmButtonColor: '#ffc107',
+                        });
                     }
                 });
             });

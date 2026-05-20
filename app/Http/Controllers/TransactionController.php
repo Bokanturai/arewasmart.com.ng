@@ -70,6 +70,7 @@ class TransactionController extends Controller
         $data = [
             'ref' => $ref ?? 'N/A',
             'token' => session('token'),
+            'serial' => session('serial'),
             'amount' => session('amount') ?? 0,
             'paid' => session('paid') ?? session('amount') ?? 0,
             'network' => session('network') ?? 'N/A',
@@ -98,7 +99,8 @@ class TransactionController extends Controller
                 } else {
                     $data['network'] = $meta['network'] ?? $data['network'];
                     $data['mobile'] = $meta['phone_number'] ?? $meta['account_number'] ?? $data['mobile'];
-                    $data['token'] = $meta['token'] ?? $data['token'];
+                    $data['token'] = $meta['token'] ?? $meta['purchased_code'] ?? $meta['purchased_pin'] ?? $data['token'];
+                    $data['serial'] = $meta['serial_number'] ?? $data['serial'];
 
                     // Dynamic Service Name identification
                     if ($data['token']) {

@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Connection Lost | Arewa Smart</title>
+    <!-- Nunito Sans Google Font (matches application default) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <!-- Font Awesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --primary: #d37102;
+            --primary-rgb: 211, 113, 2;
+            --transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+            
+            /* Light Theme Tokens */
+            --bg-gradient: linear-gradient(135deg, #f5f7fa 0%, #e4e8f0 100%);
+            --card-bg: rgba(255, 255, 255, 0.8);
+            --card-border: rgba(255, 255, 255, 0.6);
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+            --card-shadow: 0 20px 40px rgba(0, 0, 0, 0.06);
+            --glass-blur: blur(16px);
+        }
+
+        /* Dark Mode overrides */
+        [data-theme="dark"] {
+            --bg-gradient: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            --card-bg: rgba(30, 41, 59, 0.7);
+            --card-border: rgba(255, 255, 255, 0.08);
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --card-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Nunito Sans', sans-serif;
+            background: var(--bg-gradient);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1.5rem;
+            overflow: hidden;
+            transition: background 0.5s ease;
+        }
+
+        /* Ambient glowing background circles for high-end look */
+        .ambient-glow {
+            position: absolute;
+            width: 300px;
+            height: 300px;
+            border-radius: 50%;
+            background: rgba(var(--primary-rgb), 0.15);
+            filter: blur(80px);
+            z-index: 1;
+            pointer-events: none;
+            animation: floatGlow 10s ease-in-out infinite alternate;
+        }
+
+        .glow-1 {
+            top: 10%;
+            left: 10%;
+        }
+
+        .glow-2 {
+            bottom: 10%;
+            right: 10%;
+            background: rgba(255, 193, 7, 0.1);
+            animation-delay: -5s;
+        }
+
+        @keyframes floatGlow {
+            0% { transform: translate(0, 0) scale(1); }
+            100% { transform: translate(30px, 40px) scale(1.2); }
+        }
+
+        /* Offline Container Card */
+        .offline-card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 24px;
+            box-shadow: var(--card-shadow);
+            backdrop-filter: var(--glass-blur);
+            -webkit-backdrop-filter: var(--glass-blur);
+            width: 100%;
+            max-width: 520px;
+            padding: 3rem 2.5rem;
+            text-align: center;
+            z-index: 10;
+            position: relative;
+            animation: cardEntrance 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+            overflow: hidden;
+        }
+
+        @keyframes cardEntrance {
+            from {
+                opacity: 0;
+                transform: translateY(40px) scale(0.96);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        /* Media Header Container with tom.png */
+        .image-container {
+            position: relative;
+            margin: 0 auto 2rem;
+            width: 180px;
+            height: 180px;
+            border-radius: 50%;
+            background: rgba(var(--primary-rgb), 0.08);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.05);
+            animation: pulseImage 3s ease-in-out infinite;
+        }
+
+        .image-container img {
+            width: 85%;
+            height: 85%;
+            object-fit: contain;
+            transition: var(--transition);
+            filter: drop-shadow(0 10px 15px rgba(0,0,0,0.12));
+        }
+
+        .image-container:hover img {
+            transform: scale(1.08) rotate(3deg);
+        }
+
+        @keyframes pulseImage {
+            0% { box-shadow: 0 0 0 0 rgba(var(--primary-rgb), 0.15), inset 0 2px 10px rgba(0,0,0,0.05); }
+            70% { box-shadow: 0 0 0 20px rgba(var(--primary-rgb), 0), inset 0 2px 10px rgba(0,0,0,0.05); }
+            100% { box-shadow: 0 0 0 0 rgba(var(--primary-rgb), 0), inset 0 2px 10px rgba(0,0,0,0.05); }
+        }
+
+        /* Decorative Badge */
+        .offline-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: rgba(239, 68, 68, 0.1);
+            color: #ef4444;
+            padding: 0.4rem 1rem;
+            border-radius: 100px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            animation: blink 2s ease-in-out infinite;
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.75; }
+        }
+
+        /* Typography */
+        h1 {
+            font-size: 2rem;
+            font-weight: 800;
+            color: var(--text-main);
+            margin-bottom: 0.75rem;
+            letter-spacing: -0.5px;
+        }
+
+        p {
+            font-size: 1rem;
+            color: var(--text-muted);
+            line-height: 1.6;
+            margin-bottom: 2.2rem;
+        }
+
+        /* Premium Action Button */
+        .btn-retry {
+            width: 100%;
+            background: var(--primary);
+            color: #ffffff;
+            border: none;
+            padding: 1rem 2rem;
+            font-size: 1.05rem;
+            font-weight: 700;
+            border-radius: 14px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+            box-shadow: 0 10px 25px rgba(var(--primary-rgb), 0.25);
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-retry:hover {
+            background: #b56102;
+            transform: translateY(-2px);
+            box-shadow: 0 12px 28px rgba(var(--primary-rgb), 0.35);
+        }
+
+        .btn-retry:active {
+            transform: translateY(0);
+        }
+
+        .btn-retry .spinner {
+            display: none;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: #ffffff;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Sleek Status Toast */
+        .toast {
+            position: fixed;
+            bottom: 2rem;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background: #1e293b;
+            color: #ffffff;
+            padding: 0.9rem 1.8rem;
+            border-radius: 12px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.25);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            z-index: 100;
+            opacity: 0;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            pointer-events: none;
+        }
+
+        .toast.show {
+            transform: translateX(-50%) translateY(0);
+            opacity: 1;
+        }
+
+        .toast i {
+            color: #ef4444;
+        }
+
+        .toast.success i {
+            color: #10b981;
+        }
+
+        /* Mini-Footer */
+        .offline-footer {
+            margin-top: 2rem;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            letter-spacing: 0.5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="ambient-glow glow-1"></div>
+    <div class="ambient-glow glow-2"></div>
+
+    <div class="offline-card">
+        <div class="offline-badge">
+            <i class="fa-solid fa-wifi-slash"></i> Offline Mode
+        </div>
+
+        <div class="image-container">
+            <!-- tom.png placed inside as requested -->
+            <img src="/assets/img/bg/tom.png" alt="Tom and Jerry Connecting...">
+        </div>
+
+        <h1 id="title-text">Connection Lost</h1>
+        <p id="msg-text">
+            It looks like you've disconnected from the internet. We'll automatically reconnect you as soon as your network is back, or you can try manually reloading.
+        </p>
+
+        <button class="btn-retry" id="retry-btn" onclick="retryConnection()">
+            <span class="spinner" id="btn-spinner"></span>
+            <span id="btn-text"><i class="fa-solid fa-rotate-right me-1"></i> Retry Connection</span>
+        </button>
+
+        <div class="offline-footer">
+            Arewa Smart Idea &copy; <span id="year"></span>
+        </div>
+    </div>
+
+    <!-- Alert Toast -->
+    <div class="toast" id="status-toast">
+        <i id="toast-icon" class="fa-solid fa-circle-exclamation"></i>
+        <span id="toast-msg">Still offline. Checking your network...</span>
+    </div>
+
+    <script>
+        // Set Theme dynamically based on user setting
+        (function() {
+            const savedTheme = localStorage.getItem('theme') || 'light';
+            document.documentElement.setAttribute('data-theme', savedTheme);
+        })();
+
+        // Auto Year
+        document.getElementById('year').textContent = new Date().getFullYear();
+
+        // Helper to display clean premium notification toasts
+        function showToast(message, isSuccess = false) {
+            const toast = document.getElementById('status-toast');
+            const icon = document.getElementById('toast-icon');
+            const msgSpan = document.getElementById('toast-msg');
+
+            msgSpan.textContent = message;
+            if (isSuccess) {
+                toast.classList.add('success');
+                icon.className = 'fa-solid fa-circle-check';
+            } else {
+                toast.classList.remove('success');
+                icon.className = 'fa-solid fa-circle-exclamation';
+            }
+
+            toast.classList.add('show');
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+
+        // Active offline checking
+        async function verifyConnection() {
+            try {
+                // Ping a standard static resource with a cache-busting query parameter
+                const response = await fetch('/manifest.json?t=' + Date.now(), {
+                    method: 'HEAD',
+                    cache: 'no-store'
+                });
+                return response.ok;
+            } catch (e) {
+                return false;
+            }
+        }
+
+        // Triggered when button is clicked
+        async function retryConnection() {
+            const btn = document.getElementById('retry-btn');
+            const spinner = document.getElementById('btn-spinner');
+            const btnText = document.getElementById('btn-text');
+
+            // Prevent multiple parallel checks
+            if (btn.disabled) return;
+
+            btn.disabled = true;
+            spinner.style.display = 'inline-block';
+            btnText.textContent = 'Verifying connection...';
+
+            const isOnline = await verifyConnection();
+
+            setTimeout(() => {
+                if (isOnline) {
+                    spinner.style.display = 'none';
+                    btnText.innerHTML = '<i class="fa-solid fa-circle-check"></i> Connected!';
+                    btn.style.background = '#10b981';
+                    showToast('Successfully reconnected! Loading page...', true);
+                    
+                    setTimeout(() => {
+                        // Redirect back to the previous page or root
+                        const fallbackUrl = sessionStorage.getItem('offline_fallback_url') || '/';
+                        sessionStorage.removeItem('offline_fallback_url');
+                        window.location.href = fallbackUrl;
+                    }, 1200);
+                } else {
+                    spinner.style.display = 'none';
+                    btnText.innerHTML = '<i class="fa-solid fa-rotate-right"></i> Retry Connection';
+                    btn.disabled = false;
+                    showToast('Still offline. Please check your internet connection.');
+                }
+            }, 800);
+        }
+
+        // Standard event listener for natural browser reconnects
+        window.addEventListener('online', function() {
+            const title = document.getElementById('title-text');
+            const msg = document.getElementById('msg-text');
+            const btn = document.getElementById('retry-btn');
+
+            title.textContent = 'Connection Restored!';
+            msg.textContent = 'Welcome back! We are returning you to Arewa Smart.';
+            btn.style.background = '#10b981';
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner" style="display:inline-block"></span> Reconnecting...';
+
+            showToast('Connection restored! Reconnecting...', true);
+            setTimeout(() => {
+                const fallbackUrl = sessionStorage.getItem('offline_fallback_url') || '/';
+                sessionStorage.removeItem('offline_fallback_url');
+                window.location.href = fallbackUrl;
+            }, 1500);
+        });
+    </script>
+</body>
+</html>

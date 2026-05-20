@@ -6,6 +6,7 @@ use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 
 class User extends Authenticatable implements MustVerifyEmail
 {
@@ -59,6 +60,7 @@ class User extends Authenticatable implements MustVerifyEmail
     protected $hidden = [
         'password',
         'remember_token',
+        'pin',
     ];
 
     /**
@@ -74,6 +76,49 @@ class User extends Authenticatable implements MustVerifyEmail
         ];
     }
 
+    /**
+     * Get or set the user's BVN securely and with backward-compatibility.
+     */
+    protected function bvn(): Attribute
+    {
+        return Attribute::make(
+            get: function (?string $value) {
+                if (empty($value)) return $value;
+                try {
+                    return decrypt($value);
+                } catch (\Exception $e) {
+                    // Fallback to raw value if it is not encrypted (backward compatibility)
+                    return $value;
+                }
+            },
+            set: function (?string $value) {
+                if (empty($value)) return $value;
+                return encrypt($value);
+            }
+        );
+    }
+
+    /**
+     * Get or set the user's NIN securely and with backward-compatibility.
+     */
+    protected function nin(): Attribute
+    {
+        return Attribute::make(
+            get: function (?string $value) {
+                if (empty($value)) return $value;
+                try {
+                    return decrypt($value);
+                } catch (\Exception $e) {
+                    // Fallback to raw value if it is not encrypted (backward compatibility)
+                    return $value;
+                }
+            },
+            set: function (?string $value) {
+                if (empty($value)) return $value;
+                return encrypt($value);
+            }
+        );
+    }
 
     public function wallet()
     {

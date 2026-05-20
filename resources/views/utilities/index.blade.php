@@ -379,16 +379,31 @@
                     const network = selectedNetworkInput.value;
 
                     if (!number || number.length < 11) {
-                        alert('Please enter a valid 11-digit phone number.');
+                        Swal.fire({
+                            icon: 'warning',
+                            title: 'Invalid Phone Number',
+                            text: 'Please enter a valid 11-digit phone number.',
+                            confirmButtonColor: '#ffc107',
+                        });
                         phoneInput.focus();
                         return;
                     }
                     if (!network) {
-                        alert('Please select a network operator.');
+                        Swal.fire({
+                            icon: 'warning',
+                            title: 'Select Operator',
+                            text: 'Please select a network operator.',
+                            confirmButtonColor: '#ffc107',
+                        });
                         return;
                     }
                     if (!amount || amount < 50) {
-                        alert('Minimum recharge is ₦50.');
+                        Swal.fire({
+                            icon: 'warning',
+                            title: 'Invalid Amount',
+                            text: 'Minimum recharge is ₦50.',
+                            confirmButtonColor: '#ffc107',
+                        });
                         amountInput.focus();
                         return;
                     }
@@ -434,7 +449,7 @@
                         return;
                     }
 
-                    this.disabled = true;
+                    confirmPinBtn.disabled = true;
                     const loader = document.getElementById('pinLoader');
                     const btnText = document.getElementById('confirmPinText');
                     if (loader) loader.classList.remove('d-none');
@@ -461,15 +476,16 @@
                         } else {
                             if (pinErrorText) pinErrorText.textContent = 'Incorrect PIN. Try again.';
                             if (pinError) pinError.classList.remove('d-none');
-                            this.disabled = false;
+                            confirmPinBtn.disabled = false;
                             if (loader) loader.classList.add('d-none');
                             if (btnText) btnText.textContent = 'Authorize Now';
                             document.getElementById('pinInput').value = '';
                         }
                     })
                     .catch(() => {
-                        alert('Network error. Please try again.');
-                        this.disabled = false;
+                        if (pinErrorText) pinErrorText.textContent = 'Network error. Please try again.';
+                        if (pinError) pinError.classList.remove('d-none');
+                        confirmPinBtn.disabled = false;
                         if (loader) loader.classList.add('d-none');
                         if (btnText) btnText.textContent = 'Authorize Now';
                     });

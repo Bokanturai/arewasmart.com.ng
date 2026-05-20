@@ -365,7 +365,7 @@
                 }
 
                 // Show loading on btn
-                this.disabled = true;
+                confirmBtn.disabled = true;
                 const ldr = document.getElementById('pinLoader');
                 const ico = document.getElementById('pinBtnIcon');
                 const txt = document.getElementById('confirmPinText');
@@ -387,7 +387,7 @@
                         const errText = document.getElementById('pinErrorText');
                         if (errEl) errEl.classList.remove('d-none');
                         if (errText) errText.textContent = 'Incorrect Transaction PIN.';
-                        this.disabled = false;
+                        confirmBtn.disabled = false;
                         if (ldr) ldr.classList.add('d-none');
                         if (ico) ico.classList.remove('d-none');
                         if (txt) txt.textContent = 'Authorize Now';
@@ -442,8 +442,17 @@
 
                 } catch (err) {
                     console.error("Auth Error", err);
-                    alert("Authorization failed. Please try again.");
-                    this.disabled = false;
+                    const errEl = document.getElementById('pinError');
+                    const errText = document.getElementById('pinErrorText');
+                    if (errEl) errEl.classList.remove('d-none');
+                    if (errText) errText.textContent = 'Authorization failed. Please try again.';
+                    confirmBtn.disabled = false;
+                    const ldr = document.getElementById('pinLoader');
+                    const ico = document.getElementById('pinBtnIcon');
+                    const txt = document.getElementById('confirmPinText');
+                    if (ldr) ldr.classList.add('d-none');
+                    if (ico) ico.classList.remove('d-none');
+                    if (txt) txt.textContent = 'Authorize Now';
                 }
             };
         }
@@ -619,7 +628,12 @@
             }
         } catch (err) {
             console.error("PDF Error", err);
-            alert("Failed to generate PDF. You can use 'Full Receipt' to download from the main page.");
+            Swal.fire({
+                icon: 'error',
+                title: 'PDF Generation Failed',
+                text: "Failed to generate PDF. You can use 'Full Receipt' to download from the main page.",
+                confirmButtonColor: '#ffc107',
+            });
         } finally {
             btns.style.display = 'grid';
         }

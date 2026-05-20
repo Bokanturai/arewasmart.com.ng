@@ -305,12 +305,22 @@
         document.getElementById('proceedBtn').addEventListener('click', function() {
             const amount = document.getElementById('amount').value;
             if (!amount || amount <= 0) {
-                alert('Please enter a valid amount.');
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Invalid Amount',
+                    text: 'Please enter a valid amount.',
+                    confirmButtonColor: '#ffc107',
+                });
                 return;
             }
 
             if (!verifiedRecipient) {
-                alert('Please verify the recipient first.');
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Recipient Not Verified',
+                    text: 'Please verify the recipient first.',
+                    confirmButtonColor: '#ffc107',
+                });
                 return;
             }
 
