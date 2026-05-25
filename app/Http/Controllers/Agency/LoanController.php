@@ -6,7 +6,6 @@ use App\Http\Controllers\Controller;
 use App\Models\AgentService;
 use App\Models\Service;
 use App\Models\ServiceField;
-use App\Models\ServicePrice;
 use App\Models\Transaction;
 use App\Models\Wallet;
 use Illuminate\Http\Request;
@@ -16,169 +15,6 @@ use Illuminate\Support\Str;
 
 class LoanController extends Controller
 {
-    /**
-     * Default loan types with per-role qualifying amounts.
-     *
-     * Each entry becomes a ServiceField under the "Loan" service.
-     * The 'prices' array maps user role → max qualifying loan amount (₦).
-     * These are ONLY used when auto-creating missing records; admins can
-     * override amounts directly in the service_prices table at any time.
-     */
-    private const DEFAULT_LOAN_TYPES = [
-        [
-            'field_name'  => 'Solar Loan',
-            'field_code'  => 'LOAN-SOLAR',
-            'base_price'  => 100_000,
-            'description' => 'Finance solar energy systems for your home or business.',
-            'prices'      => [
-                'personal'    => 100_000,
-                'agent'       => 200_000,
-                'business'    => 500_000,
-                'partner'     => 500_000,
-                'staff'       => 1_000_000,
-                'checker'     => 1_000_000,
-                'super_admin' => 2_000_000,
-            ],
-        ],
-        [
-            'field_name'  => 'School Fees Loan',
-            'field_code'  => 'LOAN-SCHOOL',
-            'base_price'  => 50_000,
-            'description' => 'Cover tuition and educational expenses with ease.',
-            'prices'      => [
-                'personal'    => 50_000,
-                'agent'       => 100_000,
-                'business'    => 300_000,
-                'partner'     => 300_000,
-                'staff'       => 500_000,
-                'checker'     => 500_000,
-                'super_admin' => 1_000_000,
-            ],
-        ],
-        [
-            'field_name'  => 'Business Loan',
-            'field_code'  => 'LOAN-BUSINESS',
-            'base_price'  => 200_000,
-            'description' => 'Grow your business with flexible 0% interest financing.',
-            'prices'      => [
-                'personal'    => 100_000,
-                'agent'       => 300_000,
-                'business'    => 1_000_000,
-                'partner'     => 1_000_000,
-                'staff'       => 1_500_000,
-                'checker'     => 1_500_000,
-                'super_admin' => 2_000_000,
-            ],
-        ],
-        [
-            'field_name'  => 'Emergency Loan',
-            'field_code'  => 'LOAN-EMERGENCY',
-            'base_price'  => 30_000,
-            'description' => 'Quick access to funds for urgent personal needs.',
-            'prices'      => [
-                'personal'    => 30_000,
-                'agent'       => 80_000,
-                'business'    => 150_000,
-                'partner'     => 200_000,
-                'staff'       => 300_000,
-                'checker'     => 300_000,
-                'super_admin' => 500_000,
-            ],
-        ],
-        [
-            'field_name'  => 'Asset Finance Loan',
-            'field_code'  => 'LOAN-ASSET',
-            'base_price'  => 150_000,
-            'description' => 'Purchase equipment, devices, or business assets.',
-            'prices'      => [
-                'personal'    => 80_000,
-                'agent'       => 200_000,
-                'business'    => 500_000,
-                'partner'     => 750_000,
-                'staff'       => 1_000_000,
-                'checker'     => 1_000_000,
-                'super_admin' => 2_000_000,
-            ],
-        ],
-        [
-            'field_name'  => 'Loan Interest',
-            'field_code'  => 'LOAN-INTEREST',
-            'base_price'  => 20,
-            'description' => 'Interest rate for loan calculations (%).',
-            'prices'      => [
-                'personal'    => 20,
-                'agent'       => 20,
-                'business'    => 20,
-                'partner'     => 20,
-                'staff'       => 20,
-                'checker'     => 20,
-                'super_admin' => 20,
-            ],
-        ],
-    ];
-
-    // ────────────────────────────────────────────────────────────────────────────
-
-    /**
-     * Auto-create the Loan service, loan type fields, and per-role qualifying
-     * amounts if they do not already exist in the database.
-     *
-     * Uses firstOrCreate throughout — completely safe to call on every page load.
-     * Returns the Service model.
-     */
-    private function ensureLoanServiceExists(): Service
-    {
-        // 1. Create or fetch the Loan service
-        $service = Service::firstOrCreate(
-            ['name' => 'Loan'],
-            [
-                'description' => '0% Interest Loan Facility for Arewa Smart Users',
-                'is_active'   => true,
-            ]
-        );
-
-        // Reactivate if it was disabled
-        if (!$service->is_active) {
-            $service->update(['is_active' => true]);
-        }
-
-        // 2. Create each loan type (ServiceField) + prices (ServicePrice)
-        foreach (self::DEFAULT_LOAN_TYPES as $loanType) {
-            $field = ServiceField::firstOrCreate(
-                [
-                    'service_id' => $service->id,
-                    'field_code' => $loanType['field_code'],
-                ],
-                [
-                    'field_name'  => $loanType['field_name'],
-                    'base_price'  => $loanType['base_price'],
-                    'description' => $loanType['description'],
-                    'is_active'   => true,
-                ]
-            );
-
-            if (!$field->is_active) {
-                $field->update(['is_active' => true]);
-            }
-
-            // Create per-role qualifying amounts (price = max loan amount for that role)
-            foreach ($loanType['prices'] as $userType => $qualifyingAmount) {
-                ServicePrice::firstOrCreate(
-                    [
-                        'service_id'        => $service->id,
-                        'service_fields_id' => $field->id,
-                        'user_type'         => $userType,
-                    ],
-                    ['price' => $qualifyingAmount]
-                );
-            }
-        }
-
-        return $service;
-    }
-
-    // ────────────────────────────────────────────────────────────────────────────
-
     /**
      * Display the loan application page.
      *
@@ -191,8 +27,14 @@ class LoanController extends Controller
         $user = Auth::user();
         $role = $user->role ?? 'personal';
 
-        // Auto-create the Loan service + fields + prices if missing
-        $loanService = $this->ensureLoanServiceExists();
+        // Get the Loan service (must already exist from seeder)
+        $loanService = Service::where('name', 'Loan')->first();
+        
+        // If loan service doesn't exist, show error (should be seeded)
+        if (!$loanService) {
+            Log::error('Loan service not found. Please run LoanSeeder.');
+            return back()->with('error', 'Loan service is not configured. Please contact administrator.');
+        }
 
         // Total completed debit volume — shown as the user's activity score
         $totalTransactions = Transaction::where('user_id', $user->id)
@@ -282,8 +124,6 @@ class LoanController extends Controller
             'repayments'
         ));
     }
-
-    // ────────────────────────────────────────────────────────────────────────────
 
     /**
      * Submit a new loan application.
