@@ -23,6 +23,5 @@ class DatabaseSeeder extends Seeder
         ]);
 
         $this->call(SmeDataSeeder::class);
-        $this->call(LoanSeeder::class);
     }
 }
