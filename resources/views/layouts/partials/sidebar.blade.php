@@ -93,7 +93,7 @@
                         <li>
                             <a href="{{ route('withdraw.index') }}"
                                class="{{ request()->routeIs('withdraw.index') ? 'active' : '' }}">
-                                Withdraw to Bank
+                                Transfer to Bank
                             </a>
                         </li>
                     </ul>

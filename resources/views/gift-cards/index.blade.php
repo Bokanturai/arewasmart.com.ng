@@ -873,7 +873,7 @@
                         {{-- Pagination for Created Cards --}}
                         @if($createdCards->hasPages())
                             <div class="pagination-container justify-content-center {{ $isFiltered ? 'd-flex' : 'd-none d-md-flex' }}">
-                                {{ $createdCards->appends(['redeemed_page' => $redeemedCards->currentPage()])->links('pagination::bootstrap-5') }}
+                                {{ $createdCards->appends(['redeemed_page' => $redeemedCards->currentPage()])->links('vendor.pagination.custom') }}
                             </div>
                         @endif
                     @else

@@ -7,47 +7,163 @@
                 <div class="row g-0 g-md-4 align-items-stretch">
                     
                     
-                    <!-- Left Part: Marketing & Encouragement -->
-                    <div class="col-12 col-xl-5 order-2 order-lg-1 mt-2 mt-md-0">
-                        <div class="card border-0 overflow-hidden shadow-sm bg-dark text-white hero-card h-100" style="border-radius: 20px;">
-                            <div class="card-body p-4 p-md-5 d-flex flex-column justify-content-center">
-                                <h1 class="h2 h1-lg fw-bold mb-3 text-primary">Power Up Your Digital Life</h1>
-                                <p class="lead mb-4 opacity-75 small">
-                                    Keep your Arewa Smart wallet funded and never experience a "Low Balance" moment again. 
-                                    Enjoy instant, uninterrupted access to Airtime, Data, and Utility bills at the best rates.
-                                </p>
-                                
-                                <div class="mt-auto">
-                                    <div class="d-flex flex-column gap-3">
-                                        <div class="d-flex align-items-center">
-                                            <div class="bg-primary bg-opacity-25 rounded-circle p-2 me-3">
-                                                <i class="bi bi-lightning-charge-fill text-primary"></i>
+                    <!-- Left Part: Marketing & Bonus -->
+
+                                        <div class="col-12 col-xl-5 order-2 order-lg-1 mt-3 mt-xl-0">
+                                            <div class="d-flex flex-column gap-3 h-100">
+
+                            <!-- Referral/Activity Bonus Card -->
+                            <div class="card border-0 overflow-hidden position-relative transition-all bonus-reward-card @if(isset($walletData) && $walletData['bonus'] > 0) has-bonus @else no-bonus @endif"
+                                 style="min-height: 180px;">
+                                <!-- Decorative circles -->
+                                <div class="position-absolute" style="width: 150px; height: 150px; background: rgba(255,255,255,0.06); border-radius: 50%; top: -30px; right: -30px; pointer-events: none;"></div>
+                                <div class="position-absolute" style="width: 100px; height: 100px; background: rgba(255,255,255,0.04); border-radius: 50%; bottom: -20px; left: -20px; pointer-events: none;"></div>
+
+                                <div class="card-body p-4 d-flex flex-column justify-content-between position-relative z-index-1">
+                                    <div class="d-flex align-items-center justify-content-between mb-3">
+                                        <div class="d-flex align-items-center gap-2">
+                                            <div class="icon-wrapper">
+                                                <i class="bi bi-gift-fill fs-18"></i>
                                             </div>
-                                            <span class="fw-semibold small">Instant Wallet Credit</span>
+                                            <div>
+                                                <h6 class="fw-bold mb-0 text-title small">Rewards & Bonus</h6>
+                                                <span class="badge badge-claimable rounded-pill" style="font-size: 10px;">Claimable Balance</span>
+                                            </div>
                                         </div>
-                                        <div class="d-flex align-items-center">
-                                            <div class="bg-success bg-opacity-25 rounded-circle p-2 me-3">
-                                                <i class="bi bi-shield-check text-success"></i>
-                                            </div>
-                                            <span class="fw-semibold small">Secure & Encrypted Payments</span>
-                                        </div>
-                                        <div class="d-flex align-items-center">
-                                            <div class="bg-info bg-opacity-25 rounded-circle p-2 me-3">
-                                                <i class="bi bi-clock-history text-info"></i>
-                                            </div>
-                                            <span class="fw-semibold small">24/7 Service Availability</span>
+                                        <i class="bi bi-award-fill fs-2 text-title opacity-20"></i>
+                                    </div>
+
+                                    <div class="mb-4">
+                                        <span class="small text-subtitle d-block mb-1">Your Accumulated Bonus Balance</span>
+                                        <div class="d-flex align-items-baseline">
+                                            <span class="fs-24 fw-bold me-1 text-amount">₦{{ number_format($walletData['bonus'] ?? 0, 2) }}</span>
                                         </div>
                                     </div>
-                                </div>
 
-                                <div class="mt-5 d-none d-lg-block">
-                                    <div class="opacity-25 text-end">
-                                        <i class="bi bi-wallet2 display-1"></i>
+                                    <div>
+                                        @if(isset($walletData) && $walletData['bonus'] > 0)
+                                            <form method="POST" action="{{ route('wallet.claimBonus') }}" id="claimBonusForm" class="no-loader">
+                                                @csrf
+                                                <button type="submit" class="btn claim-btn w-100 rounded-pill py-2-5 fw-bold shadow-sm d-flex align-items-center justify-content-center gap-2 transition-all hover-scale"
+                                                        style="font-size: 14px;">
+                                                    <i class="bi bi-wallet2"></i>
+                                                    Claim & Transfer to Main Wallet
+                                                </button>
+                                            </form>
+                                        @else
+                                            <button class="btn claim-btn w-100 rounded-pill py-2-5 fw-bold shadow-sm d-flex align-items-center justify-content-center gap-2"
+                                                    style="font-size: 14px;" disabled>
+                                                <i class="bi bi-lock-fill"></i>
+                                                No Bonus Available to Claim
+                                            </button>
+                                        @endif
                                     </div>
                                 </div>
                             </div>
+
+                            <!-- NEW: Encouragement & Motivation Card -->
+                            <div class="card border-0 overflow-hidden position-relative encouragement-card"
+                                 style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 20px;">
+                                <div class="card-body p-4">
+                                    <!-- Animated icon -->
+                                    <div class="text-center mb-3">
+                                        <div class="position-relative d-inline-block">
+                                            <i class="bi bi-stars fs-1 text-white"></i>
+                                            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-warning" style="font-size: 10px;">
+                                                🔥 HOT
+                                            </span>
+                                        </div>
+                                    </div>
+
+                                    <!-- Main encouragement message -->
+                                    <h5 class="text-white text-center fw-bold mb-2">
+                                        🚀 Turn Transactions into Rewards!
+                                    </h5>
+
+                                    <p class="text-white-50 text-center small mb-3">
+                                        Every transaction brings you closer to amazing bonuses
+                                    </p>
+
+                                    <!-- Bonus tiers/progress -->
+                                    <div class="bg-white bg-opacity-10 rounded-3 p-3 mb-3">
+                                        <div class="d-flex justify-content-between align-items-center mb-2">
+                                            <span class="text-white-50 small">Next Bonus Target</span>
+                                            <span class="text-white fw-bold small">
+                                                ₦{{ number_format($nextBonusTarget ?? 50000, 2) }}
+                                            </span>
+                                        </div>
+                                        <div class="progress mb-2" style="height: 8px; background: rgba(255,255,255,0.2);">
+                                            <div class="progress-bar bg-warning" role="progressbar"
+                                                 style="width: {{ $bonusProgress ?? 0 }}%;"
+                                                 aria-valuenow="{{ $bonusProgress ?? 0 }}"
+                                                 aria-valuemin="0"
+                                                 aria-valuemax="100"></div>
+                                        </div>
+                                        <div class="d-flex justify-content-between">
+                                            <span class="text-white-50 small">Current: ₦{{ number_format($currentSpend ?? 0, 2) }}</span>
+                                            <span class="text-white-50 small">Goal: ₦{{ number_format($bonusTarget ?? 50000, 2) }}</span>
+                                        </div>
+                                    </div>
+
+                                    <!-- Bonus benefits list -->
+                                    <div class="row g-2 mb-3">
+                                        <div class="col-6">
+                                            <div class="bg-white bg-opacity-10 rounded-2 p-2 text-center">
+                                                <i class="bi bi-currency-exchange text-warning me-1" style="font-size: 12px;"></i>
+                                                <small class="text-white">5-10% Cashback</small>
+                                            </div>
+                                        </div>
+                                        <div class="col-6">
+                                            <div class="bg-white bg-opacity-10 rounded-2 p-2 text-center">
+                                                <i class="bi bi-trophy-fill text-warning me-1" style="font-size: 12px;"></i>
+                                                <small class="text-white">Exclusive Badges</small>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Call to action buttons -->
+                                    <div class="d-grid gap-2">
+                                        <a href="{{ route('transactions') }}" class="btn btn-light rounded-pill fw-bold py-2 shadow-sm hover-scale"
+                                           style="background: white; color: #667eea; transition: transform 0.2s;">
+                                            <i class="bi bi-plus-circle-fill me-2"></i>
+                                            Start a Transaction Now!
+                                        </a>
+                                        <a href="#" class="btn btn-outline-light rounded-pill py-2 small">
+                                            <i class="bi bi-info-circle me-1"></i>
+                                            How to earn more bonuses?
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Quick stats: What you're missing -->
+                            @if(!isset($walletData) || $walletData['bonus'] == 0)
+                            <div class="alert alert-warning bg-warning bg-opacity-10 border-0 rounded-3 py-2 px-3 fade show" role="alert">
+                                <div class="d-flex align-items-center">
+                                    <i class="bi bi-exclamation-triangle-fill text-warning me-2"></i>
+                                    <small class="text-warning">
+                                        💡 <strong>Pro tip:</strong> Complete just ₦10,000 more in transactions to unlock ₦500 bonus!
+                                    </small>
+                                </div>
+                            </div>
+                            @endif
+
+                            <!-- Success message for active users -->
+                            @if(isset($walletData) && $walletData['bonus'] > 500)
+                            <div class="alert alert-success bg-success bg-opacity-10 border-0 rounded-3 py-2 px-3 fade show" role="alert">
+                                <div class="d-flex align-items-center">
+                                    <i class="bi bi-emoji-laughing-fill text-success me-2"></i>
+                                    <small class="text-success">
+                                        🎉 Amazing! You've earned <strong>₦{{ number_format($walletData['bonus'] ?? 0, 2) }}</strong> in bonuses this month!
+                                    </small>
+                                </div>
+                            </div>
+                            @endif
+
                         </div>
                     </div>
+
+
 
                     <!-- Right Part: Automatic Wallet Funding -->
                     <div class="col-12 col-xl-7 order-1 order-lg-2">
@@ -55,7 +171,7 @@
                             <div class="card-header border-0 py-3 bg-gradient text-white" style="border-radius: 20px 20px 0 0;">
                                 <div class="d-flex align-items-center">
                                     <div class="bg-white bg-opacity-25 rounded-circle p-2 me-3">
-                                        <i class="bi bi-bank fs-4"></i>
+                                        <i class="bi bi-bank fs-14"></i>
                                     </div>
                                     <h4 class="mb-0 fw-bold">Automatic Funding</h4>
                                 </div>
@@ -209,7 +325,143 @@
                 </div>
             </div>
         </div>
-    </div>
+    <style>
+        /* ==================== Encouragement & Hover Animations ==================== */
+/* Hover effects */
+.hover-scale:hover {
+    transform: scale(0.98);
+    transition: transform 0.2s ease;
+}
+
+.encouragement-card {
+    animation: glow 2s ease-in-out infinite alternate;
+}
+
+@keyframes glow {
+    from {
+        box-shadow: 0 0 10px rgba(102, 126, 234, 0.3);
+    }
+    to {
+        box-shadow: 0 0 20px rgba(102, 126, 234, 0.6);
+    }
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .encouragement-card .card-body {
+        padding: 1rem;
+    }
+    
+    .encouragement-card h5 {
+        font-size: 1rem;
+    }
+    
+    .bg-white.bg-opacity-10 {
+        padding: 0.5rem !important;
+    }
+}
+
+/* Button pulse animation */
+.btn-light:hover {
+    animation: pulse 0.5s ease;
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+}
+
+        /* ==================== Referral & Activity Bonus Card Premium Theme ==================== */
+        .bonus-reward-card {
+            border-radius: 20px !important;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 1px solid rgba(0, 0, 0, 0.05) !important;
+            box-shadow: 0 10px 20px -5px rgba(0, 0, 0, 0.04), 0 6px 6px -6px rgba(0, 0, 0, 0.04) !important;
+        }
+
+        /* ── LIGHT MODE STYLING ── */
+        .bonus-reward-card.has-bonus {
+            background: linear-gradient(135deg, #FFF9E6 0%, #FFEFC2 100%) !important;
+            border: 1px solid rgba(245, 158, 11, 0.18) !important;
+        }
+        .bonus-reward-card.no-bonus {
+            background: linear-gradient(135deg, #F8F9FA 0%, #E9ECEF 100%) !important;
+            border: 1px solid rgba(0, 0, 0, 0.04) !important;
+        }
+
+        .bonus-reward-card.has-bonus .text-title { color: #854d0e !important; }
+        .bonus-reward-card.has-bonus .text-subtitle { color: #a16207 !important; }
+        .bonus-reward-card.has-bonus .text-amount { color: #d97706 !important; }
+        .bonus-reward-card.has-bonus .badge-claimable { background: rgba(217, 119, 6, 0.1) !important; color: #d97706 !important; }
+        .bonus-reward-card.has-bonus .icon-wrapper { background: #F59E0B !important; color: #FFFFFF !important; }
+
+        .bonus-reward-card.no-bonus .text-title { color: #495057 !important; }
+        .bonus-reward-card.no-bonus .text-subtitle { color: #6c757d !important; }
+        .bonus-reward-card.no-bonus .text-amount { color: #212529 !important; }
+        .bonus-reward-card.no-bonus .badge-claimable { background: rgba(0, 0, 0, 0.06) !important; color: #495057 !important; }
+        .bonus-reward-card.no-bonus .icon-wrapper { background: #6C757D !important; color: #FFFFFF !important; }
+
+        .bonus-reward-card .icon-wrapper {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.03);
+        }
+
+        .bonus-reward-card.has-bonus .claim-btn {
+            background: linear-gradient(135deg, #F59E0B 0%, #D97706 100%) !important;
+            color: #FFFFFF !important;
+            border: none !important;
+            box-shadow: 0 4px 10px rgba(217, 119, 6, 0.2) !important;
+        }
+        .bonus-reward-card.has-bonus .claim-btn:hover {
+            transform: translateY(-2px) !important;
+            box-shadow: 0 6px 15px rgba(217, 119, 6, 0.3) !important;
+        }
+
+        .bonus-reward-card.no-bonus .claim-btn {
+            background: rgba(0, 0, 0, 0.03) !important;
+            color: #6C757D !important;
+            border: 1px dashed rgba(0, 0, 0, 0.12) !important;
+            cursor: not-allowed !important;
+        }
+
+        /* ── DARK MODE THEME OVERRIDES ── */
+        [data-theme="dark"] .bonus-reward-card {
+            border: 1px solid rgba(255, 255, 255, 0.03) !important;
+            box-shadow: none !important;
+        }
+        [data-theme="dark"] .bonus-reward-card.has-bonus {
+            background: linear-gradient(135deg, #2D1D02 0%, #1A0F00 100%) !important;
+            border: 1px solid rgba(245, 158, 11, 0.22) !important;
+        }
+        [data-theme="dark"] .bonus-reward-card.no-bonus {
+            background: linear-gradient(135deg, #161B22 0%, #0D1117 100%) !important;
+            border: 1px solid rgba(255, 255, 255, 0.02) !important;
+        }
+
+        [data-theme="dark"] .bonus-reward-card.has-bonus .text-title { color: #fef3c7 !important; }
+        [data-theme="dark"] .bonus-reward-card.has-bonus .text-subtitle { color: #fde68a !important; }
+        [data-theme="dark"] .bonus-reward-card.has-bonus .text-amount { color: #f59e0b !important; }
+        [data-theme="dark"] .bonus-reward-card.has-bonus .badge-claimable { background: rgba(245, 158, 11, 0.15) !important; color: #fde68a !important; }
+        [data-theme="dark"] .bonus-reward-card.has-bonus .icon-wrapper { background: #F59E0B !important; color: #000000 !important; }
+
+        [data-theme="dark"] .bonus-reward-card.no-bonus .text-title { color: #c9d1d9 !important; }
+        [data-theme="dark"] .bonus-reward-card.no-bonus .text-subtitle { color: #8b949e !important; }
+        [data-theme="dark"] .bonus-reward-card.no-bonus .text-amount { color: #ffffff !important; }
+        [data-theme="dark"] .bonus-reward-card.no-bonus .badge-claimable { background: rgba(255, 255, 255, 0.04) !important; color: #8b949e !important; }
+        [data-theme="dark"] .bonus-reward-card.no-bonus .icon-wrapper { background: #30363d !important; color: #8b949e !important; }
+
+        [data-theme="dark"] .bonus-reward-card.no-bonus .claim-btn {
+            background: rgba(255, 255, 255, 0.02) !important;
+            color: rgba(255, 255, 255, 0.38) !important;
+            border: 1px dashed rgba(255, 255, 255, 0.08) !important;
+        }
+    </style>
 
     <!-- Scripts -->
     <script>

@@ -255,9 +255,9 @@
                                         <div class="bg-light rounded-circle d-flex align-items-center justify-content-center mb-3 mx-auto" style="width:64px;height:64px;">
                                             <i class="bi bi-people fs-2 text-muted opacity-50"></i>
                                         </div>
-                                        <h6 class="fw-semibold">No Recent Transfers</h6>
+                                        <h6 class="fw-semibold">No Recent Airtime</h6>
                                         <p class="small text-muted mb-0 px-4">
-                                            Your trusted recipients will appear here after your first successful transfer.
+                                            Your trusted recipients will appear here after your first successful airtime purchase.
                                         </p>
                                     </div>
                                 @endif

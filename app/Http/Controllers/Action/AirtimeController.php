@@ -45,7 +45,7 @@ class AirtimeController extends Controller
             ->limit(50) // Get a larger set first to filter unique phone numbers
             ->get()
             ->unique('phone_number')
-            ->take(15)
+            ->take(10)
             ->map(function ($report) {
                 $network = strtolower($report->network);
                 $img = match (true) {
@@ -94,6 +94,15 @@ class AirtimeController extends Controller
                  return response()->json(['status' => 'error', 'message' => "Your account is currently {$user->status}. Access denied."], 403);
              }
              return redirect()->back()->with('error', "Your account is currently {$user->status}. Access denied.");
+        }
+
+        // 0.1 Purchase Limit Check (Max ₦5,000 per transaction)
+        if ($amount > 5000) {
+             $limitMsg = 'Purchase limit exceeded! The maximum airtime amount allowed per transaction is ₦5,000.';
+             if ($request->wantsJson()) {
+                 return response()->json(['status' => 'error', 'message' => $limitMsg], 422);
+             }
+             return redirect()->back()->with('error', $limitMsg)->withInput();
         }
 
 

@@ -91,4 +91,65 @@ class ReferralController extends Controller
             'referralLink'
         ));
     }
+
+    /**
+     * Update the user's custom referral code
+     */
+    public function updateReferralCode(Request $request)
+    {
+        $request->validate([
+            'referral_code' => ['required', 'string', 'max:20', 'alpha_num'],
+        ], [
+            'referral_code.required' => 'The referral code is required.',
+            'referral_code.max' => 'The referral code must not exceed 20 characters.',
+            'referral_code.alpha_num' => 'The referral code must contain only letters and numbers.',
+        ]);
+
+        $user = Auth::user();
+        $newCode = trim($request->referral_code);
+
+        // Case-insensitive uniqueness check excluding current user
+        $exists = User::whereRaw('LOWER(referral_code) = ?', [strtolower($newCode)])
+            ->where('id', '!=', $user->id)
+            ->exists();
+
+        if ($exists) {
+            return back()->withInput()->with('error', 'username already use by another user');
+        }
+
+        $user->referral_code = $newCode;
+        $user->save();
+
+        return back()->with('success', 'Referral code updated successfully!');
+    }
+
+    /**
+     * Check if a referral code is available
+     */
+    public function checkReferralCode(Request $request)
+    {
+        $code = trim($request->query('code'));
+
+        if (empty($code)) {
+            return response()->json(['available' => false, 'message' => 'Code cannot be empty.']);
+        }
+
+        if (!preg_match('/^[a-zA-Z0-9]+$/', $code)) {
+            return response()->json(['available' => false, 'message' => 'Alphanumeric characters only.']);
+        }
+
+        if (strlen($code) > 20) {
+            return response()->json(['available' => false, 'message' => 'Maximum 20 characters.']);
+        }
+
+        $exists = User::whereRaw('LOWER(referral_code) = ?', [strtolower($code)])
+            ->where('id', '!=', Auth::id())
+            ->exists();
+
+        if ($exists) {
+            return response()->json(['available' => false, 'message' => 'username already use by another user']);
+        }
+
+        return response()->json(['available' => true, 'message' => 'Referral code is available!']);
+    }
 }

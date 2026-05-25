@@ -24,7 +24,7 @@ class BuyAirtimeRequest extends FormRequest
         return [
             'network'   => ['required', 'string', 'in:mtn,airtel,glo,etisalat,9mobile'],
             'mobileno'  => ['required', 'string', 'regex:/^[0-9]{11}$/'],
-            'amount'    => ['required', 'numeric', 'min:50', 'max:50000'],
+            'amount'    => ['required', 'numeric', 'min:50', 'max:5000'],
         ];
     }
 

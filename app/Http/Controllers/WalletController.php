@@ -31,7 +31,26 @@ class WalletController extends Controller
             'available_balance' => $wallet->available_balance ?? 0,
         ];
 
-        return view('wallet.index', compact('virtualAccount', 'walletData'));
+        // Dynamic rewards & bonus spend progress
+        $currentSpend = Transaction::where('user_id', $userId)
+            ->where('type', 'debit')
+            ->where('status', 'completed')
+            ->whereMonth('created_at', now()->month)
+            ->whereYear('created_at', now()->year)
+            ->sum('amount') ?? 0;
+
+        $bonusTarget = 50000;
+        $nextBonusTarget = 50000;
+        $bonusProgress = $bonusTarget > 0 ? min(100, round(($currentSpend / $bonusTarget) * 100)) : 0;
+
+        return view('wallet.index', compact(
+            'virtualAccount', 
+            'walletData', 
+            'currentSpend', 
+            'bonusTarget', 
+            'nextBonusTarget', 
+            'bonusProgress'
+        ));
     }
 
     /**
@@ -78,37 +97,52 @@ class WalletController extends Controller
     public function claimBonus(Request $request)
     {
         $userId = Auth::id();
-        $wallet = Wallet::where('user_id', $userId)->lockForUpdate()->first();
 
-        if (!$wallet || $wallet->bonus <= 0) {
-            return redirect()->route('wallet')->with(['error' => 'No bonus available to claim.']);
-        }
+        try {
+            $bonusAmount = DB::transaction(function () use ($userId) {
+                // Fetch the wallet with a pessimistic lock INSIDE the active database transaction
+                $wallet = Wallet::where('user_id', $userId)->lockForUpdate()->first();
 
-        DB::transaction(function () use ($wallet, $userId) {
-            $bonusAmount = $wallet->bonus;
+                if (!$wallet || $wallet->bonus <= 0) {
+                    throw new \Exception('No bonus available to claim.');
+                }
 
-            // Update wallet balances
-            $wallet->balance += $bonusAmount;
-            $wallet->bonus = 0;
-            $wallet->save();
+                $bonus = $wallet->bonus;
 
-            // Performed by
-            $user = User::find($userId);
-            $performedBy = $user ? $user->first_name . ' ' . $user->last_name : 'System';
+                // Update wallet balances
+                $wallet->balance += $bonus;
+                $wallet->bonus = 0;
+                $wallet->save();
 
-            // Save transaction
-            Transaction::create([
-                'user_id'         => $userId,
-                'type'            => 'credit',
-                'amount'          => $bonusAmount,
-                'description'     => 'Bonus claimed and credited to wallet balance',
-                'status'          => 'completed',
-                'transaction_ref' => 'BONUS-' . strtoupper(uniqid()),
-                'performed_by'    => $performedBy,
+                // Performed by
+                $user = User::find($userId);
+                $performedBy = $user ? $user->first_name . ' ' . $user->last_name : 'System';
+
+                // Save transaction
+                Transaction::create([
+                    'user_id'         => $userId,
+                    'type'            => 'credit',
+                    'amount'          => $bonus,
+                    'fee'             => 0.00,
+                    'net_amount'      => $bonus,
+                    'description'     => 'Bonus claimed and credited to wallet balance',
+                    'status'          => 'completed',
+                    'transaction_ref' => 'BONUS-' . strtoupper(uniqid()),
+                    'performed_by'    => $performedBy,
+                ]);
+
+                return $bonus;
+            });
+
+            return redirect()->route('wallet')->with([
+                'success' => 'Bonus of ₦' . number_format($bonusAmount, 2) . ' successfully claimed and added to your wallet balance.'
             ]);
-        });
 
-        return redirect()->route('wallet')->with(['success' => 'Bonus successfully claimed and added to your wallet balance.']);
+        } catch (\Exception $e) {
+            return redirect()->route('wallet')->with([
+                'error' => $e->getMessage()
+            ]);
+        }
     }
 
 }

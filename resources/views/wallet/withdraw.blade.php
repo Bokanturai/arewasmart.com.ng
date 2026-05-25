@@ -87,8 +87,8 @@
                                 <div class="alert alert-warning rounded-3 shadow-sm border-0 d-flex align-items-center mb-4">
                                     <i class="bi bi-hourglass-split fs-15 me-3 text-warning"></i>
                                     <div class="small">
-                                        <strong>Withdrawal Not Yet Unlocked</strong><br>
-                                        Complete <strong>₦{{ number_format($eligibilityAmount - $totalVolume, 2) }}</strong> more in transactions to enable payouts.
+                                        <strong>Your are not eligible for transfer yet</strong><br>
+                                        Complete <strong></strong> more in transactions to enable transfer Service.
                                     </div>
                                 </div>
                             @else

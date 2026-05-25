@@ -85,7 +85,7 @@
     <div class="col-12 col-xl-5 d-none d-lg-flex">
         <div class="card flex-fill border-0 shadow-lg overflow-hidden dashboard-card" style="border-radius: 30px !important;">
             <div class="card-header bg-white py-3 border-bottom-0">
-                <h5 class="mb-0 fw-bold text-dark">Transaction Statistics</h5>
+                <h5 class="mb-0 fw-bold text-primary">Transaction Statistics</h5>
             </div>
 
             <div class="card-body">

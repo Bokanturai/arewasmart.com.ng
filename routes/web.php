@@ -245,7 +245,7 @@ Route::middleware(['auth'])->group(function () {
     // Loan Service
     Route::controller(LoanController::class)->prefix('loan')->name('loan.')->group(function () {
         Route::get('/', 'index')->name('index');
-        Route::post('/store', 'store')->name('store');
+        Route::post('/store', 'store')->middleware('throttle:3,1')->name('store');
     });
 
     /*
@@ -318,6 +318,8 @@ Route::middleware(['auth'])->group(function () {
 
     // Referral System
     Route::get('/referrals', [App\Http\Controllers\ReferralController::class, 'index'])->name('referrals.index');
+    Route::post('/referrals/update', [App\Http\Controllers\ReferralController::class, 'updateReferralCode'])->name('referrals.updateCode');
+    Route::get('/referrals/check', [App\Http\Controllers\ReferralController::class, 'checkReferralCode'])->name('referrals.checkCode');
 
     // AI Comment Routes
     Route::prefix('ai')->middleware('throttle:10,1')->group(function () {

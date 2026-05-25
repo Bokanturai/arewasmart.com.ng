@@ -17,6 +17,7 @@ class Announcement extends Model
         'image',
         'discount',
         'service_name',
+        'link',
     ];
 
     /**

@@ -11,9 +11,9 @@
                 @php
                     $services = [
                         ['route' => route('wallet'), 'icon' => 'ti-wallet', 'color' => 'primary', 'name' => 'Wallet'],
+                        ['route' => route('withdraw.index'), 'icon' => 'ti ti-arrow-up-right', 'color' => 'success', 'name' => 'Transfer', 'hot' => true],
                         ['route' => route('airtime'), 'icon' => 'ti-phone-call', 'color' => 'info', 'name' => 'Airtime', 'hot' => true],
                         ['modal' => '#dataplans', 'icon' => 'ti-world', 'color' => 'warning', 'name' => 'Data', 'hot' => true],
-                        ['route' => route('withdraw.index'), 'icon' => 'ti-credit-card', 'color' => 'danger', 'name' => 'Withdraw', 'hot' => true],
                         ['route' => route('gift-card.index'), 'icon' => 'ti-gift', 'color' => 'info', 'name' => 'Gift Card', 'hot' => true],
                         ['route' => route('electricity'), 'icon' => 'ti-bolt', 'color' => 'danger', 'name' => 'Electricity'],
                         ['route' => route('cable'), 'icon' => 'ti-device-tv', 'color' => 'success', 'name' => 'Cable TV', 'hot' => true],
@@ -37,9 +37,12 @@
                     ];
                 @endphp
 
-                <div class="row row-cols-4 row-cols-md-4 row-cols-lg-6 g-2 g-md-3 text-center">
-                    @foreach ($services as $sv)
-                        <div class="col">
+                {{-- ── Service Grid ── --}}
+                <div class="row row-cols-4 row-cols-md-4 row-cols-lg-6 g-2 g-md-3 text-center" id="services-grid">
+
+                    @foreach ($services as $index => $sv)
+                        {{-- On mobile: hide items beyond first 8. On desktop: always show everything --}}
+                        <div class="col {{ $index >= 8 ? 'svc-extra d-none d-lg-block' : '' }}">
                             <a 
                                 @if(isset($sv['route'])) href="{{ $sv['route'] }}" 
                                 @elseif(isset($sv['modal'])) href="#" data-bs-toggle="modal" data-bs-target="{{ $sv['modal'] }}"
@@ -61,6 +64,19 @@
                             </a>
                         </div>
                     @endforeach
+
+                </div>
+
+                {{-- ── View More / Less Button (Mobile Only) ── --}}
+                <div class="text-center mt-3 d-lg-none">
+                    <button id="svc-toggle-btn" type="button"
+                        class="btn btn-svc-toggle px-4 py-2">
+                        <span id="svc-toggle-label">
+                            <i class="ti ti-layout-grid-add me-1"></i>
+                            View More Services
+                            <i class="ti ti-chevron-down ms-1 svc-chevron"></i>
+                        </span>
+                    </button>
                 </div>
             </div>
         </div>
@@ -583,4 +599,70 @@
     70% { transform: translate(50%, -50%) scale(1); box-shadow: 0 0 0 6px rgba(220, 53, 69, 0); }
     100% { transform: translate(50%, -50%) scale(0.95); box-shadow: 0 0 0 0 rgba(220, 53, 69, 0); }
 }
+
+/* ── View More Button ── */
+.btn-svc-toggle {
+    background: linear-gradient(135deg, rgba(99,102,241,0.10), rgba(99,102,241,0.06));
+    color: #6366f1;
+    border: 1.5px dashed rgba(99,102,241,0.35);
+    border-radius: 14px;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.2px;
+    transition: all 0.25s ease;
+}
+.btn-svc-toggle:hover {
+    background: linear-gradient(135deg, rgba(99,102,241,0.18), rgba(99,102,241,0.10));
+    border-color: #6366f1;
+    color: #4f52e0;
+    transform: translateY(-1px);
+}
+.btn-svc-toggle:active {
+    transform: translateY(0);
+}
+.svc-chevron {
+    display: inline-block;
+    transition: transform 0.3s ease;
+}
+.svc-expanded .svc-chevron {
+    transform: rotate(180deg);
+}
+/* Animate extra items in */
+.svc-extra {
+    animation: fadeInUp 0.25s ease both;
+}
+@keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
 </style>
+
+<script>
+(function () {
+    const btn   = document.getElementById('svc-toggle-btn');
+    const label = document.getElementById('svc-toggle-label');
+    const extras = document.querySelectorAll('.svc-extra');
+    let expanded = false;
+
+    if (!btn) return;
+
+    btn.addEventListener('click', function () {
+        expanded = !expanded;
+
+        extras.forEach(function (el) {
+            if (expanded) {
+                // Show: remove d-none but keep d-lg-block so desktop is unaffected
+                el.classList.remove('d-none');
+            } else {
+                el.classList.add('d-none');
+            }
+        });
+
+        btn.classList.toggle('svc-expanded', expanded);
+
+        label.innerHTML = expanded
+            ? '<i class="ti ti-layout-grid me-1"></i> Show Less <i class="ti ti-chevron-up ms-1 svc-chevron"></i>'
+            : '<i class="ti ti-layout-grid-add me-1"></i> View More Services <i class="ti ti-chevron-down ms-1 svc-chevron"></i>';
+    });
+})();
+</script>

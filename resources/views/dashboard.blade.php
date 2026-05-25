@@ -130,7 +130,7 @@
                         
                         <!-- Top Actions -->
                         <div class="row g-0 text-center">
-                            <div class="col-3">
+                            <div class="col">
                                 <a href="{{ route('wallet') }}" class="action-item">
                                     <div class="action-icon-box bg-info bg-opacity-10 text-info">
                                         <i class="ti ti-wallet"></i>
@@ -138,15 +138,15 @@
                                     <span class="action-label">Deposit</span>
                                 </a>
                             </div>
-                            <div class="col-3">
+                            <div class="col">
                                 <a href="{{ route('withdraw.index') }}" class="action-item">
                                     <div class="action-icon-box bg-success bg-opacity-10 text-success">
                                         <i class="ti ti-arrow-up-right"></i>
                                     </div>
-                                    <span class="action-label">Withdraw</span>
+                                    <span class="action-label">Transfer</span>
                                 </a>
                             </div>
-                            <div class="col-3">
+                            <div class="col">
                                 <a href="{{ route('airtime') }}" class="action-item">
                                     <div class="action-icon-box bg-danger bg-opacity-10 text-danger">
                                         <i class="ti ti-phone"></i>
@@ -154,12 +154,13 @@
                                     <span class="action-label">Airtime</span>
                                 </a>
                             </div>
-                            <div class="col-3">
-                                <a href="{{ route('buy-data') }}" class="action-item">
-                                    <div class="action-icon-box bg-warning bg-opacity-10 text-primary">
-                                        <i class="ti ti-wifi"></i>
+                           
+                            <div class="col">
+                                <a href="{{ route('transactions') }}" class="action-item">
+                                    <div class="action-icon-box bg-info bg-opacity-10 text-purple" style="background-color: rgba(111,66,193,0.12); color: #6f42c1;">
+                                        <i class="ti ti-receipt"></i>
                                     </div>
-                                    <span class="action-label">Buy Data</span>
+                                    <span class="action-label">History</span>
                                 </a>
                             </div>
                         </div>
@@ -181,6 +182,13 @@
             </div>
         </div>
 
+        <!-- Recent Transactions (Mobile Only) -->
+        <div class="row g-0 mt-4 d-lg-none">
+            <div class="col-12 px-0 px-md-3">
+                @include('pages.dashboard.recent')
+            </div>
+        </div>
+
         <!-- 2. Alerts Section -->
         <div class="row g-0 mt-4">
             <div class="col-12 px-0 px-md-3">
@@ -199,6 +207,13 @@
         <div class="row g-0 mt-4 mb-5 d-none d-lg-flex">
             <div class="col-12 px-0 px-md-3">
                 @include('pages.dashboard.trans')
+            </div>
+        </div>
+
+        <!-- 5. Advert Carousel (Mobile Only) -->
+        <div class="row g-0 mt-2 mb-2 d-lg-none">
+            <div class="col-12 px-0 px-md-3">
+                @include('pages.dashboard.bokanturai')
             </div>
         </div>
     </div>
