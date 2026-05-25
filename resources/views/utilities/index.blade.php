@@ -207,15 +207,15 @@
                 </div>
             </div>
 
-            {{-- Recent Recipients Column --}}
+            {{-- Recent Airtime Purchases Column --}}
             <div class="col-12 col-xl-7 mt-2 mt-md-0">
                 <div class="card shadow-lg border-0 rounded-20px h-100">
                             {{-- Header --}}
                             <div class="card-header bg-white p-3 p-md-4 border-bottom d-flex align-items-center rounded-20px rounded-bottom-0">
                                 <i class="bi bi-clock-history text-primary me-2 fs-15"></i>
                                 <div>
-                                    <h5 class="mb-0 fw-bold text-dark fs-15">Recent Recipients</h5>
-                                    <p class="text-muted small mb-0">Tap a recipient to auto-fill the form</p>
+                                    <h5 class="mb-0 fw-bold text-dark fs-15">Recent Airtime Purchases</h5>
+                                    <p class="text-muted small mb-0">Tap a recent purchase to re-fill form details</p>
                                 </div>
                             </div>
 
@@ -241,23 +241,46 @@
 
                                                 <div class="flex-grow-1 min-w-0">
                                                     <span class="fw-bold d-block small text-truncate text-dark">{{ $recipient['account_no'] }}</span>
-                                                    <small class="text-muted text-truncate d-block" style="font-size: 11px;">
-                                                        Network: {{ $recipient['bank_name'] }}
-                                                    </small>
+                                                    <div class="d-flex align-items-center gap-2 mt-1 flex-wrap">
+                                                        <span class="text-muted" style="font-size: 11px;">
+                                                            {{ $recipient['bank_name'] }}
+                                                        </span>
+                                                        <span class="text-muted d-none d-sm-inline" style="font-size: 11px;">•</span>
+                                                        <small class="text-muted" style="font-size: 11px;">
+                                                            {{ $recipient['date'] }}
+                                                        </small>
+                                                    </div>
                                                 </div>
 
-                                                <i class="bi bi-chevron-right text-muted small ms-2 flex-shrink-0"></i>
+                                                <div class="text-end ms-3 flex-shrink-0">
+                                                    <span class="fw-bold d-block text-dark" style="font-size: 14px;">₦{{ number_format($recipient['amount'], 2) }}</span>
+                                                    <div class="mt-1">
+                                                        @if($recipient['status'] === 'successful')
+                                                            <span class="badge bg-success bg-opacity-10 text-success rounded-pill py-1 px-2" style="font-size: 9px; font-weight: 600;">
+                                                                Success
+                                                            </span>
+                                                        @elseif($recipient['status'] === 'failed')
+                                                            <span class="badge bg-danger bg-opacity-10 text-danger rounded-pill py-1 px-2" style="font-size: 9px; font-weight: 600;">
+                                                                Failed
+                                                            </span>
+                                                        @else
+                                                            <span class="badge bg-warning bg-opacity-10 text-warning rounded-pill py-1 px-2" style="font-size: 9px; font-weight: 600;">
+                                                                Processing
+                                                            </span>
+                                                        @endif
+                                                    </div>
+                                                </div>
                                             </div>
                                         @endforeach
                                     </div>
                                 @else
                                     <div class="text-center py-5 text-muted">
                                         <div class="bg-light rounded-circle d-flex align-items-center justify-content-center mb-3 mx-auto" style="width:64px;height:64px;">
-                                            <i class="bi bi-people fs-2 text-muted opacity-50"></i>
+                                            <i class="bi bi-phone fs-2 text-muted opacity-50"></i>
                                         </div>
-                                        <h6 class="fw-semibold">No Recent Airtime</h6>
+                                        <h6 class="fw-semibold">No Recent Purchases</h6>
                                         <p class="small text-muted mb-0 px-4">
-                                            Your trusted recipients will appear here after your first successful airtime purchase.
+                                            Your recent purchases will appear here after your first airtime transaction.
                                         </p>
                                     </div>
                                 @endif

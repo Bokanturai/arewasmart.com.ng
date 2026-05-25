@@ -37,15 +37,12 @@ class AirtimeController extends Controller
             ['balance' => 0.00, 'status' => 'active']
         );
 
-        // Fetch unique recent airtime recipients
+        // Fetch recent airtime purchases
         $recentRecipients = \App\Models\Report::where('user_id', $user->id)
             ->where('type', 'airtime')
-            ->where('status', 'successful')
             ->orderBy('created_at', 'desc')
-            ->limit(50) // Get a larger set first to filter unique phone numbers
-            ->get()
-            ->unique('phone_number')
             ->take(10)
+            ->get()
             ->map(function ($report) {
                 $network = strtolower($report->network);
                 $img = match (true) {
@@ -62,7 +59,10 @@ class AirtimeController extends Controller
                     'account_name' => $report->phone_number,
                     'bank_name'    => strtoupper($report->network),
                     'bank_code'    => $report->network,
-                    'bank_url'     => asset('assets/img/apps/' . $img)
+                    'bank_url'     => asset('assets/img/apps/' . $img),
+                    'amount'       => $report->amount,
+                    'status'       => $report->status,
+                    'date'         => $report->created_at ? $report->created_at->format('M d, h:i A') : 'N/A'
                 ];
             })
             ->values();
