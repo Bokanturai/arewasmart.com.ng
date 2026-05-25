@@ -255,7 +255,7 @@
                                                 <div class="text-end ms-3 flex-shrink-0">
                                                     <span class="fw-bold d-block text-dark" style="font-size: 14px;">₦{{ number_format($recipient['amount'], 2) }}</span>
                                                     <div class="mt-1">
-                                                        @if($recipient['status'] === 'successful')
+                                                        @if($recipient['status'] === 'successful' || $recipient['status'] === 'processing')
                                                             <span class="badge bg-success bg-opacity-10 text-success rounded-pill py-1 px-2" style="font-size: 9px; font-weight: 600;">
                                                                 Success
                                                             </span>

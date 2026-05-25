@@ -192,7 +192,7 @@ class AirtimeController extends Controller
                 'network'      => $networkKey,
                 'ref'          => $requestId,
                 'amount'       => $amount,
-                'status'       => 'processing', // Use processing state
+                'status'       => 'successful', 
                 'type'         => 'airtime',
                 'description'  => "Processing: Airtime purchase for {$mobile}",
                 'old_balance'  => $oldBalance,
