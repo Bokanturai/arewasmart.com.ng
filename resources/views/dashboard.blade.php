@@ -6,7 +6,7 @@
             <div class="scrolling-text-container bg-primary text-white shadow-sm py-2" style="border-radius: 20px;">
                 <div class="scrolling-text">
                     <span class="fw-bold me-3"><i class="fas fa-bullhorn"></i> ANNOUNCEMENT:</span>
-                    {{ $announcement->message }}
+                    {!! trim(strip_tags($announcement->message)) !!}
                 </div>
             </div>
         </div>
@@ -27,7 +27,7 @@
             .scrolling-text {
                 display: inline-block;
                 padding-left: 100%;
-                animation: scroll-left 15s linear infinite;
+                animation: scroll-left 25s linear infinite;
             }
             @keyframes scroll-left {
                 0% { transform: translateX(0); }
