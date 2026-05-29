@@ -192,5 +192,33 @@
     .btn-view-all:active {
         transform: translateY(0);
     }
+
+    /* ─── Dark Mode Overrides ─── */
+    [data-theme="dark"] .recent-tx-card {
+        background: #0f172a !important;
+        border: 1px solid rgba(255, 255, 255, 0.05) !important;
+        box-shadow: none !important;
+    }
+    [data-theme="dark"] .recent-tx-header {
+        background: #0f172a !important;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important;
+    }
+    [data-theme="dark"] .recent-tx-header h6,
+    [data-theme="dark"] .recent-tx-card .text-dark {
+        color: #f1f5f9 !important;
+    }
+    [data-theme="dark"] .recent-tx-list li.recent-tx-item {
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important;
+    }
+    [data-theme="dark"] .recent-tx-list li.recent-tx-item:hover {
+        background: rgba(255, 255, 255, 0.03) !important;
+    }
+    [data-theme="dark"] .recent-tx-footer {
+        background: #0f172a !important;
+        border-top: 1px solid rgba(255, 255, 255, 0.05) !important;
+    }
+    [data-theme="dark"] .recent-tx-empty-icon {
+        background: rgba(255, 255, 255, 0.05) !important;
+    }
 </style>
 @endpush

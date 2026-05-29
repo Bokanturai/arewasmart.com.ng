@@ -458,7 +458,8 @@
                                         newCreditsDetected = true;
                                         announced.push(creditId);
 
-                                        // 1. Play premium TTS Voice announcement
+                                        // 1. Play premium cash chime & TTS Voice announcement
+                                        playSuccessChime();
                                         speakCreditNotification();
 
                                         // 2. Show premium SweetAlert2 Toast
@@ -482,26 +483,69 @@
                 });
             }
 
+            // Function to play a premium synthesizer cash-receipt arpeggio chime (Web Audio API)
+            function playSuccessChime() {
+                try {
+                    const AudioContext = window.AudioContext || window.webkitAudioContext;
+                    if (!AudioContext) return;
+                    const ctx = new AudioContext();
+                    
+                    // Chime note 1 (E5 - 659.25 Hz)
+                    const osc1 = ctx.createOscillator();
+                    const gain1 = ctx.createGain();
+                    osc1.type = 'sine';
+                    osc1.frequency.setValueAtTime(659.25, ctx.currentTime);
+                    gain1.gain.setValueAtTime(0.12, ctx.currentTime);
+                    gain1.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.4);
+                    osc1.connect(gain1);
+                    gain1.connect(ctx.destination);
+                    osc1.start();
+                    osc1.stop(ctx.currentTime + 0.4);
+                    
+                    // Chime note 2 (A5 - 880.00 Hz) - offset for arpeggio
+                    setTimeout(function () {
+                        const osc2 = ctx.createOscillator();
+                        const gain2 = ctx.createGain();
+                        osc2.type = 'sine';
+                        osc2.frequency.setValueAtTime(880.00, ctx.currentTime);
+                        gain2.gain.setValueAtTime(0.12, ctx.currentTime);
+                        gain2.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.6);
+                        osc2.connect(gain2);
+                        gain2.connect(ctx.destination);
+                        osc2.start();
+                        osc2.stop(ctx.currentTime + 0.6);
+                    }, 120);
+                } catch (e) {
+                    console.warn("Chime Web Audio failed:", e);
+                }
+            }
+
             // Function to announce credit using Speech Synthesis (Web Speech API)
             function speakCreditNotification() {
                 if ('speechSynthesis' in window) {
-                    // Stop any ongoing speech to avoid overlap issues
-                    window.speechSynthesis.cancel();
+                    try {
+                        // Force resume in case browser engine is stuck in suspended mode
+                        window.speechSynthesis.resume();
+                        window.speechSynthesis.cancel();
 
-                    const text = "Your Arewa Smart Wallet has been credited successfully";
-                    const utterance = new SpeechSynthesisUtterance(text);
-                    
-                    // Auto-select best English voice if available
-                    const voices = window.speechSynthesis.getVoices();
-                    const englishVoice = voices.find(voice => voice.lang.startsWith('en'));
-                    if (englishVoice) {
-                        utterance.voice = englishVoice;
+                        const text = "Your Arewa Smart Wallet has been credited successfully";
+                        const utterance = new SpeechSynthesisUtterance(text);
+                        utterance.lang = 'en-US'; // Explicitly target English to ensure speech engine triggers properly
+                        
+                        // Auto-select best English voice if available
+                        const voices = window.speechSynthesis.getVoices();
+                        const englishVoice = voices.find(voice => voice.lang.startsWith('en'));
+                        if (englishVoice) {
+                            utterance.voice = englishVoice;
+                        }
+                        
+                        utterance.rate = 0.95; // Slightly slower for crisp clear pronunciation
+                        utterance.pitch = 1.0;
+                        
+                        window.speechSynthesis.speak(utterance);
+                    } catch (err) {
+                        console.warn("Speech Synthesis error:", err);
                     }
-                    
-                    utterance.rate = 0.95; // Slightly slower for clear pronunciation
-                    utterance.pitch = 1.0;
-                    
-                    window.speechSynthesis.speak(utterance);
                 } else {
                     console.warn("Speech Synthesis not supported in this browser.");
                 }
