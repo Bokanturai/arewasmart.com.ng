@@ -431,6 +431,39 @@
     @auth
     <script>
         document.addEventListener("DOMContentLoaded", function () {
+            let globalAudioContext = null;
+
+            // Initialize and unlock audio context on the very first user interaction
+            function unlockAudio() {
+                try {
+                    const AudioContext = window.AudioContext || window.webkitAudioContext;
+                    if (AudioContext && !globalAudioContext) {
+                        globalAudioContext = new AudioContext();
+                    }
+                    if (globalAudioContext && globalAudioContext.state === 'suspended') {
+                        globalAudioContext.resume();
+                    }
+                    if ('speechSynthesis' in window) {
+                        window.speechSynthesis.resume();
+                        // Warm up the voices
+                        window.speechSynthesis.getVoices();
+                    }
+                } catch (e) {
+                    console.warn("Audio unlock failed:", e);
+                }
+            }
+
+            // Bind to first click or touch start
+            document.addEventListener('click', unlockAudio, { once: true });
+            document.addEventListener('touchstart', unlockAudio, { once: true });
+
+            // Warm up speech voices asynchronously
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.onvoiceschanged = function () {
+                    window.speechSynthesis.getVoices();
+                };
+            }
+
             // Function to check for new credit transactions
             function checkNewCredits() {
                 $.ajax({
@@ -486,9 +519,21 @@
             // Function to play a premium synthesizer cash-receipt arpeggio chime (Web Audio API)
             function playSuccessChime() {
                 try {
-                    const AudioContext = window.AudioContext || window.webkitAudioContext;
-                    if (!AudioContext) return;
-                    const ctx = new AudioContext();
+                    // Try to unlock or reuse the global context
+                    if (!globalAudioContext) {
+                        const AudioContext = window.AudioContext || window.webkitAudioContext;
+                        if (AudioContext) {
+                            globalAudioContext = new AudioContext();
+                        }
+                    }
+                    if (!globalAudioContext) return;
+
+                    // If suspended, try to resume
+                    if (globalAudioContext.state === 'suspended') {
+                        globalAudioContext.resume();
+                    }
+
+                    const ctx = globalAudioContext;
                     
                     // Chime note 1 (E5 - 659.25 Hz)
                     const osc1 = ctx.createOscillator();
@@ -504,6 +549,7 @@
                     
                     // Chime note 2 (A5 - 880.00 Hz) - offset for arpeggio
                     setTimeout(function () {
+                        if (ctx.state === 'suspended') return;
                         const osc2 = ctx.createOscillator();
                         const gain2 = ctx.createGain();
                         osc2.type = 'sine';
