@@ -41,23 +41,6 @@
         <div class="row g-3 g-md-4 mb-4">
             <div class="col-sm-6 col-lg-4">
                 <div class="card border-0 shadow-sm rounded-4 h-100 overflow-hidden stats-card">
-                    <div class="card-body p-3 p-md-4 text-white position-relative" style="background: linear-gradient(135deg, #4e73df 0%, #224abe 100%);">
-                        <div class="d-flex justify-content-between align-items-center mb-3">
-                            <div>
-                                <span class="fs-12 fw-medium opacity-75 text-uppercase">Pending Milestone</span>
-                                <h2 class="fw-bold mb-1 mt-2 fs-2">{{ number_format($pendingCount) }}</h2>
-                                <p class="mb-0 fs-12 opacity-75">Working towards 5 transactions</p>
-                            </div>
-                            <div class="bg-opacity-20 rounded-3 p-2">
-                                <i class="ti ti-users fs-2"></i>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="col-sm-6 col-lg-4">
-                <div class="card border-0 shadow-sm rounded-4 h-100 overflow-hidden stats-card">
                     <div class="card-body p-3 p-md-4 text-white position-relative" style="background: linear-gradient(135deg, #1cc88a 0%, #13855c 100%);">
                         <div class="d-flex justify-content-between align-items-center mb-3">
                             <div>
@@ -72,32 +55,6 @@
                     </div>
                 </div>
             </div>
-
-            <div class="col-sm-6 col-lg-4">
-                <div class="card border-0 shadow-sm rounded-4 h-100 overflow-hidden stats-card">
-                    <div class="card-body p-3 p-md-4 text-white position-relative" style="background: linear-gradient(135deg, #36b9cc 0%, #258391 100%);">
-                        <div class="d-flex justify-content-between align-items-center mb-3">
-                            <div>
-                                <span class="fs-12 fw-medium opacity-75 text-uppercase">Claimable Bonus</span>
-                                <h2 class="fw-bold mb-1 mt-2 fs-2">₦{{ number_format($wallet->bonus ?? 0, 2) }}</h2>
-                                @if(($wallet->bonus ?? 0) > 0)
-                                    <form action="{{ route('wallet.claimBonus') }}" method="POST" class="mt-2">
-                                        @csrf
-                                        <button type="submit" class="btn btn-sm btn-light text-primary fw-bold px-3">
-                                            <i class="ti ti-wallet me-1"></i> Claim Now
-                                        </button>
-                                    </form>
-                                @else
-                                    <p class="mb-0 fs-12 opacity-75">No pending bonus</p>
-                                @endif
-                            </div>
-                            <div class="bg-opacity-20 rounded-3 p-2">
-                                <i class="ti ti-wallet fs-2"></i>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
         </div>
 
         <div class="row g-3 g-md-4">
@@ -107,7 +64,7 @@
                     <div class="card-body p-3 p-md-4">
                         <h5 class="fw-bold mb-2 fs-20">Spread the word</h5>
                         <p class="text-muted mb-4 small">
-                            Share your referral link with friends and business owners. When they register, you earn a bonus instantly!
+                            Share your referral link with friends and business owners. When they register and meet the transaction milestones, you earn <strong>₦{{ number_format($referralAmount, 2) }}</strong> instantly!
                         </p>
                         
                         <!-- Referral Link Box -->
@@ -197,33 +154,54 @@
             <!-- How it works -->
             <div class="col-lg-5">
                 <div class="card border-0 shadow-sm rounded-4 h-100 bg-primary text-white">
-                    <div class="card-body p-3 p-md-4">
-                        <h5 class="fw-bold mb-4 fs-20">
-                            <i class="ti ti-help me-2"></i>How it works?
-                        </h5>
-                        
-                        <div class="d-flex align-items-start mb-4">
-                            <div class="step-number bg-white text-primary rounded-circle me-3 flex-shrink-0 d-flex align-items-center justify-content-center fw-bold">1</div>
-                            <div>
-                                <h6 class="fw-bold mb-1 fs-15">Send Invitation</h6>
-                                <p class="mb-0 fs-13 opacity-75">Send your referral link to your friends and associates.</p>
+                    <div class="card-body p-3 p-md-4 d-flex flex-column justify-content-between">
+                        <div>
+                            <h5 class="fw-bold mb-4 fs-20">
+                                <i class="ti ti-help me-2"></i>How it works?
+                            </h5>
+                            
+                            <div class="d-flex align-items-start mb-4">
+                                <div class="step-number bg-white text-primary rounded-circle me-3 flex-shrink-0 d-flex align-items-center justify-content-center fw-bold" style="width: 28px; height: 28px;">1</div>
+                                <div>
+                                    <h6 class="fw-bold mb-1 fs-15">Send Invitation</h6>
+                                    <p class="mb-0 fs-13 opacity-75">Send your referral link to your friends and associates.</p>
+                                </div>
+                            </div>
+
+                            <div class="d-flex align-items-start mb-4">
+                                <div class="step-number bg-white text-primary rounded-circle me-3 flex-shrink-0 d-flex align-items-center justify-content-center fw-bold" style="width: 28px; height: 28px;">2</div>
+                                <div>
+                                    <h6 class="fw-bold mb-1 fs-15">Registration</h6>
+                                    <p class="mb-0 fs-13 opacity-75">They sign up as a user or agent using your specific link.</p>
+                                </div>
+                            </div>
+
+                            <div class="d-flex align-items-start mb-4">
+                                <div class="step-number bg-white text-primary rounded-circle me-3 flex-shrink-0 d-flex align-items-center justify-content-center fw-bold" style="width: 28px; height: 28px;">3</div>
+                                <div>
+                                    <h6 class="fw-bold mb-1 fs-15">Qualify Milestone</h6>
+                                    <p class="mb-0 fs-13 opacity-75">They complete 5 qualified transactions on their account.</p>
+                                </div>
+                            </div>
+
+                            <div class="d-flex align-items-start mb-3">
+                                <div class="step-number bg-white text-primary rounded-circle me-3 flex-shrink-0 d-flex align-items-center justify-content-center fw-bold" style="width: 28px; height: 28px;">4</div>
+                                <div>
+                                    <h6 class="fw-bold mb-1 fs-15">Get ₦{{ number_format($referralAmount, 2) }} Reward</h6>
+                                    <p class="mb-0 fs-13 opacity-75">Get credited instantly in your claimable bonus balance when milestones are met!</p>
+                                </div>
                             </div>
                         </div>
 
-                        <div class="d-flex align-items-start mb-4">
-                            <div class="step-number bg-white text-primary rounded-circle me-3 flex-shrink-0 d-flex align-items-center justify-content-center fw-bold">2</div>
-                            <div>
-                                <h6 class="fw-bold mb-1 fs-15">Registration</h6>
-                                <p class="mb-0 fs-13 opacity-75">They sign up as a user or agent using your specific link.</p>
-                            </div>
-                        </div>
-
-                        <div class="d-flex align-items-start">
-                            <div class="step-number bg-white text-primary rounded-circle me-3 flex-shrink-0 d-flex align-items-center justify-content-center fw-bold">3</div>
-                            <div>
-                                <h6 class="fw-bold mb-1 fs-15">Get Reward</h6>
-                                <p class="mb-0 fs-13 opacity-75">Once registration is successful, you get credited instantly!</p>
-                            </div>
+                        <!-- Qualified Transaction Rules Info -->
+                        <div class="mt-3 p-3 rounded-4 bg-white bg-opacity-10 border border-white border-opacity-10">
+                            <h6 class="fw-bold mb-2 fs-12 text-white text-uppercase">
+                                <i class="ti ti-alert-circle me-1 text-warning"></i>Qualified Transaction Rules
+                            </h6>
+                            <ul class="list-unstyled mb-0 fs-12 opacity-90 ps-0">
+                                <li class="mb-1"><i class="ti ti-checks text-warning me-1"></i><strong>Debit Purchases:</strong> Must be <strong>₦1,000</strong> or above per transaction.</li>
+                                <li><i class="ti ti-checks text-warning me-1"></i><strong>Credit Deposits:</strong> Must be <strong>₦2,000</strong> or above per transaction.</li>
+                            </ul>
                         </div>
                     </div>
                 </div>

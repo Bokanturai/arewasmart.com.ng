@@ -51,7 +51,8 @@ class RegisteredUserController extends Controller
                 'email'         => $request->email,
                 'password'      => Hash::make($request->password),
                 'referral_code' => $referralDetails['myOwnCode'],
-                'limit' => 20000,
+                'referred_by'   => $referralDetails['referral_id'],
+                'limit'         => 20000,
             ]);
 
             // Create wallet

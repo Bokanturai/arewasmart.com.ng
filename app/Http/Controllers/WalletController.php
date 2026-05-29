@@ -145,4 +145,35 @@ class WalletController extends Controller
         }
     }
 
+    /**
+     * Check for any recent completed credit transactions (last 10 minutes)
+     */
+    public function checkVoiceCredits()
+    {
+        $userId = Auth::id();
+
+        // Get recent completed credit transactions in the last 10 minutes
+        $newCredits = Transaction::where('user_id', $userId)
+            ->where('type', 'credit')
+            ->where('status', 'completed')
+            ->where('created_at', '>=', now()->subMinutes(10))
+            ->orderBy('id', 'desc')
+            ->get();
+
+        $wallet = Wallet::where('user_id', $userId)->first();
+        $balance = $wallet ? $wallet->balance : 0;
+
+        return response()->json([
+            'success' => true,
+            'credits' => $newCredits->map(function ($trx) {
+                return [
+                    'id' => $trx->id,
+                    'amount' => $trx->amount,
+                    'description' => $trx->description,
+                ];
+            }),
+            'balance' => $balance
+        ]);
+    }
+
 }

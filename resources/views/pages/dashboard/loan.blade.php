@@ -77,8 +77,9 @@
                         {{-- ========= ACTIVE / UNRESOLVED / FAILED LOAN STATE ========= --}}
                         @php
                             $statusLower = strtolower($latestLoan->status ?? '');
-                            $isDeclined  = in_array($statusLower, ['failed', 'rejected', 'declined']);
                             $isApproved  = in_array($statusLower, ['approved']);
+                            $isPending   = in_array($statusLower, ['pending']);
+                            $isDeclined  = !$isPending && !$isApproved;
                         @endphp
                         <div class="card border-0 shadow-sm mb-4 overflow-hidden animate__animated animate__fadeInUp"
                              style="border-radius: 20px;">
@@ -90,7 +91,11 @@
                                     </div>
                                     <h4 class="fw-bold text-dark mb-3">Loan Facility Locked</h4>
                                     <p class="text-muted mb-4 mx-auto" style="max-width: 480px;">
-                                        Your previous loan application was not successful (declined, rejected, or failed). To maintain system integrity, you are currently locked from reapplying. Please contact our credit team or support to unlock your account.
+                                        @if(!Auth::user()->can_apply_loan)
+                                            Your loan facility is currently locked by the administration. To maintain system integrity, you are currently locked from reapplying. Please contact our credit team or support to unlock your account.
+                                        @else
+                                            Your previous loan application was not successful (declined, rejected, or failed). To maintain system integrity, you are currently locked from reapplying. Please contact our credit team or support to unlock your account.
+                                        @endif
                                     </p>
                                 @elseif($isApproved)
                                     <div class="mx-auto bg-success-soft rounded-circle d-flex align-items-center justify-content-center mb-4"
@@ -112,52 +117,60 @@
                                     </p>
                                 @endif
                                 
-                                <div class="p-3 bg-light rounded-4 border mb-4 text-start mx-auto" style="max-width: 450px;">
-                                    <div class="d-flex justify-content-between mb-2">
-                                        <span class="text-muted">Type:</span>
-                                        <strong class="text-dark">{{ $latestLoan->service_name ?? 'Loan' }}</strong>
+                                @if($latestLoan)
+                                    <div class="p-3 bg-light rounded-4 border mb-4 text-start mx-auto" style="max-width: 450px;">
+                                        <div class="d-flex justify-content-between mb-2">
+                                            <span class="text-muted">Type:</span>
+                                            <strong class="text-dark">{{ $latestLoan->service_name ?? 'Loan' }}</strong>
+                                        </div>
+                                        <div class="d-flex justify-content-between mb-2">
+                                            <span class="text-muted">Requested Amount:</span>
+                                            <strong class="text-dark">₦{{ number_format($latestLoan->amount ?? 0, 2) }}</strong>
+                                        </div>
+                                        <div class="d-flex justify-content-between mb-2">
+                                            <span class="text-muted">Status:</span>
+                                            @php
+                                                $badgeClass = match($latestLoan->status ?? '') {
+                                                    'successful', 'success', 'approved' => 'success',
+                                                    'pending'                           => 'warning',
+                                                    'failed', 'rejected', 'declined'    => 'danger',
+                                                    default                             => 'secondary'
+                                                };
+                                            @endphp
+                                            <span class="badge bg-{{ $badgeClass }}-soft text-{{ $badgeClass }} py-1 px-3 rounded-pill fw-bold" style="font-size: 10px;">
+                                                {{ ucfirst($latestLoan->status ?? 'Pending') }}
+                                            </span>
+                                        </div>
+                                        <div class="d-flex justify-content-between">
+                                            <span class="text-muted">Reference:</span>
+                                            <span class="font-monospace text-dark">{{ $latestLoan->reference ?? '—' }}</span>
+                                        </div>
                                     </div>
-                                    <div class="d-flex justify-content-between mb-2">
-                                        <span class="text-muted">Requested Amount:</span>
-                                        <strong class="text-dark">₦{{ number_format($latestLoan->amount ?? 0, 2) }}</strong>
-                                    </div>
-                                    <div class="d-flex justify-content-between mb-2">
-                                        <span class="text-muted">Status:</span>
-                                        @php
-                                            $badgeClass = match($latestLoan->status) {
-                                                'successful', 'success', 'approved' => 'success',
-                                                'pending'                           => 'warning',
-                                                'failed', 'rejected', 'declined'    => 'danger',
-                                                default                             => 'secondary'
-                                            };
-                                        @endphp
-                                        <span class="badge bg-{{ $badgeClass }}-soft text-{{ $badgeClass }} py-1 px-3 rounded-pill fw-bold" style="font-size: 10px;">
-                                            {{ ucfirst($latestLoan->status ?? 'Pending') }}
-                                        </span>
-                                    </div>
-                                    <div class="d-flex justify-content-between">
-                                        <span class="text-muted">Reference:</span>
-                                        <span class="font-monospace text-dark">{{ $latestLoan->reference ?? '—' }}</span>
-                                    </div>
-                                </div>
 
-                                @if($isApproved)
-                                    <a href="{{ route('transactions', ['search' => 'repayment', 'type' => 'debit']) }}" 
-                                       class="btn btn-success rounded-pill px-4 py-2 fw-bold text-white"
-                                       style="background: linear-gradient(135deg, #198754 0%, #2bb16f 100%); border: none; box-shadow: 0 4px 10px rgba(25, 135, 84, 0.25) !important;">
-                                        <i class="ti ti-receipt me-2"></i> View Repayment History
-                                    </a>
+                                    @if($isApproved)
+                                        <a href="{{ route('transactions', ['search' => 'repayment', 'type' => 'debit']) }}" 
+                                           class="btn btn-success rounded-pill px-4 py-2 fw-bold text-white"
+                                           style="background: linear-gradient(135deg, #198754 0%, #2bb16f 100%); border: none; box-shadow: 0 4px 10px rgba(25, 135, 84, 0.25) !important;">
+                                            <i class="ti ti-receipt me-2"></i> View Repayment History
+                                        </a>
+                                    @else
+                                        <button type="button" 
+                                                class="btn btn-primary rounded-pill px-4 py-2 fw-bold"
+                                                style="background: linear-gradient(135deg, #F26522 0%, #ff8c52 100%); border: none; box-shadow: 0 4px 8px rgba(242, 101, 34, 0.2);"
+                                                data-bs-toggle="modal"
+                                                data-bs-target="#commentModal"
+                                                data-comment="{{ $latestLoan->comment ?? ($isDeclined ? 'Your loan application was declined after checking credit score/account parameters. Contact support for help.' : 'Your loan application is currently under review by our credit team. We will update you shortly.') }}"
+                                                data-ref="{{ $latestLoan->reference ?? '' }}"
+                                                data-approved-by="{{ $latestLoan->approved_by ?? $latestLoan->completed_by ?? '' }}">
+                                            <i class="ti ti-eye me-2"></i> {{ $isDeclined ? 'View Decline Reason' : 'View Application Details' }}
+                                        </button>
+                                    @endif
                                 @else
-                                    <button type="button" 
-                                            class="btn btn-primary rounded-pill px-4 py-2 fw-bold"
-                                            style="background: linear-gradient(135deg, #F26522 0%, #ff8c52 100%); border: none; box-shadow: 0 4px 8px rgba(242, 101, 34, 0.2);"
-                                            data-bs-toggle="modal"
-                                            data-bs-target="#commentModal"
-                                            data-comment="{{ $latestLoan->comment ?? ($isDeclined ? 'Your loan application was declined after checking credit score/account parameters. Contact support for help.' : 'Your loan application is currently under review by our credit team. We will update you shortly.') }}"
-                                            data-ref="{{ $latestLoan->reference ?? '' }}"
-                                            data-approved-by="{{ $latestLoan->approved_by ?? $latestLoan->completed_by ?? '' }}">
-                                        <i class="ti ti-eye me-2"></i> {{ $isDeclined ? 'View Decline Reason' : 'View Application Details' }}
-                                    </button>
+                                    <a href="{{ route('support.create') }}" 
+                                       class="btn btn-primary rounded-pill px-4 py-2 fw-bold"
+                                       style="background: linear-gradient(135deg, #F26522 0%, #ff8c52 100%); border: none; box-shadow: 0 4px 8px rgba(242, 101, 34, 0.2);">
+                                        <i class="ti ti-headphones me-2"></i> Contact Support
+                                    </a>
                                 @endif
                             </div>
                         </div>

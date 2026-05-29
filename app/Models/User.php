@@ -50,6 +50,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'role',
         'password',
         'limit',
+        'can_apply_loan',
     ];
 
     /**
@@ -73,6 +74,7 @@ class User extends Authenticatable implements MustVerifyEmail
         return [
             'email_verified_at' => 'datetime',
             'password'          => 'hashed',
+            'can_apply_loan'    => 'boolean',
         ];
     }
 

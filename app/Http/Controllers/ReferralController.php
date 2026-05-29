@@ -24,9 +24,18 @@ class ReferralController extends Controller
             ->get();
 
         foreach ($pendingBonuses as $bonus) {
-            // Count successful transactions by the referred user
+            // Count qualified transactions by the referred user (debit >= 1000 or credit >= 2000)
             $transactionCount = \App\Models\Transaction::where('user_id', $bonus->referred_user_id)
                 ->where('status', 'completed')
+                ->where(function ($query) {
+                    $query->where(function ($q) {
+                        $q->where('type', 'debit')
+                          ->where('amount', '>=', 1000);
+                    })->orWhere(function ($q) {
+                        $q->where('type', 'credit')
+                          ->where('amount', '>=', 2000);
+                    });
+                })
                 ->count();
 
             if ($transactionCount >= 5) {
@@ -66,21 +75,33 @@ class ReferralController extends Controller
         // Current wallet and bonus balance
         $wallet = Wallet::where('user_id', $userId)->first();
         
-        // Fetch history with referred user details - ONLY PENDING
+        // Fetch all referral history with referred user details
         $bonusHistory = BonusHistory::where('user_id', $userId)
-            ->where('status', 'pending')
             ->with('referredUser')
             ->orderBy('id', 'desc')
             ->get();
 
-        // For each bonus in history, attach the current transaction count of the referred user
+        // For each bonus in history, attach the current qualified transaction count of the referred user
         foreach ($bonusHistory as $history) {
             $history->referred_user_transaction_count = \App\Models\Transaction::where('user_id', $history->referred_user_id)
                 ->where('status', 'completed')
+                ->where(function ($query) {
+                    $query->where(function ($q) {
+                        $q->where('type', 'debit')
+                          ->where('amount', '>=', 1000);
+                    })->orWhere(function ($q) {
+                        $q->where('type', 'credit')
+                          ->where('amount', '>=', 2000);
+                    });
+                })
                 ->count();
         }
 
         $referralLink = config('app.url') . '/register?ref=' . $user->referral_code;
+
+        $referralAmount = $user->referral_bonus > 0
+            ? $user->referral_bonus
+            : (\DB::table('referral_bonus')->value('bonus') ?? 500.00);
 
         return view('referral.index', compact(
             'user',
@@ -88,7 +109,8 @@ class ReferralController extends Controller
             'totalEarnings',
             'wallet',
             'bonusHistory',
-            'referralLink'
+            'referralLink',
+            'referralAmount'
         ));
     }
 

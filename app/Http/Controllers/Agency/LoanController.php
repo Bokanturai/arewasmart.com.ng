@@ -80,10 +80,14 @@ class LoanController extends Controller
             ->orderBy('created_at', 'desc')
             ->first();
 
-        $hasNonSuccessfulLoan = false;
-        if ($latestLoan && !in_array(strtolower($latestLoan->status), ['successful', 'success'])) {
-            $hasNonSuccessfulLoan = true;
-        }
+        $latestStatus = $latestLoan ? strtolower($latestLoan->status) : null;
+        $isPending = in_array($latestStatus, ['pending']);
+        $isApproved = in_array($latestStatus, ['approved']);
+
+        // User can apply if they do not have an active pending or approved loan AND their can_apply_loan permission is true
+        $canApply = $user->can_apply_loan && !$isPending && !$isApproved;
+
+        $hasNonSuccessfulLoan = !$canApply;
 
         // Get dynamic interest rate for this role (falls back to 20 if not set)
         $interestField = ServiceField::where('service_id', $loanService->id)
@@ -137,14 +141,18 @@ class LoanController extends Controller
         $user = Auth::user();
         $role = $user->role ?? 'personal';
 
-        // ── Security Check: Ensure user does not have any active/unsuccessful loan ──
+        // ── Security Check: Ensure user is allowed to apply ──
+        if (!$user->can_apply_loan) {
+            return back()->with('error', 'Security Block: Your loan facility is currently locked. Please contact our support team to unlock your account.')->withInput();
+        }
+
         $latestLoan = AgentService::where('user_id', $user->id)
             ->where('service_type', 'loan')
             ->orderBy('created_at', 'desc')
             ->first();
 
-        if ($latestLoan && !in_array(strtolower($latestLoan->status), ['successful', 'success'])) {
-            return back()->with('error', 'Security Block: You already have a ' . ucfirst($latestLoan->status) . ' loan application. You are only allowed to apply for a new loan once your existing one is fully settled and successful.')->withInput();
+        if ($latestLoan && in_array(strtolower($latestLoan->status), ['pending', 'approved'])) {
+            return back()->with('error', 'Security Block: You already have an active or pending loan application under review. You can only apply for a new loan once your existing one is fully resolved.')->withInput();
         }
 
         // ── Basic validation ─────────────────────────────────────────────────
@@ -204,6 +212,9 @@ class LoanController extends Controller
                 'submission_date'    => now(),
                 'performed_by'       => $performedBy,
             ]);
+
+            // Lock user's loan permission until reviewed and re-enabled by admin
+            $user->update(['can_apply_loan' => false]);
 
             Log::info('Loan application submitted', [
                 'user_id'          => $user->id,
