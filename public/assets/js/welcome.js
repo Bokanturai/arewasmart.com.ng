@@ -357,4 +357,114 @@ document.addEventListener('DOMContentLoaded', () => {
         createTestiDots();
         startTestiAutoPlay();
     }
+
+    // --- PWA Service Worker Registration ---
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+            navigator.serviceWorker.register('/sw.js')
+                .then(reg => {
+                    console.log('Service Worker registered', reg);
+                    reg.addEventListener('updatefound', () => {
+                        const newWorker = reg.installing;
+                        if (newWorker) {
+                            newWorker.addEventListener('statechange', () => {
+                                if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                                    console.log('New service worker installed. Reloading...');
+                                    window.location.reload();
+                                }
+                            });
+                        }
+                    });
+                })
+                .catch(err => console.log('Service Worker registration failed', err));
+        });
+
+        let refreshing = false;
+        navigator.serviceWorker.addEventListener('controllerchange', () => {
+            if (!refreshing) {
+                refreshing = true;
+                window.location.reload();
+            }
+        });
+    }
+
+    // --- Graceful Connection drop monitoring: Avoid immediate redirects ---
+    let connectionCheckInterval = null;
+    let offlineTimeout = null;
+
+    function handleDeviceOffline() {
+        if (window.location.pathname.includes('/ofline/')) return;
+
+        // 1. Create the banner dynamically if not present
+        let banner = document.getElementById('premium-offline-toast');
+        if (!banner) {
+            banner = document.createElement('div');
+            banner.id = 'premium-offline-toast';
+            banner.className = 'premium-offline-banner';
+            banner.innerHTML = `
+                <div class="premium-offline-content">
+                    <i class="premium-offline-icon fa-solid fa-wifi-slash"></i>
+					<span>Connection lost. Attempting to reconnect...</span>
+                </div>
+                <div class="premium-offline-spinner"></div>
+            `;
+            document.body.appendChild(banner);
+        }
+
+        // Force reflow and display banner
+        setTimeout(() => banner.classList.add('show'), 100);
+
+        // 2. Start dynamic countdown (5 seconds before ultimate redirect)
+        if (offlineTimeout) clearTimeout(offlineTimeout);
+        offlineTimeout = setTimeout(() => {
+            sessionStorage.setItem('offline_fallback_url', window.location.href);
+            window.location.href = '/ofline/index.html';
+        }, 5000);
+
+        // 3. Start active background reconnect checking (pings every 1.5 seconds)
+        if (connectionCheckInterval) clearInterval(connectionCheckInterval);
+        connectionCheckInterval = setInterval(async () => {
+            try {
+                const response = await fetch('/manifest.json?t=' + Date.now(), {
+                    method: 'HEAD',
+                    cache: 'no-store'
+                });
+                if (response.ok) {
+                    // Connection restored! Clear everything and hide banner
+                    handleDeviceOnline();
+                }
+            } catch (e) {
+                // Still offline
+            }
+        }, 1500);
+    }
+
+    function handleDeviceOnline() {
+        // Clear intervals and timeouts
+        if (offlineTimeout) {
+            clearTimeout(offlineTimeout);
+            offlineTimeout = null;
+        }
+        if (connectionCheckInterval) {
+            clearInterval(connectionCheckInterval);
+            connectionCheckInterval = null;
+        }
+
+        // Hide the warning banner
+        const banner = document.getElementById('premium-offline-toast');
+        if (banner) {
+            banner.classList.remove('show');
+        }
+    }
+
+    window.addEventListener('offline', handleDeviceOffline);
+    window.addEventListener('online', handleDeviceOnline);
+
+    // Prevent form submissions when offline to avoid browser network error screens
+    document.addEventListener('submit', function(event) {
+        if (!navigator.onLine) {
+            event.preventDefault();
+            handleDeviceOffline(); // Instantly show offline toast
+        }
+    }, true);
 });

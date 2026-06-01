@@ -298,4 +298,68 @@
        border-radius: 20px !important;
    }
 
+/* Premium Glassmorphic Offline Banner */
+.premium-offline-banner {
+    position: fixed;
+    top: -100px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 92%;
+    max-width: 480px;
+    background: rgba(211, 113, 2, 0.15); /* Orange brand glassmorphism tint */
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(211, 113, 2, 0.35);
+    border-radius: 16px;
+    padding: 0.9rem 1.4rem;
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.12);
+    z-index: 100002;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    transition: top 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.premium-offline-banner.show {
+    top: 24px;
+}
+
+.premium-offline-content {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    color: #1e293b;
+    font-weight: 700;
+    font-size: 0.95rem;
+}
+
+[data-theme="dark"] .premium-offline-content {
+    color: #f8fafc;
+}
+
+.premium-offline-icon {
+    font-size: 1.2rem;
+    color: #d37102;
+    animation: offlinePulse 1.5s infinite alternate;
+}
+
+@keyframes offlinePulse {
+    from { opacity: 0.6; transform: scale(0.96); }
+    to { opacity: 1; transform: scale(1.06); }
+}
+
+.premium-offline-spinner {
+    width: 18px;
+    height: 18px;
+    border: 2.5px solid rgba(211, 113, 2, 0.2);
+    border-top-color: #d37102;
+    border-radius: 50%;
+    animation: offlineSpin 0.8s linear infinite;
+}
+
+@keyframes offlineSpin {
+    to { transform: rotate(360deg); }
+}
+
 

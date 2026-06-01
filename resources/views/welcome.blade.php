@@ -36,6 +36,10 @@
         <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('assets/img/logo/app-logo.png') }}">
         <link rel="icon" type="image/png" sizes="16x16" href="{{ asset('assets/img/logo/app-logo.png') }}">
 
+        <!-- PWA Manifest -->
+        <link rel="manifest" href="/manifest.json">
+        <meta name="theme-color" content="#ffffff">
+
         <!-- Custom Styles -->
         <link rel="stylesheet" href="{{ asset('assets/css/welcome.css') }}">
     </head>

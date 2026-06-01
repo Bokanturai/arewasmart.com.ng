@@ -15,6 +15,9 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
 
 
+use Illuminate\Support\Facades\Cache;
+
+
 class AirtimeController extends Controller
 {
     protected $loginUserId;
@@ -22,6 +25,7 @@ class AirtimeController extends Controller
     public function __construct()
     {
         $this->loginUserId = Auth::id();
+        $this->middleware('throttle:6,1')->only('buyAirtime');
     }
 
     /**
@@ -96,6 +100,14 @@ class AirtimeController extends Controller
              return redirect()->back()->with('error', "Your account is currently {$user->status}. Access denied.");
         }
 
+        // 0.0 PIN Verification
+        if (!\Illuminate\Support\Facades\Hash::check($request->pin, $user->pin)) {
+             if ($request->wantsJson()) {
+                 return response()->json(['status' => 'error', 'message' => 'Invalid transaction PIN.'], 403);
+             }
+             return redirect()->back()->with('error', 'Invalid transaction PIN.');
+        }
+
         // 0.1 Purchase Limit Check (Max ₦5,000 per transaction)
         if ($amount > 5000) {
              $limitMsg = 'Purchase limit exceeded! The maximum airtime amount allowed per transaction is ₦5,000.';
@@ -103,6 +115,17 @@ class AirtimeController extends Controller
                  return response()->json(['status' => 'error', 'message' => $limitMsg], 422);
              }
              return redirect()->back()->with('error', $limitMsg)->withInput();
+        }
+
+        // Double-click/Concurrency lock (reject rapid concurrent requests)
+        $lockKey = 'airtime_purchase_lock_' . $user->id;
+        $lock = Cache::lock($lockKey, 30); // 30-second lock
+
+        if (!$lock->get()) {
+            if ($request->wantsJson()) {
+                return response()->json(['status' => 'error', 'message' => 'A transaction is already in progress. Please wait a moment.'], 429);
+            }
+            return redirect()->back()->with('error', 'A transaction is already in progress. Please wait a moment.');
         }
 
 
@@ -139,9 +162,9 @@ class AirtimeController extends Controller
         // 3. Calculate Discount
         $discountPercentage = 0;
         if ($serviceField) {
-            $userType = $user->user_type ?? 'personal'; 
+            $userRole = $user->role ?? 'personal'; 
             $servicePrice = \App\Models\ServicePrice::where('service_fields_id', $serviceField->id)
-                ->where('user_type', $userType)
+                ->where('user_type', $userRole)
                 ->first();
 
             $discountPercentage = $servicePrice ? $servicePrice->price : ($serviceField->base_price ?? 0);
@@ -150,24 +173,33 @@ class AirtimeController extends Controller
         $discountAmount = ($amount * $discountPercentage) / 100;
         $payableAmount = $amount - $discountAmount;
 
-        // 4. Check Wallet Balance & Status
-        $wallet = Wallet::where('user_id', $user->id)->first();
-        if (!$wallet || $wallet->balance < $payableAmount) {
-
-            $msg = 'Insufficient wallet balance! You need ₦' . number_format($payableAmount, 2);
-            if ($request->wantsJson()) return response()->json(['status' => 'error', 'message' => $msg], 422);
-            return redirect()->back()->with('error', $msg);
-        }
-
-        if ($wallet->status !== 'active') {
-            if ($request->wantsJson()) return response()->json(['status' => 'error', 'message' => 'Your wallet is not active.'], 403);
-            return redirect()->back()->with('error', 'Your wallet is not active. Please contact support.');
-        }
-
-
-        // 5. Initialize Records (Mark as Processing)
+        // 4. Start DB Transaction & Initialize Records
         DB::beginTransaction();
         try {
+            // Fetch Wallet with Row Locking to prevent concurrent race conditions
+            $wallet = Wallet::where('user_id', $user->id)->lockForUpdate()->first();
+
+            if (!$wallet) {
+                DB::rollBack();
+                $msg = 'Wallet not found.';
+                if ($request->wantsJson()) return response()->json(['status' => 'error', 'message' => $msg], 404);
+                return redirect()->back()->with('error', $msg);
+            }
+
+            if ($wallet->balance < $payableAmount) {
+                DB::rollBack();
+                $msg = 'Insufficient wallet balance! You need ₦' . number_format($payableAmount, 2);
+                if ($request->wantsJson()) return response()->json(['status' => 'error', 'message' => $msg], 422);
+                return redirect()->back()->with('error', $msg);
+            }
+
+            if ($wallet->status !== 'active') {
+                DB::rollBack();
+                $msg = 'Your wallet is not active. Please contact support.';
+                if ($request->wantsJson()) return response()->json(['status' => 'error', 'message' => $msg], 403);
+                return redirect()->back()->with('error', $msg);
+            }
+
             $oldBalance = $wallet->balance;
             $wallet->decrement('balance', $payableAmount);
             $newBalance = $wallet->balance;
@@ -212,9 +244,9 @@ class AirtimeController extends Controller
         // 6. Call Airtime API (OUTSIDE the DB Transaction)
         try {
             $response = Http::withHeaders([
-                'api-key'    => env('API_KEY'),
-                'secret-key' => env('SECRET_KEY'),
-            ])->timeout(30)->post(env('MAKE_PAYMENT'), [
+                'api-key'    => config('services.vtpass.api_key'),
+                'secret-key' => config('services.vtpass.secret_key'),
+            ])->timeout(30)->post(config('services.vtpass.payment_url'), [
                 'request_id' => $requestId,
                 'serviceID'  => $networkKey,
                 'amount'     => $amount,

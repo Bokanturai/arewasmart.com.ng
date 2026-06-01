@@ -52,12 +52,18 @@ self.addEventListener('fetch', event => {
   const request = event.request;
   const url = new URL(request.url);
 
-  // SECURITY: Avoid caching POST/PUT/DELETE, external CDNs, or sensitive routes
+  // Permit caching specific dynamic/static assets from approved external CDNs
+  const isApprovedCdn = 
+    url.hostname === 'cdnjs.cloudflare.com' ||
+    url.hostname === 'fonts.googleapis.com' ||
+    url.hostname === 'fonts.gstatic.com';
+
+  // SECURITY: Avoid caching POST/PUT/DELETE, external cross-origin (except CDNs), logout, admin, api, or wallet balance
   if (
     request.method !== 'GET' ||
-    url.origin !== self.location.origin ||
+    (url.origin !== self.location.origin && !isApprovedCdn) ||
     url.pathname.includes('/logout') ||
-    url.pathname.includes('/login') ||
+    url.pathname.includes('/wallet/balance') ||
     url.pathname.startsWith('/admin') ||
     url.pathname.startsWith('/api')
   ) {
@@ -67,6 +73,24 @@ self.addEventListener('fetch', event => {
   // STRATEGY A: Network-First (for HTML / Document Navigation Pages)
   // Ensures fresh live data, but falls back to previously visited cached pages, then to the offline screen
   if (request.mode === 'navigate') {
+    // Check if this is a sensitive/auth route that should NOT be cached
+    const isAuthOrSensitive = 
+      url.pathname.includes('/login') ||
+      url.pathname.includes('/register') ||
+      url.pathname.includes('/forgot-password') ||
+      url.pathname.includes('/reset-password') ||
+      url.pathname.includes('/verify-email') ||
+      url.pathname.includes('/confirm-password');
+
+    if (isAuthOrSensitive) {
+      // Intercept navigation but DO NOT cache, just fallback to offline page if fetch fails
+      event.respondWith(
+        fetch(request)
+          .catch(() => caches.match('/ofline/index.html'))
+      );
+      return;
+    }
+
     event.respondWith(
       fetch(request)
         .then(response => {
@@ -98,7 +122,8 @@ self.addEventListener('fetch', event => {
         return cachedResponse;
       }
       return fetch(request).then(response => {
-        if (!response || response.status !== 200 || response.type !== 'basic') {
+        // Allow basic (same-origin) or cors (approved cross-origin CDN) response types to be cached
+        if (!response || response.status !== 200 || (response.type !== 'basic' && response.type !== 'cors')) {
           return response;
         }
         const responseClone = response.clone();

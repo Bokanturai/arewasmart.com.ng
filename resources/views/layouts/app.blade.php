@@ -431,217 +431,54 @@
     @auth
     <script>
         document.addEventListener("DOMContentLoaded", function () {
-            let globalAudioContext = null;
+            let isSyncing = false;
 
-            // Initialize and unlock audio context on the very first user interaction
-            function unlockAudio() {
-                try {
-                    const AudioContext = window.AudioContext || window.webkitAudioContext;
-                    if (AudioContext && !globalAudioContext) {
-                        globalAudioContext = new AudioContext();
-                    }
-                    if (globalAudioContext && globalAudioContext.state === 'suspended') {
-                        globalAudioContext.resume();
-                    }
-                    if ('speechSynthesis' in window) {
-                        window.speechSynthesis.resume();
-                        // Warm up the voices
-                        window.speechSynthesis.getVoices();
-                    }
-                } catch (e) {
-                    console.warn("Audio unlock failed:", e);
-                }
-            }
+            // Function to sync the user's current wallet balance
+            function syncWalletBalance() {
+                if (isSyncing) return;
+                isSyncing = true;
 
-            // Bind to first click or touch start
-            document.addEventListener('click', unlockAudio, { once: true });
-            document.addEventListener('touchstart', unlockAudio, { once: true });
+                // Dispatch event that balance synchronization has started
+                document.dispatchEvent(new CustomEvent('wallet-balance-syncing'));
 
-            // Warm up speech voices asynchronously
-            if ('speechSynthesis' in window) {
-                window.speechSynthesis.onvoiceschanged = function () {
-                    window.speechSynthesis.getVoices();
-                };
-            }
-
-            // Function to check for new credit transactions
-            function checkNewCredits() {
                 $.ajax({
-                    url: "{{ route('wallet.checkVoiceCredits') }}",
+                    url: "{{ route('wallet.balance') }}",
                     type: "GET",
                     dataType: "json",
                     success: function (response) {
-                        if (response.success) {
-                            // Update balance dynamically on every poll in case it changed
-                            if (response.balance !== undefined) {
-                                const event = new CustomEvent('wallet-balance-updated', {
-                                    detail: { balance: response.balance }
-                                });
-                                document.dispatchEvent(event);
-                            }
-
-                            if (response.credits && response.credits.length > 0) {
-                                let announced = JSON.parse(localStorage.getItem('announced_credits') || '[]');
-                                let newCreditsDetected = false;
-
-                                response.credits.forEach(function (credit) {
-                                    const creditId = String(credit.id);
-                                    if (!announced.includes(creditId)) {
-                                        // Mark as new credit detected
-                                        newCreditsDetected = true;
-                                        announced.push(creditId);
-
-                                        // 1. Play premium cash chime & TTS Voice announcement
-                                        playSuccessChime();
-                                        speakCreditNotification();
-
-                                        // 2. Show premium SweetAlert2 Toast
-                                        showPremiumCreditToast(credit.amount, credit.description);
-                                    }
-                                });
-
-                                if (newCreditsDetected) {
-                                    // Limit cached IDs to latest 50 to keep localStorage clean
-                                    if (announced.length > 50) {
-                                        announced = announced.slice(announced.length - 50);
-                                    }
-                                    localStorage.setItem('announced_credits', JSON.stringify(announced));
-                                }
-                            }
+                        if (response.success && response.balance !== undefined) {
+                            // Dispatch event with the up-to-date balance
+                            document.dispatchEvent(new CustomEvent('wallet-balance-updated', {
+                                detail: { balance: response.balance }
+                            }));
                         }
                     },
                     error: function (xhr, status, error) {
-                        console.warn("Silent failure checking credits:", error);
+                        if (xhr.status === 401) {
+                            clearInterval(balancePollInterval);
+                            console.log("[Arewa Smart] Session expired. Stopped real-time balance polling.");
+                        } else {
+                            console.warn("[Arewa Smart] Real-time balance sync error:", error);
+                        }
+                    },
+                    complete: function () {
+                        isSyncing = false;
+                        // Dispatch event that balance synchronization is finished
+                        document.dispatchEvent(new CustomEvent('wallet-balance-synced'));
                     }
                 });
             }
 
-            // Function to play a premium synthesizer cash-receipt arpeggio chime (Web Audio API)
-            function playSuccessChime() {
-                try {
-                    // Try to unlock or reuse the global context
-                    if (!globalAudioContext) {
-                        const AudioContext = window.AudioContext || window.webkitAudioContext;
-                        if (AudioContext) {
-                            globalAudioContext = new AudioContext();
-                        }
-                    }
-                    if (!globalAudioContext) return;
+            // Listen for manual sync requests from the UI
+            document.addEventListener('trigger-wallet-balance-sync', function () {
+                syncWalletBalance();
+            });
 
-                    // If suspended, try to resume
-                    if (globalAudioContext.state === 'suspended') {
-                        globalAudioContext.resume();
-                    }
+            // Run initial balance sync 1 second after page load
+            setTimeout(syncWalletBalance, 1000);
 
-                    const ctx = globalAudioContext;
-                    
-                    // Chime note 1 (E5 - 659.25 Hz)
-                    const osc1 = ctx.createOscillator();
-                    const gain1 = ctx.createGain();
-                    osc1.type = 'sine';
-                    osc1.frequency.setValueAtTime(659.25, ctx.currentTime);
-                    gain1.gain.setValueAtTime(0.12, ctx.currentTime);
-                    gain1.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.4);
-                    osc1.connect(gain1);
-                    gain1.connect(ctx.destination);
-                    osc1.start();
-                    osc1.stop(ctx.currentTime + 0.4);
-                    
-                    // Chime note 2 (A5 - 880.00 Hz) - offset for arpeggio
-                    setTimeout(function () {
-                        if (ctx.state === 'suspended') return;
-                        const osc2 = ctx.createOscillator();
-                        const gain2 = ctx.createGain();
-                        osc2.type = 'sine';
-                        osc2.frequency.setValueAtTime(880.00, ctx.currentTime);
-                        gain2.gain.setValueAtTime(0.12, ctx.currentTime);
-                        gain2.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.6);
-                        osc2.connect(gain2);
-                        gain2.connect(ctx.destination);
-                        osc2.start();
-                        osc2.stop(ctx.currentTime + 0.6);
-                    }, 120);
-                } catch (e) {
-                    console.warn("Chime Web Audio failed:", e);
-                }
-            }
-
-            // Function to announce credit using Speech Synthesis (Web Speech API)
-            function speakCreditNotification() {
-                if ('speechSynthesis' in window) {
-                    try {
-                        // Force resume in case browser engine is stuck in suspended mode
-                        window.speechSynthesis.resume();
-                        window.speechSynthesis.cancel();
-
-                        const text = "Your Arewa Smart Wallet has been credited successfully";
-                        const utterance = new SpeechSynthesisUtterance(text);
-                        utterance.lang = 'en-US'; // Explicitly target English to ensure speech engine triggers properly
-                        
-                        // Auto-select best English voice if available
-                        const voices = window.speechSynthesis.getVoices();
-                        const englishVoice = voices.find(voice => voice.lang.startsWith('en'));
-                        if (englishVoice) {
-                            utterance.voice = englishVoice;
-                        }
-                        
-                        utterance.rate = 0.95; // Slightly slower for crisp clear pronunciation
-                        utterance.pitch = 1.0;
-                        
-                        window.speechSynthesis.speak(utterance);
-                    } catch (err) {
-                        console.warn("Speech Synthesis error:", err);
-                    }
-                } else {
-                    console.warn("Speech Synthesis not supported in this browser.");
-                }
-            }
-
-            // Function to show a premium, jaw-dropping visual toast alert
-            function showPremiumCreditToast(amount, description) {
-                const formattedAmount = '₦' + parseFloat(amount).toLocaleString('en-US', {minimumFractionDigits: 2});
-                
-                Swal.fire({
-                    title: '<span style="font-family: \'Nunito Sans\', sans-serif; font-weight: 800; color: #fff;">Wallet Credited!</span>',
-                    html: `
-                        <div class="d-flex align-items-center gap-3" style="text-align: left; font-family: 'Nunito Sans', sans-serif;">
-                            <div style="background: rgba(255, 255, 255, 0.15); border-radius: 12px; padding: 10px; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 10px rgba(0,0,0,0.15);">
-                                <i class="ti ti-wallet fs-24 text-warning" style="color: #ffc107 !important;"></i>
-                            </div>
-                            <div>
-                                <h4 class="mb-0 text-white" style="font-weight: 800; font-size: 1.15rem; letter-spacing: -0.3px;">+ ${formattedAmount}</h4>
-                                <p class="mb-0 text-white-50" style="font-size: 0.75rem; line-height: 1.2; margin-top: 2px;">${description || 'Your wallet has been funded successfully.'}</p>
-                            </div>
-                        </div>
-                    `,
-                    toast: true,
-                    position: 'top-end',
-                    showConfirmButton: false,
-                    timer: 8000,
-                    timerProgressBar: true,
-                    background: 'linear-gradient(135deg, #1e293b 0%, #0f172a 100%)',
-                    showClass: {
-                        popup: 'animate__animated animate__fadeInRight animate__faster'
-                    },
-                    hideClass: {
-                        popup: 'animate__animated animate__fadeOutRight animate__faster'
-                    },
-                    customClass: {
-                        popup: 'premium-toast border-0 shadow-lg'
-                    },
-                    didOpen: (toast) => {
-                        toast.style.borderRadius = '16px';
-                        toast.style.border = '1px solid rgba(255, 255, 255, 0.08)';
-                        toast.style.backdropFilter = 'blur(10px)';
-                    }
-                });
-            }
-
-            // Run initial check 3.5 seconds after page load (gives time for SpeechSynthesis voices to load)
-            setTimeout(checkNewCredits, 3500);
-
-            // Poll every 10 seconds for real-time responsiveness
-            setInterval(checkNewCredits, 10000);
+            // Poll every 10 seconds to keep the wallet balance in real-time sync
+            const balancePollInterval = setInterval(syncWalletBalance, 10000);
         });
     </script>
     @endauth

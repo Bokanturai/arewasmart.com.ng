@@ -22,7 +22,10 @@ class EducationalController extends Controller
 {
     use ActiveUsers;
 
-    // No constructor needed as Auth is handled per-method
+    public function __construct()
+    {
+        $this->middleware('throttle:6,1')->only(['buypin', 'buyJamb']);
+    }
 
 
     // ─────────────────────────────────────────────
@@ -222,9 +225,9 @@ class EducationalController extends Controller
             // ── 9. Call VTpass API (with timeout) ───────────────
             $startTime = microtime(true);
             $response = Http::withHeaders([
-                'api-key'    => env('API_KEY'),
-                'secret-key' => env('SECRET_KEY'),
-            ])->timeout(30)->post(env('MAKE_PAYMENT'), [
+                'api-key'    => config('services.vtpass.api_key'),
+                'secret-key' => config('services.vtpass.secret_key'),
+            ])->timeout(30)->post(config('services.vtpass.payment_url'), [
                 'request_id'     => $requestId,
                 'serviceID'      => $request->service,
                 'billersCode'    => '0123456789',
@@ -399,9 +402,9 @@ class EducationalController extends Controller
             Log::info('JAMB Verification Request', $requestPayload);
 
             $response = Http::withHeaders([
-                'api-key'    => env('API_KEY'),
-                'secret-key' => env('SECRET_KEY'),
-            ])->timeout(30)->post(env('VTPASS_BASE_URL', 'https://vtpass.com/api') . '/merchant-verify', $requestPayload);
+                'api-key'    => config('services.vtpass.api_key'),
+                'secret-key' => config('services.vtpass.secret_key'),
+            ])->timeout(30)->post(config('services.vtpass.base_url') . '/merchant-verify', $requestPayload);
 
             $data = $response->json();
 
@@ -527,9 +530,9 @@ class EducationalController extends Controller
             // ── 9. Call VTpass API (with timeout) ───────────────
             $startTime = microtime(true);
             $response = Http::withHeaders([
-                'api-key'    => env('API_KEY'),
-                'secret-key' => env('SECRET_KEY'),
-            ])->timeout(30)->post(env('MAKE_PAYMENT'), [
+                'api-key'    => config('services.vtpass.api_key'),
+                'secret-key' => config('services.vtpass.secret_key'),
+            ])->timeout(30)->post(config('services.vtpass.payment_url'), [
                 'request_id'     => $requestId,
                 'serviceID'      => 'jamb',
                 'billersCode'    => $request->profile_id,

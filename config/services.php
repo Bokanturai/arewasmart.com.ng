@@ -41,6 +41,7 @@ return [
         'base_url'      => env('BASE_URL', 'https://sandbox.vtpass.com/api'),
         'payment_url'   => env('MAKE_PAYMENT'),
         'variation_url' => env('VARIATION_URL'),
+        'biller_code'   => env('BIILER_CODE'),
     ],
 
     'deepseek' => [

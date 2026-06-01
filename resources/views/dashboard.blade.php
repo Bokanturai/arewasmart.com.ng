@@ -86,6 +86,68 @@
                 color: #111827;
                 font-size: 20px;
                 letter-spacing: -0.5px;
+                transition: all 0.3s ease;
+            }
+            .live-indicator-badge {
+                background: rgba(16, 185, 129, 0.08);
+                color: #10b981;
+                padding: 3px 8px;
+                border-radius: 20px;
+                font-weight: 700;
+                letter-spacing: 0.5px;
+                text-transform: uppercase;
+                border: 1px solid rgba(16, 185, 129, 0.15);
+                display: inline-flex;
+                align-items: center;
+                gap: 5px;
+            }
+            .pulse-dot {
+                width: 6px;
+                height: 6px;
+                background-color: #10b981;
+                border-radius: 50%;
+                display: inline-block;
+                box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
+                animation: pulse 1.6s infinite;
+            }
+            @keyframes pulse {
+                0% {
+                    transform: scale(0.95);
+                    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
+                }
+                70% {
+                    transform: scale(1);
+                    box-shadow: 0 0 0 5px rgba(16, 185, 129, 0);
+                }
+                100% {
+                    transform: scale(0.95);
+                    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
+                }
+            }
+            .sync-icon {
+                transition: transform 0.6s ease;
+            }
+            .sync-icon.spinning {
+                animation: spin 1s linear infinite;
+            }
+            @keyframes spin {
+                from { transform: rotate(0deg); }
+                to { transform: rotate(360deg); }
+            }
+            .balance-val.flash-update {
+                animation: flashGlow 0.8s ease-out;
+            }
+            @keyframes flashGlow {
+                0% {
+                    color: #10b981;
+                    text-shadow: 0 0 8px rgba(16, 185, 129, 0.4);
+                    transform: scale(1.04);
+                }
+                100% {
+                    color: inherit;
+                    text-shadow: none;
+                    transform: scale(1);
+                }
             }
         </style>
     @endpush
@@ -169,13 +231,22 @@
                         <div class="wallet-footer d-flex align-items-center justify-content-between">
                             <div class="d-flex align-items-center gap-2">
                                 <span class="balance-title">Balance:</span>
-                                <button id="toggle-balance" class="btn btn-link text-primary p-0 border-0 shadow-none">
+                                <button id="toggle-balance" class="btn btn-link text-primary p-0 border-0 shadow-none" title="Toggle Visibility">
                                     <i class="fas fa-eye eye-icon fs-14"></i>
                                 </button>
+                                <span class="live-indicator-badge" title="Active">
+                                    <span class="pulse-dot"></span>
+                                    <span class="live-text" style="font-size: 9px; line-height: 1;"></span>
+                                </span>
                             </div>
-                            <span id="wallet-balance" class="balance-val text-primary">
-                                ₦{{ number_format($wallet->balance ?? 0, 2) }}
-                            </span>
+                            <div class="d-flex align-items-center gap-2">
+                                <span id="wallet-balance" class="balance-val text-primary">
+                                    ₦{{ number_format($wallet->balance ?? 0, 2) }}
+                                </span>
+                                <button id="sync-balance-btn" class="btn btn-link text-muted p-0 border-0 shadow-none ms-1" title="Sync Balance">
+                                    <i class="fas fa-sync-alt sync-icon fs-10"></i>
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>

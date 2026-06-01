@@ -48,7 +48,7 @@ Route::get('/terms', function () {
 
 Route::middleware(['auth'])->group(function () {
 
-    Route::get('/wallet/check-voice-credits', [WalletController::class, 'checkVoiceCredits'])->name('wallet.checkVoiceCredits');
+    Route::get('/wallet/balance', [WalletController::class, 'getBalance'])->name('wallet.balance');
 
     Route::get('/dashboard', [DashboardController::class, 'index'])->middleware('verified')->name('dashboard');
 

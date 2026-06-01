@@ -285,12 +285,12 @@ class DataController extends Controller
 
             // 5. Make Payment via VTPass
             $response = Http::withHeaders([
-                'api-key'    => env('API_KEY'),
-                'secret-key' => env('SECRET_KEY'),
-            ])->post(env('MAKE_PAYMENT'), [
+                'api-key'    => config('services.vtpass.api_key'),
+                'secret-key' => config('services.vtpass.secret_key'),
+            ])->post(config('services.vtpass.payment_url'), [
                 'request_id'     => $requestId,
                 'serviceID'      => $variation->service_id,
-                'billersCode'    => env('BIILER_CODE'),
+                'billersCode'    => config('services.vtpass.biller_code'),
                 'variation_code' => $request->bundle,
                 'phone'          => $request->mobileno,
             ]);

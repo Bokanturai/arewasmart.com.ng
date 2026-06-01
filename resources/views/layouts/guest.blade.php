@@ -189,5 +189,40 @@
             }
         });
     </script>
+
+    <script>
+        // PWA Implementation & Service Worker (Crucial for TWA / Play Store installation verification)
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js')
+                    .then(reg => {
+                        console.log('Service Worker registered', reg);
+                        // Check for service worker updates immediately
+                        reg.addEventListener('updatefound', () => {
+                            const newWorker = reg.installing;
+                            if (newWorker) {
+                                newWorker.addEventListener('statechange', () => {
+                                    if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                                        console.log('New service worker installed. Reloading...');
+                                        window.location.reload();
+                                    }
+                                });
+                            }
+                        });
+                    })
+                    .catch(err => console.log('Service Worker registration failed', err));
+            });
+
+            // Reload the page when the new active service worker takes control
+            let refreshing = false;
+            navigator.serviceWorker.addEventListener('controllerchange', () => {
+                if (!refreshing) {
+                    refreshing = true;
+                    console.log('Controller changed. Reloading page...');
+                    window.location.reload();
+                }
+            });
+        }
+    </script>
 </body>
 </html>
