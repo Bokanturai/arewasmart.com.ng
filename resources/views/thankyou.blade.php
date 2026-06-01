@@ -104,6 +104,24 @@
                         <span class="text-secondary small fw-medium">{{ str_contains(strtolower($serviceName), 'withdrawal') ? 'Account Number' : 'Phone/Account' }}</span>
                         <span class="text-dark small fw-bold">{{ $mobile }}</span>
                     </div>
+                    @if(str_contains(strtolower($serviceName), 'withdrawal') && (($fee ?? 0) > 0 || ($tax ?? 0) > 0))
+                    <div class="list-group-item d-flex justify-content-between border-0 px-0 py-2">
+                        <span class="text-secondary small fw-medium">Payout Amount</span>
+                        <span class="text-dark small fw-bold">₦{{ number_format($amount - $fee, 2) }}</span>
+                    </div>
+                    @if(($fee ?? 0) > 0)
+                    <div class="list-group-item d-flex justify-content-between border-0 px-0 py-2">
+                        <span class="text-secondary small fw-medium">Service Fee</span>
+                        <span class="text-dark small fw-bold">₦{{ number_format($fee, 2) }}</span>
+                    </div>
+                    @endif
+                    @if(($tax ?? 0) > 0)
+                    <div class="list-group-item d-flex justify-content-between border-0 px-0 py-2">
+                        <span class="text-secondary small fw-medium">Government Tax</span>
+                        <span class="text-dark small fw-bold">₦{{ number_format($tax, 2) }}</span>
+                    </div>
+                    @endif
+                    @endif
                 </div>
 
                 {{-- ── Educational PIN Section (WAEC / NECO / NABTED / JAMB) ── --}}
@@ -240,20 +258,23 @@
                     </p>
                     
                     <div class="row g-2 mt-3">
-                        <div class="col-12">
+                        <div class="col-6">
+                            <button onclick="downloadPDF()" class="btn btn-outline-primary w-100 rounded-3 py-2 fw-bold extra-small shadow-sm d-flex align-items-center justify-content-center">
+                                <i class="bi bi-download me-2"></i>Download PDF
+                            </button>
+                        </div>
+                        <div class="col-6">
                             <button onclick="shareAsPDF()" class="btn btn-outline-dark w-100 rounded-3 py-2 fw-bold extra-small shadow-sm d-flex align-items-center justify-content-center">
-                                <i class="bi bi-share me-2"></i>Share
+                                <i class="bi bi-share me-2"></i>Share PDF
                             </button>
                         </div>
                         @if($token && !$isEduPin)
-                        <div class="col-12">
+                        <div class="col-12 mt-2">
                             <button onclick="copyToClipboard('{{ $token }}', null)" class="btn btn-primary bg-gradient w-100 rounded-3 py-2 fw-bold extra-small shadow-sm mb-2 d-flex align-items-center justify-content-center border-0">
                                 <i class="bi bi-clipboard-check me-2"></i>Copy PIN
                             </button>
                         </div>
                         @endif
-                        <div class="col-12">
-                        </div>
                     </div>
                     <p class="text-muted text-center extra-small mb-0 px-2" style="line-height: 1.4; font-size: 0.7rem;">
                         Transaction complete. Thanks for choosing <span class="fw-bold text-dark">Arewa Smart Idea</span>.
@@ -279,8 +300,8 @@
             }
         });
 
-        // Share as PDF functionality
-        async function shareAsPDF() {
+        // Private helper to generate PDF using html2canvas & jsPDF
+        async function generateReceiptPDF() {
             const { jsPDF } = window.jspdf;
             const receipt = document.getElementById('receipt-capture');
             const noPrintElements = receipt.querySelectorAll('.no-print');
@@ -309,6 +330,29 @@
                 });
                 
                 pdf.addImage(imgData, 'JPEG', 0, 0, canvas.width / 2, canvas.height / 2);
+                return pdf;
+            } finally {
+                // Show elements back
+                noPrintElements.forEach(el => el.style.display = 'block');
+            }
+        }
+
+        // Direct PDF Download functionality
+        async function downloadPDF() {
+            try {
+                const pdf = await generateReceiptPDF();
+                const fileName = `ArewaSmart_Receipt_{{ $ref }}.pdf`;
+                pdf.save(fileName);
+            } catch (err) {
+                console.error('Download failed:', err);
+                alert('Download failed. Please try the Print button.');
+            }
+        }
+
+        // Share as PDF functionality
+        async function shareAsPDF() {
+            try {
+                const pdf = await generateReceiptPDF();
                 const pdfBlob = pdf.output('blob');
                 const fileName = `ArewaSmart_Receipt_{{ $ref }}.pdf`;
                 const file = new File([pdfBlob], fileName, { type: 'application/pdf' });
@@ -330,9 +374,6 @@
             } catch (err) {
                 console.error('Sharing failed:', err);
                 alert('Sharing failed. Please try the Print button.');
-            } finally {
-                // Show elements back
-                noPrintElements.forEach(el => el.style.display = 'block');
             }
         }
 

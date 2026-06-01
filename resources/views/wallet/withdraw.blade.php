@@ -233,7 +233,7 @@
                                 {{-- Amount --}}
                                 <div class="col-12">
                                     <div class="d-flex justify-content-between align-items-center mb-1">
-                                        <label for="amount" class="form-label fw-semibold text-dark mb-0">
+                                        <label for="amount_display" class="form-label fw-semibold text-dark mb-0">
                                             Withdrawal Amount <span class="text-danger">*</span>
                                         </label>
                                         <small class="text-muted">
@@ -242,15 +242,17 @@
                                     </div>
                                     <div class="input-group shadow-sm">
                                         <span class="input-group-text bg-white border-0 fw-bold text-muted">₦</span>
-                                        <input type="number"
-                                               id="amount"
-                                               name="amount"
+                                        <input type="text"
+                                               id="amount_display"
                                                class="form-control bg-light border-0 ps-0"
                                                placeholder="0.00"
-                                               min="100"
-                                               step="any"
+                                               required>
+                                        <input type="hidden"
+                                               id="amount"
+                                               name="amount"
                                                required>
                                     </div>
+                                    <div id="amount_in_words" class="text-primary fw-semibold mt-2 small text-capitalize ms-1 animate__animated animate__fadeIn" style="font-size: 0.8rem; display: none; line-height: 1.4;"></div>
                                     <div class="d-flex justify-content-between mt-2">
                                         <small class="text-muted">Min: ₦100.00</small>
                                         <small class="text-muted">Limit: ₦{{ number_format($user->limit, 2) }}</small>
@@ -394,6 +396,159 @@
         const accountNameHidden = document.getElementById('account_name_hidden');
         const proceedBtn        = document.getElementById('proceedBtn');
         const amountInput       = document.getElementById('amount');
+        const amountDisplay     = document.getElementById('amount_display');
+        const amountInWordsDisp = document.getElementById('amount_in_words');
+
+        /* ── Live Amount Comma Formatting & Synchronizing ── */
+        if (amountDisplay && amountInput) {
+            amountDisplay.addEventListener('input', function (e) {
+                let selectionStart = this.selectionStart;
+                let originalValue = this.value;
+                
+                // Clean: strip everything except digits and dot
+                let cleanValue = originalValue.replace(/[^0-9.]/g, '');
+                
+                // Keep only first dot
+                const parts = cleanValue.split('.');
+                if (parts.length > 2) {
+                    cleanValue = parts[0] + '.' + parts.slice(1).join('');
+                }
+                
+                // Update raw hidden input
+                amountInput.value = cleanValue;
+                
+                if (cleanValue === '') {
+                    this.value = '';
+                    if (amountInWordsDisp) amountInWordsDisp.style.display = 'none';
+                    return;
+                }
+                
+                // Limit decimal precision to 2 digits
+                let integerPart = parts[0];
+                let decimalPart = parts[1];
+                if (decimalPart !== undefined) {
+                    decimalPart = decimalPart.substring(0, 2);
+                    cleanValue = integerPart + '.' + decimalPart;
+                    amountInput.value = cleanValue;
+                }
+                
+                // Add commas to the integer part
+                let formattedInteger = integerPart.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+                
+                let formattedValue = formattedInteger;
+                if (decimalPart !== undefined) {
+                    formattedValue += '.' + decimalPart;
+                }
+                
+                this.value = formattedValue;
+                
+                // Update amount in words
+                const words = numberToWords(cleanValue);
+                if (words && parseFloat(cleanValue) >= 1) {
+                    amountInWordsDisp.innerText = words;
+                    amountInWordsDisp.style.display = 'block';
+                } else {
+                    amountInWordsDisp.style.display = 'none';
+                }
+                
+                // Correct cursor position
+                let lengthDiff = formattedValue.length - originalValue.length;
+                let newSelection = selectionStart + lengthDiff;
+                newSelection = Math.max(0, Math.min(newSelection, formattedValue.length));
+                this.setSelectionRange(newSelection, newSelection);
+            });
+
+            // Format to standard 2 decimal places on blur
+            amountDisplay.addEventListener('blur', function() {
+                if (amountInput.value) {
+                    let val = parseFloat(amountInput.value);
+                    if (!isNaN(val)) {
+                        this.value = val.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                        amountInput.value = val.toFixed(2);
+                    }
+                }
+            });
+
+            // Strip trailing .00 on focus for easier editing of whole numbers
+            amountDisplay.addEventListener('focus', function() {
+                if (amountInput.value) {
+                    let val = parseFloat(amountInput.value);
+                    if (!isNaN(val)) {
+                        if (val % 1 === 0) {
+                            this.value = val.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+                        }
+                    }
+                }
+            });
+        }
+
+        // Helper function: Convert number to English words
+        function numberToWords(num) {
+            if (isNaN(num) || num === '') return '';
+            
+            let n = parseFloat(num);
+            if (n === 0) return 'Zero Naira Only';
+            
+            const a = [
+                '', 'One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight', 'Nine', 'Ten',
+                'Eleven', 'Twelve', 'Thirteen', 'Fourteen', 'Fifteen', 'Sixteen', 'Seventeen', 'Eighteen', 'Nineteen'
+            ];
+            const b = [
+                '', '', 'Twenty', 'Thirty', 'Forty', 'Fifty', 'Sixty', 'Seventy', 'Eighty', 'Ninety'
+            ];
+            const g = [
+                '', 'Thousand', 'Million', 'Billion', 'Trillion'
+            ];
+
+            function chunk(n) {
+                if (n === 0) return '';
+                let str = '';
+                if (n >= 100) {
+                    str += a[Math.floor(n / 100)] + ' Hundred ';
+                    n %= 100;
+                }
+                if (n >= 20) {
+                    str += b[Math.floor(n / 10)] + ' ';
+                    if (n % 10 > 0) {
+                        str += a[n % 10] + ' ';
+                    }
+                } else if (n > 0) {
+                    str += a[n] + ' ';
+                }
+                return str;
+            }
+
+            let integerPart = Math.floor(n);
+            let decimalPart = Math.round((n - integerPart) * 100);
+
+            let words = '';
+            
+            if (integerPart === 0) {
+                words = 'Zero ';
+            } else {
+                let parts = [];
+                let groupIdx = 0;
+                while (integerPart > 0) {
+                    let rem = integerPart % 1000;
+                    if (rem > 0) {
+                        let cStr = chunk(rem);
+                        let gStr = g[groupIdx];
+                        parts.unshift(cStr + (gStr ? gStr + ' ' : ''));
+                    }
+                    integerPart = Math.floor(integerPart / 1000);
+                    groupIdx++;
+                }
+                words = parts.join('').trim() + ' ';
+            }
+
+            words += 'Naira';
+
+            if (decimalPart > 0) {
+                words += ' and ' + chunk(decimalPart).trim() + ' Kobo';
+            }
+
+            return words.replace(/\s+/g, ' ').trim() + ' Only';
+        }
 
         // Bank preview
         const bankPreviewWrapper = document.getElementById('bankPreviewWrapper');
@@ -592,7 +747,7 @@
             accountErrorDisp.innerHTML = '';
             updateBankPreview();
 
-            document.getElementById('amount').focus();
+            document.getElementById('amount_display').focus();
             document.getElementById('withdrawForm').scrollIntoView({ behavior: 'smooth', block: 'center' });
         };
 

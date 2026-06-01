@@ -18,14 +18,23 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Cache;
 
 
-class AirtimeController extends Controller
+use Illuminate\Routing\Controllers\HasMiddleware;
+use Illuminate\Routing\Controllers\Middleware;
+
+class AirtimeController extends Controller implements HasMiddleware
 {
     protected $loginUserId;
+
+    public static function middleware(): array
+    {
+        return [
+            new Middleware('throttle:6,1', only: ['buyAirtime']),
+        ];
+    }
 
     public function __construct()
     {
         $this->loginUserId = Auth::id();
-        $this->middleware('throttle:6,1')->only('buyAirtime');
     }
 
     /**

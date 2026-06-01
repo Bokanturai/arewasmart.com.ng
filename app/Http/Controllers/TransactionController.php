@@ -72,6 +72,8 @@ class TransactionController extends Controller
             'token' => session('token'),
             'serial' => session('serial'),
             'amount' => session('amount') ?? 0,
+            'fee' => session('fee') ?? 0,
+            'tax' => 0,
             'paid' => session('paid') ?? session('amount') ?? 0,
             'network' => session('network') ?? 'N/A',
             'mobile' => session('mobile') ?? 'N/A',
@@ -79,13 +81,14 @@ class TransactionController extends Controller
             'receiverName' => null,
             'serviceName' => 'Service Purchase',
         ];
-
+ 
         // Attempt to fetch robust data from DB if ref exists
         if ($ref && $ref !== 'N/A') {
             $tx = Transaction::where('transaction_ref', $ref)->first();
             if ($tx) {
                 $data['amount'] = $tx->amount;
                 $data['paid'] = $tx->net_amount;
+                $data['fee'] = $tx->fee ?? 0;
                 $data['date'] = $tx->created_at;
                 $data['ref'] = $tx->transaction_ref;
                 
@@ -96,6 +99,15 @@ class TransactionController extends Controller
                     $data['network'] = $meta['bankName'] ?? 'Bank Transfer';
                     $data['mobile'] = $meta['account_no'] ?? 'N/A';
                     $data['receiverName'] = $meta['account_name'] ?? null;
+                    
+                    // Query for associated withdrawal tax transaction
+                    $taxTx = Transaction::where('user_id', $tx->user_id)
+                        ->where('type', 'debit')
+                        ->where('metadata->service', 'withdrawal_tax')
+                        ->where('metadata->withdrawal_ref', $ref)
+                        ->first();
+                    $data['tax'] = $taxTx ? $taxTx->amount : 0;
+                    $data['paid'] = $tx->net_amount + $data['tax'];
                 } else {
                     $data['network'] = $meta['network'] ?? $data['network'];
                     $data['mobile'] = $meta['phone_number'] ?? $meta['account_number'] ?? $data['mobile'];

@@ -11,6 +11,7 @@
             border-radius: 10px;
             transition: all 0.2s ease-in-out;
             position: relative;
+            background-color: #ffffff;
         }
         .network-option:hover {
             background-color: #f8f9fa;
@@ -32,6 +33,29 @@
         .network-option.active .check-mark {
             display: block;
         }
+
+        /* ── Dark Mode styling ── */
+        [data-theme="dark"] .network-option {
+            background-color: var(--dark-card) !important;
+            border: 2px solid rgba(255, 255, 255, 0.05) !important;
+        }
+        [data-theme="dark"] .network-option:hover {
+            background-color: rgba(255, 255, 255, 0.08) !important;
+        }
+        [data-theme="dark"] .network-option.active {
+            border-color: #df6808ff !important;
+            background-color: rgba(223, 104, 8, 0.18) !important;
+        }
+        [data-theme="dark"] .network-option .text-dark {
+            color: var(--dark-text) !important;
+        }
+        [data-theme="dark"] .network-option.active .text-dark {
+            color: #ffffff !important;
+        }
+        [data-theme="dark"] .network-option .check-mark {
+            background: var(--dark-card) !important;
+        }
+
         .small-note {
             font-size: 0.8rem;
             color: #6c757d;
@@ -173,7 +197,13 @@
                                 </label>
                                 <div class="input-group shadow-sm">
                                     <span class="input-group-text bg-light border-end-0 fw-bold text-secondary">₦</span>
-                                    <input type="number" id="amount" name="amount" value="{{ old('amount') }}" class="form-control border-start-0 ps-0 text-center fw-bold text-dark fs-15" min="50" max="50000" placeholder="0.00" required>
+                                    <input type="text" id="amount_display" class="form-control border-start-0 ps-0 text-center fw-bold text-dark fs-15" placeholder="0.00" required autocomplete="off">
+                                    <input type="hidden" id="amount" name="amount" value="{{ old('amount') }}" required>
+                                </div>
+                                <div id="amount_in_words" class="text-primary fw-bold mt-2 small text-capitalize text-center" style="font-size: 0.8rem; display: none; line-height: 1.4;"></div>
+                                <div class="d-flex justify-content-between mt-2 px-1">
+                                    <small class="text-muted" style="font-size: 10px;">Min: ₦50.00</small>
+                                    <small class="text-muted" style="font-size: 10px;">Max: ₦5,000.00</small>
                                 </div>
 
                                 {{-- Quick Amount Suggestions --}}
@@ -305,6 +335,8 @@
             const networkOptions      = document.querySelectorAll('.network-option');
             const selectedNetworkInput = document.getElementById('selectedNetwork');
             const amountInput         = document.getElementById('amount');
+            const amountDisplay       = document.getElementById('amount_display');
+            const amountInWordsDisp   = document.getElementById('amount_in_words');
             const amountButtons       = document.querySelectorAll('.amount-btn');
             const phoneInput          = document.getElementById('mobileno');
             const networkResultDiv    = document.getElementById('networkResult');
@@ -312,6 +344,74 @@
             const toggleBalance       = document.getElementById('toggleBalance');
             const walletBalance       = document.getElementById('walletBalance');
             const hiddenBalance       = document.getElementById('hiddenBalance');
+
+            // Helper function: Convert number to English words
+            function numberToWords(num) {
+                if (isNaN(num) || num === '') return '';
+                
+                let n = parseFloat(num);
+                if (n === 0) return 'Zero Naira Only';
+                
+                const a = [
+                    '', 'One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight', 'Nine', 'Ten',
+                    'Eleven', 'Twelve', 'Thirteen', 'Fourteen', 'Fifteen', 'Sixteen', 'Seventeen', 'Eighteen', 'Nineteen'
+                ];
+                const b = [
+                    '', '', 'Twenty', 'Thirty', 'Forty', 'Fifty', 'Sixty', 'Seventy', 'Eighty', 'Ninety'
+                ];
+                const g = [
+                    '', 'Thousand', 'Million', 'Billion', 'Trillion'
+                ];
+
+                function chunk(n) {
+                    if (n === 0) return '';
+                    let str = '';
+                    if (n >= 100) {
+                        str += a[Math.floor(n / 100)] + ' Hundred ';
+                        n %= 100;
+                    }
+                    if (n >= 20) {
+                        str += b[Math.floor(n / 10)] + ' ';
+                        if (n % 10 > 0) {
+                            str += a[n % 10] + ' ';
+                        }
+                    } else if (n > 0) {
+                        str += a[n] + ' ';
+                    }
+                    return str;
+                }
+
+                let integerPart = Math.floor(n);
+                let decimalPart = Math.round((n - integerPart) * 100);
+
+                let words = '';
+                
+                if (integerPart === 0) {
+                    words = 'Zero ';
+                } else {
+                    let parts = [];
+                    let groupIdx = 0;
+                    while (integerPart > 0) {
+                        let rem = integerPart % 1000;
+                        if (rem > 0) {
+                            let cStr = chunk(rem);
+                            let gStr = g[groupIdx];
+                            parts.unshift(cStr + (gStr ? gStr + ' ' : ''));
+                        }
+                        integerPart = Math.floor(integerPart / 1000);
+                        groupIdx++;
+                    }
+                    words = parts.join('').trim() + ' ';
+                }
+
+                words += 'Naira';
+
+                if (decimalPart > 0) {
+                    words += ' and ' + chunk(decimalPart).trim() + ' Kobo';
+                }
+
+                return words.replace(/\s+/g, ' ').trim() + ' Only';
+            }
 
             // --- Toggle Balance Visibility ---
             if (toggleBalance) {
@@ -341,12 +441,116 @@
                 });
             });
 
+            /* ── Live Amount Comma Formatting & Synchronizing ── */
+            if (amountDisplay && amountInput) {
+                amountDisplay.addEventListener('input', function (e) {
+                    let selectionStart = this.selectionStart;
+                    let originalValue = this.value;
+                    
+                    // Clean: strip everything except digits and dot
+                    let cleanValue = originalValue.replace(/[^0-9.]/g, '');
+                    
+                    // Keep only first dot
+                    const parts = cleanValue.split('.');
+                    if (parts.length > 2) {
+                        cleanValue = parts[0] + '.' + parts.slice(1).join('');
+                    }
+                    
+                    // Limit to maximum 5,000
+                    let parsedVal = parseFloat(cleanValue);
+                    if (!isNaN(parsedVal) && parsedVal > 5000) {
+                        cleanValue = '5000';
+                        const originalParts = originalValue.split('.');
+                        if (originalParts.length > 1) {
+                            cleanValue = '5000.' + originalParts[1].substring(0, 2);
+                        }
+                    }
+                    
+                    // Update raw hidden input
+                    amountInput.value = cleanValue;
+                    
+                    if (cleanValue === '') {
+                        this.value = '';
+                        if (amountInWordsDisp) amountInWordsDisp.style.display = 'none';
+                        return;
+                    }
+                    
+                    const newParts = cleanValue.split('.');
+                    let integerPart = newParts[0];
+                    let decimalPart = newParts[1];
+                    
+                    // Add commas to the integer part
+                    let formattedInteger = integerPart.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+                    
+                    let formattedValue = formattedInteger;
+                    if (decimalPart !== undefined) {
+                        formattedValue += '.' + decimalPart;
+                    }
+                    
+                    this.value = formattedValue;
+                    
+                    // Update amount in words
+                    if (amountInWordsDisp) {
+                        const words = numberToWords(cleanValue);
+                        if (words && parseFloat(cleanValue) >= 1) {
+                            amountInWordsDisp.innerText = words;
+                            amountInWordsDisp.style.display = 'block';
+                        } else {
+                            amountInWordsDisp.style.display = 'none';
+                        }
+                    }
+                    
+                    // Correct cursor position
+                    let lengthDiff = formattedValue.length - originalValue.length;
+                    let newSelection = selectionStart + lengthDiff;
+                    newSelection = Math.max(0, Math.min(newSelection, formattedValue.length));
+                    this.setSelectionRange(newSelection, newSelection);
+                });
+
+                // Format to standard 2 decimal places on blur
+                amountDisplay.addEventListener('blur', function() {
+                    if (amountInput.value) {
+                        let val = parseFloat(amountInput.value);
+                        if (!isNaN(val)) {
+                            this.value = val.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                            amountInput.value = val.toFixed(2);
+                        }
+                    }
+                });
+
+                // Strip trailing .00 on focus for easier editing of whole numbers
+                amountDisplay.addEventListener('focus', function() {
+                    if (amountInput.value) {
+                        let val = parseFloat(amountInput.value);
+                        if (!isNaN(val)) {
+                            if (val % 1 === 0) {
+                                this.value = val.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+                            }
+                        }
+                    }
+                });
+            }
+
             // --- Quick amount selection ---
             amountButtons.forEach(button => {
                 button.addEventListener('click', function () {
-                    amountInput.value = this.dataset.amount;
-                    amountInput.classList.add('is-valid');
-                    setTimeout(() => amountInput.classList.remove('is-valid'), 500);
+                    const rawVal = this.dataset.amount;
+                    amountInput.value = rawVal;
+                    if (amountDisplay) {
+                        const val = parseFloat(rawVal);
+                        amountDisplay.value = val.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                        amountDisplay.classList.add('is-valid');
+                        setTimeout(() => amountDisplay.classList.remove('is-valid'), 500);
+                    }
+                    if (amountInWordsDisp) {
+                        const words = numberToWords(rawVal);
+                        if (words && parseFloat(rawVal) >= 1) {
+                            amountInWordsDisp.innerText = words;
+                            amountInWordsDisp.style.display = 'block';
+                        } else {
+                            amountInWordsDisp.style.display = 'none';
+                        }
+                    }
                 });
             });
 
@@ -420,14 +624,15 @@
                         });
                         return;
                     }
-                    if (!amount || amount < 50) {
+                    if (!amount || amount < 50 || amount > 5000) {
                         Swal.fire({
                             icon: 'warning',
                             title: 'Invalid Amount',
-                            text: 'Minimum recharge is ₦50.',
+                            text: 'Recharge amount must be between ₦50 and ₦5,000.',
                             confirmButtonColor: '#ffc107',
                         });
-                        amountInput.focus();
+                        if (amountDisplay) amountDisplay.focus();
+                        else amountInput.focus();
                         return;
                     }
 

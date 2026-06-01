@@ -18,13 +18,22 @@ use Illuminate\Support\Facades\Mail;
 use App\Traits\ActiveUsers;
 use Carbon\Carbon;
 
-class EducationalController extends Controller
+use Illuminate\Routing\Controllers\HasMiddleware;
+use Illuminate\Routing\Controllers\Middleware;
+
+class EducationalController extends Controller implements HasMiddleware
 {
     use ActiveUsers;
 
+    public static function middleware(): array
+    {
+        return [
+            new Middleware('throttle:6,1', only: ['buypin', 'buyJamb']),
+        ];
+    }
+
     public function __construct()
     {
-        $this->middleware('throttle:6,1')->only(['buypin', 'buyJamb']);
     }
 
 

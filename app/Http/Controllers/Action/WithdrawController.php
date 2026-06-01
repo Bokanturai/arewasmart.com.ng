@@ -166,6 +166,33 @@ class WithdrawController extends Controller
 
         $user = Auth::user();
 
+        // Fetch Withdrawal fee early for duplicate detection and amount calculation
+        $service = Service::firstOrCreate(
+            ['name' => 'Withdrawal'],
+            ['description' => 'Wallet Withdrawal Service', 'is_active' => true]
+        );
+
+        if (!$service->is_active) {
+            return back()->with('error', 'Withdrawal service is currently inactive.');
+        }
+
+        $feeField = ServiceField::firstOrCreate(
+            ['service_id' => $service->id, 'field_name' => 'withdrawal fee'],
+            ['field_code' => 'WDL_001', 'description' => 'Fee charged for withdrawals', 'base_price' => 0, 'is_active' => true]
+        );
+        $fee = $feeField->getPriceForUserType($user->role);
+        $totalCharge = $request->amount + $fee;
+
+        // Calculate Withdrawal Tax for transactions >= 10,000 NGN
+        $tax = 0;
+        if ($request->amount >= 10000) {
+            $taxField = ServiceField::firstOrCreate(
+                ['service_id' => $service->id, 'field_name' => 'withdrawal tax'],
+                ['field_code' => 'WDL_003', 'description' => 'Tax charged for withdrawals ₦10,000 and above', 'base_price' => 50, 'is_active' => true]
+            );
+            $tax = $taxField->getPriceForUserType($user->role);
+        }
+
         // 1. One Active Withdrawal at a Time (Check for Processing/Pending)
         $hasPending = \App\Models\Report::where('user_id', $user->id)
             ->where('type', 'withdrawal')
@@ -189,7 +216,7 @@ class WithdrawController extends Controller
             $recentDuplicate = Transaction::where('user_id', $user->id)
                 ->where('type', 'debit')
                 ->whereIn('status', ['completed', 'pending'])
-                ->where('amount', $request->amount)
+                ->where('amount', $totalCharge)
                 ->where('metadata->account_no', $request->account_no)
                 ->where('created_at', '>=', now()->subMinutes(2))
                 ->first();
@@ -222,29 +249,11 @@ class WithdrawController extends Controller
                 \Illuminate\Support\Facades\RateLimiter::clear($pinLimiterKey);
             }
 
-            // 5. Service Check / Auto-creation
-            $service = Service::firstOrCreate(
-                ['name' => 'Withdrawal'],
-                ['description' => 'Wallet Withdrawal Service', 'is_active' => true]
-            );
-
-            if (!$service->is_active) {
-                return back()->with('error', 'Withdrawal service is currently inactive.');
-            }
-
-            // 3. Service Fields (Fee and Eligibility) from DB
-            $feeField = ServiceField::firstOrCreate(
-                ['service_id' => $service->id, 'field_name' => 'withdrawal fee'],
-                ['field_code' => 'WDL_001', 'description' => 'Fee charged for withdrawals', 'base_price' => 0, 'is_active' => true]
-            );
-
+            // Fetch Eligibility field and calculate role-based amount
             $eligibilityField = ServiceField::firstOrCreate(
                 ['service_id' => $service->id, 'field_name' => 'withdrawal eligibility'],
                 ['field_code' => 'WDL_002', 'description' => 'Minimum transaction volume for eligibility', 'base_price' => 2000000, 'is_active' => true]
             );
-
-            // Calculate Pricing & Eligibility based on role
-            $fee = $feeField->getPriceForUserType($user->role);
             $eligibilityAmount = $eligibilityField->getPriceForUserType($user->role);
 
             // Eligibility Check - Total Transaction Volume
@@ -262,8 +271,6 @@ class WithdrawController extends Controller
                 return back()->with('error', 'Amount exceeds your withdrawal limit of ' . number_format($user->limit, 2));
             }
 
-            $totalCharge = $request->amount + $fee;
-
             // Phase 1: Deduct Wallet & Create Pending Records safely inside a DB lock
             DB::beginTransaction();
             try {
@@ -278,8 +285,8 @@ class WithdrawController extends Controller
                     throw new \Exception('Your wallet is not active.');
                 }
 
-                if ($wallet->balance < $totalCharge) {
-                    throw new \Exception('Insufficient wallet balance. Total required: ' . number_format($totalCharge, 2));
+                if ($wallet->balance < ($totalCharge + $tax)) {
+                    throw new \Exception('Insufficient wallet balance. Total required (including tax): ' . number_format($totalCharge + $tax, 2));
                 }
 
                 $oldBalance = $wallet->balance;
@@ -294,7 +301,7 @@ class WithdrawController extends Controller
                 $transaction = Transaction::create([
                     'transaction_ref' => $transactionRef,
                     'user_id' => $user->id,
-                    'amount' => $request->amount,
+                    'amount' => $totalCharge,
                     'fee' => $fee,
                     'net_amount' => $totalCharge,
                     'description' => $detailedDescription,
@@ -373,6 +380,56 @@ class WithdrawController extends Controller
 
                     $report->status = 'completed';
                     $report->save();
+
+                    // If tax is applicable, execute tax debit and create transaction/report
+                    if ($tax > 0) {
+                        try {
+                            DB::transaction(function () use ($user, $tax, $transactionRef, $service) {
+                                $wallet = Wallet::where('user_id', $user->id)->lockForUpdate()->first();
+                                if ($wallet && $wallet->balance >= $tax) {
+                                    $oldBal = $wallet->balance;
+                                    $newBal = $oldBal - $tax;
+                                    $wallet->balance = $newBal;
+                                    $wallet->save();
+
+                                    $taxRef = 'TAX' . strtoupper(Str::random(12));
+                                    Transaction::create([
+                                        'transaction_ref' => $taxRef,
+                                        'user_id' => $user->id,
+                                        'amount' => $tax,
+                                        'fee' => 0,
+                                        'net_amount' => $tax,
+                                        'description' => "Withdrawal Tax for Ref #{$transactionRef}",
+                                        'type' => 'debit',
+                                        'status' => 'completed',
+                                        'performed_by' => 'System',
+                                        'metadata' => [
+                                            'service' => 'withdrawal_tax',
+                                            'withdrawal_ref' => $transactionRef,
+                                        ],
+                                    ]);
+
+                                    \App\Models\Report::create([
+                                        'user_id' => $user->id,
+                                        'phone_number' => $user->phone_number ?? 'N/A',
+                                        'account_number' => $wallet->wallet_no ?? 'N/A',
+                                        'account_name' => trim($user->first_name . ' ' . $user->last_name),
+                                        'network' => 'System Tax',
+                                        'ref' => $taxRef,
+                                        'amount' => $tax,
+                                        'status' => 'completed',
+                                        'type' => 'withdrawal_tax',
+                                        'description' => "Withdrawal Tax for Ref #{$transactionRef}",
+                                        'old_balance' => $oldBal,
+                                        'new_balance' => $newBal,
+                                        'service_id' => $service->id,
+                                    ]);
+                                }
+                            });
+                        } catch (\Exception $taxEx) {
+                            Log::error('Withdrawal Tax charging failed: ' . $taxEx->getMessage());
+                        }
+                    }
 
                     return redirect()->route('thankyou', ['ref' => $transaction->transaction_ref]);
                 } else {
