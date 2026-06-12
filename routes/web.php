@@ -232,7 +232,6 @@ Route::middleware(['auth'])->group(function () {
     Route::controller(NinValidationController::class)->prefix('nin-validation')->name('nin-validation.')->group(function () {
         Route::get('/', 'index')->name('index');
         Route::post('/store', 'store')->name('store');
-        Route::get('/check/{id}', 'checkStatus')->name('check');
         Route::post('/webhook', 'webhook')->name('webhook');
     });
 

@@ -32,7 +32,7 @@ class AutoCheckNinStatus extends Command
         // User said "check status each 1h". If I run this command hourly, I can just check all pending/processing.
         // But to be safe and avoid rate limits, maybe I check those updated <= 1h ago? No, check all pending.
         
-        $pendingRecords = \App\Models\AgentService::whereIn('service_type', ['nin_validation', 'ipe', 'NIN_VALIDATION', 'IPE'])
+        $pendingRecords = \App\Models\AgentService::whereIn('service_type', ['ipe', 'IPE'])
             ->whereIn('status', ['pending', 'processing'])
             ->get();
 
@@ -46,7 +46,7 @@ class AutoCheckNinStatus extends Command
         // Condition: Status = successful AND recheck_count < 2 AND updated_at <= 2 hours ago
         // Actually, "after 2h each" means if it was updated (verified successful) 2 hours ago, check again.
         
-        $successfulRecords = \App\Models\AgentService::whereIn('service_type', ['nin_validation', 'ipe', 'NIN_VALIDATION', 'IPE'])
+        $successfulRecords = \App\Models\AgentService::whereIn('service_type', ['ipe', 'IPE'])
             ->where('status', 'successful')
             ->where('recheck_count', '<', 2)
             ->where('updated_at', '<=', now()->subHours(2)) 

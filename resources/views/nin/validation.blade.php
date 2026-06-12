@@ -186,8 +186,8 @@
                                                 <td class="text-end pe-4">
                                                     <div class="d-flex justify-content-end gap-2">
                                                         <!-- Check Status -->
-                                                        @if(in_array($statusLower, ['pending', 'processing', 'in-progress']))
-                                                            <a href="{{ route('nin-validation.check', $submission->id) }}" class="btn btn-sm btn-light text-primary shadow-sm rounded-circle d-flex align-items-center justify-content-center" data-bs-toggle="tooltip" title="Check Status" style="width: 35px; height: 35px;">
+                                                        @if(false)
+                                                            <a style="display:none;" href="#" class="btn btn-sm btn-light text-primary shadow-sm rounded-circle d-flex align-items-center justify-content-center" data-bs-toggle="tooltip" title="Check Status" style="width: 35px; height: 35px;">
                                                                 <i class="bi bi-arrow-repeat fs-15"></i>
                                                             </a>
                                                         @endif
